@@ -2,14 +2,14 @@
 
 <div class="page-header">
     <h1>Hut Menu</h1>
-    <p class="page-header__sub">Games added to the hut by at least one member</p>
+    <p class="page-header__sub">Games we want to play at the hut</p>
 </div>
 
 <?php if (empty($games)): ?>
     <p class="empty-state">No games selected yet. <a href="/games">Suggest games</a> and add some!</p>
 <?php else: ?>
 
-    <div class="collection-filters">
+    <div class="collection-filters">^
         <div class="collection-filters__group">
             <label class="collection-filters__label" for="filterBestPlayers">Best players</label>
             <select class="collection-filters__select" id="filterBestPlayers" data-collection-filter="bestplayers">

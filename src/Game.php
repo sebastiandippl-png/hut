@@ -208,7 +208,14 @@ class Game
         SQL;
         $stmt = $pdo->prepare($sql);
         $stmt->execute([':user_id' => $currentUserId]);
-        return $stmt->fetchAll();
+        $rows = $stmt->fetchAll();
+
+        return array_map(static function (array $row): array {
+            if (isset($row['hearted_by']) && $row['hearted_by'] !== 'No hearts yet' && $row['hearted_by'] !== '') {
+                $row['hearted_by'] = Auth::firstNames($row['hearted_by']);
+            }
+            return $row;
+        }, $rows);
     }
 
     private static function groupConcatNamesExpr(\PDO $pdo, bool $distinct): string

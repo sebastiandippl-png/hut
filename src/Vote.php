@@ -66,7 +66,8 @@ class Vote
         );
         $stmt->execute([$gameId]);
 
-        return (string) ($stmt->fetchColumn() ?: 'No hearts yet');
+        $names = $stmt->fetchColumn();
+        return $names ? Auth::firstNames((string) $names) : 'No hearts yet';
     }
 
     /**
@@ -76,7 +77,7 @@ class Vote
     {
         $pdo = Database::getInstance();
         $heartedByExpr = self::groupConcatNamesExpr($pdo, true);
-        return $pdo->query(<<<SQL
+        $rows = $pdo->query(<<<SQL
             WITH selectors AS (
                 SELECT game_id, COUNT(DISTINCT user_id) AS selectors
                 FROM user_games
@@ -116,6 +117,13 @@ class Vote
                      g.rank ASC,
                      g.name ASC
         SQL)->fetchAll();
+
+        return array_map(static function (array $row): array {
+            if ($row['hearted_by'] !== '') {
+                $row['hearted_by'] = Auth::firstNames($row['hearted_by']);
+            }
+            return $row;
+        }, $rows);
     }
 
     private static function groupConcatNamesExpr(\PDO $pdo, bool $distinct): string

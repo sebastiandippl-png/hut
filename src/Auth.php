@@ -250,4 +250,26 @@ class Auth
         }
         session_destroy();
     }
+
+    /**
+     * Return only the first name (first word) from a full name.
+     */
+    public static function firstName(string $name): string
+    {
+        $trimmed = trim($name);
+        $space   = strpos($trimmed, ' ');
+        return $space !== false ? substr($trimmed, 0, $space) : $trimmed;
+    }
+
+    /**
+     * Apply firstName() to each name in a comma-separated list and rejoin.
+     */
+    public static function firstNames(string $names, string $separator = ', '): string
+    {
+        $parts = array_map(
+            static fn (string $n): string => self::firstName($n),
+            explode($separator, $names)
+        );
+        return implode($separator, $parts);
+    }
 }

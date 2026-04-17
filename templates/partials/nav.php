@@ -16,7 +16,7 @@
             <?php endif; ?>
         </div>
         <div class="nav__user">
-            <span class="nav__username"><?= htmlspecialchars($user['name']) ?></span>
+            <span class="nav__username"><?= htmlspecialchars(Auth::firstName($user['name'])) ?></span>
             <form method="POST" action="/logout" class="nav__logout-form">
                 <input type="hidden" name="_csrf" value="<?= htmlspecialchars(Auth::csrfToken()) ?>">
                 <button type="submit" class="nav__link nav__link--logout nav__logout-button">Log out</button>

@@ -219,6 +219,28 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // ── Heart burst animation ─────────────────────────────────────────────
+    function spawnHearts(origin) {
+        const rect = origin.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const count = 6;
+        for (let i = 0; i < count; i++) {
+            const el = document.createElement('span');
+            el.textContent = '♥';
+            el.className = 'heart-particle';
+            const angle = (Math.PI * 2 / count) * i - Math.PI / 2 + (Math.random() - 0.5) * 1.0;
+            const dist = 50 + Math.random() * 70;
+            const flyX = Math.cos(angle) * dist;
+            const flyY = Math.sin(angle) * dist;
+            const delay = Math.random() * 120;
+            const size = 0.75 + Math.random() * 0.9;
+            el.style.cssText = `left:${cx}px;top:${cy}px;--fly-x:${flyX}px;--fly-y:${flyY}px;font-size:${size}rem;animation-delay:${delay}ms;`;
+            document.body.appendChild(el);
+            el.addEventListener('animationend', () => el.remove());
+        }
+    }
+
     // ── Hearts ───────────────────────────────────────────────────────────────
     document.querySelectorAll('[data-heart-button]').forEach(btn => {
         btn.addEventListener('click', async () => {
@@ -239,6 +261,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 btn.classList.toggle('btn--heart--active', data.hearted === true);
                 btn.textContent = data.hearted === true ? '♥ Hearted' : '♥ Heart';
+                if (data.hearted === true) spawnHearts(btn);
 
                 document.querySelectorAll(`.heart-controls[data-game-id="${gameId}"] .heart-tally`).forEach(node => {
                     node.textContent = String(data.hearts);

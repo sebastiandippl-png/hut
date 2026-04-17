@@ -6,7 +6,7 @@
 </div>
 
 <?php if (empty($rankings)): ?>
-    <p class="empty-state">No hearts yet. <a href="/collection">Browse Hut Choice</a> and heart your favorites!</p>
+    <p class="empty-state">No hearts yet. <a href="/collection">Browse Hut Menu</a> and heart your favorites!</p>
 <?php else: ?>
 
     <div class="collection-filters">

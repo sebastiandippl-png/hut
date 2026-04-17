@@ -222,53 +222,6 @@ if ($thingBestPlayerCount !== '') {
             </div>
         <?php endif; ?>
 
-        <?php if ($categoryRanks): ?>
-            <p class="detail__section-label">Category ranks</p>
-            <div class="detail__tags">
-                <?php foreach ($categoryRanks as $label => $value): ?>
-                    <span class="tag"><?= htmlspecialchars($label) ?> #<?= htmlspecialchars((string) $value) ?></span>
-                <?php endforeach; ?>
-            </div>
-        <?php endif; ?>
-
-        <?php if ($thingCategories): ?>
-            <p class="detail__section-label">Categories</p>
-            <div class="detail__tags">
-                <?php foreach ($thingCategories as $category): ?>
-                    <span class="tag"><?= htmlspecialchars($category) ?></span>
-                <?php endforeach; ?>
-            </div>
-        <?php endif; ?>
-
-        <?php if ($thingMechanics): ?>
-            <p class="detail__section-label">Mechanics</p>
-            <div class="detail__tags">
-                <?php foreach ($thingMechanics as $mechanic): ?>
-                    <span class="tag"><?= htmlspecialchars($mechanic) ?></span>
-                <?php endforeach; ?>
-            </div>
-        <?php endif; ?>
-
-        <?php if ($thingDesigners): ?>
-            <p class="detail__section-label">Designers</p>
-            <p class="detail__text-list"><?= htmlspecialchars(implode(', ', $thingDesigners)) ?></p>
-        <?php endif; ?>
-
-        <?php if ($thingPublishers): ?>
-            <p class="detail__section-label">Publishers</p>
-            <p class="detail__text-list"><?= htmlspecialchars(implode(', ', $thingPublishers)) ?></p>
-        <?php endif; ?>
-
-        <?php if ($thingFamilies): ?>
-            <p class="detail__section-label">Families</p>
-            <p class="detail__text-list"><?= htmlspecialchars(implode(', ', $thingFamilies)) ?></p>
-        <?php endif; ?>
-
-        <?php if ($thingDescription !== ''): ?>
-            <p class="detail__section-label">Description</p>
-            <p class="detail__description"><?= nl2br(htmlspecialchars($thingDescription)) ?></p>
-        <?php endif; ?>
-
         <?php if ($thingUpdated): ?>
             <p class="detail__updated">Last updated from BGG: <?= htmlspecialchars($thingUpdated) ?></p>
         <?php endif; ?>

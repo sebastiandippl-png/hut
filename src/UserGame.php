@@ -59,18 +59,15 @@ class UserGame
                 EXISTS(
                     SELECT 1
                     FROM user_games
-                    WHERE user_id = :user_id AND game_id = :game_id AND selected = 1
+                    WHERE user_id = ? AND game_id = ? AND selected = 1
                 ) AS selected_by_me,
                 EXISTS(
                     SELECT 1
                     FROM user_games
-                    WHERE game_id = :game_id AND selected = 1
+                    WHERE game_id = ? AND selected = 1
                 ) AS in_hut'
         );
-        $stmt->execute([
-            ':user_id' => $userId,
-            ':game_id' => $gameId,
-        ]);
+        $stmt->execute([$userId, $gameId, $gameId]);
 
         $state = $stmt->fetch();
 

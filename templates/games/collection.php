@@ -1,7 +1,7 @@
 <?php $pageTitle = 'Hut Choice'; require __DIR__ . '/../partials/header.php'; ?>
 
 <div class="page-header">
-    <h1>Hut Choice</h1>
+    <h1>Hut Menu</h1>
     <p class="page-header__sub">Games added to the hut by at least one member</p>
 </div>
 

@@ -9,7 +9,7 @@
     <?php if ($user): ?>
         <div class="nav__links">
             <a href="/games" class="nav__link">Suggest</a>
-            <a href="/collection" class="nav__link">Hut Choice</a>
+            <a href="/collection" class="nav__link">Hut Menu</a>
             <a href="/rankings" class="nav__link">Hearts</a>
             <?php if ($user['is_admin']): ?>
                 <a href="/admin" class="nav__link">Admin</a>

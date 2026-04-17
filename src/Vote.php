@@ -101,11 +101,13 @@ class Vote
                    g.name,
                    g.yearpublished,
                    g.rank,
+                   bt.averageweight,
                    s.selectors,
                    COALESCE(bo.bgg_owned_by, '') AS bgg_owned_by,
                    COALESCE(h.hearts, 0) AS hearts,
                    COALESCE(h.hearted_by, '') AS hearted_by
             FROM games g
+            LEFT JOIN bgg_thing bt ON bt.bgg_id = g.id
             JOIN selectors s ON s.game_id = g.id
             LEFT JOIN bgg_owners bo ON bo.bgg_game_id = g.id
             LEFT JOIN hearts h ON h.game_id = g.id

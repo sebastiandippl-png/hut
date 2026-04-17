@@ -304,8 +304,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
                 if (complexityFilter === 'light')   { show = show && (cx > 0 && cx <= 1.8); }
-                if (complexityFilter === 'medium')  { show = show && (cx > 1.8 && cx <= 2.8); }
-                if (complexityFilter === 'complex') { show = show && (cx > 2.8); }
+                if (complexityFilter === 'medium')  { show = show && (cx > 1.8 && cx <= 3.0); }
+                if (complexityFilter === 'complex') { show = show && (cx > 3.0); }
 
                 card.hidden = !show;
                 if (show) visible++;
@@ -341,6 +341,46 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         filterCards();
+    }
+
+    // ── Rankings complexity filter ─────────────────────────────────────────
+    const rankingsGrid = document.querySelector('[data-rankings-grid]');
+    if (rankingsGrid) {
+        const rankingsCountEl = document.querySelector('[data-rankings-count]');
+        let rankComplexityFilter = '';
+
+        const filterRankings = () => {
+            let position = 0;
+            rankingsGrid.querySelectorAll('.game-card').forEach(card => {
+                const cx = Number(card.dataset.complexity);
+                let show = true;
+                if (rankComplexityFilter === 'light')   { show = cx > 0 && cx <= 1.8; }
+                if (rankComplexityFilter === 'medium')  { show = cx > 1.8 && cx <= 3.0; }
+                if (rankComplexityFilter === 'complex') { show = cx > 3.0; }
+                card.hidden = !show;
+                if (show) {
+                    position++;
+                    const pos = card.querySelector('.rankings__position');
+                    if (pos) { pos.textContent = `🏆 #${position}`; }
+                }
+            });
+            if (rankingsCountEl) {
+                rankingsCountEl.textContent = `${position} game${position !== 1 ? 's' : ''}`;
+            }
+        };
+
+        document.querySelectorAll('[data-rankings-complexity] .filter-seg').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('[data-rankings-complexity] .filter-seg').forEach(b => {
+                    b.classList.remove('filter-seg--active');
+                });
+                btn.classList.add('filter-seg--active');
+                rankComplexityFilter = btn.dataset.complexity || '';
+                filterRankings();
+            });
+        });
+
+        filterRankings();
     }
 
     // ── Collection table sorting ───────────────────────────────────────────

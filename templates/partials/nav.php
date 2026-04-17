@@ -1,6 +1,6 @@
 <?php use Hut\Auth; $user = Auth::user(); ?>
 <nav class="nav" id="mainNav">
-    <a class="nav__brand" href="/games">🏠 Hut</a>
+    <a class="nav__brand" href="/games">🏠 Hut Game Manager</a>
     <button class="nav__burger" aria-label="Toggle menu" aria-expanded="false" aria-controls="mainNav" data-nav-burger>
         <span class="nav__burger-bar"></span>
         <span class="nav__burger-bar"></span>
@@ -10,7 +10,7 @@
         <div class="nav__links">
             <a href="/games" class="nav__link">Suggest</a>
             <a href="/collection" class="nav__link">Hut Choice</a>
-            <a href="/rankings" class="nav__link">Rankings</a>
+            <a href="/rankings" class="nav__link">Hearts</a>
             <?php if ($user['is_admin']): ?>
                 <a href="/admin" class="nav__link">Admin</a>
             <?php endif; ?>

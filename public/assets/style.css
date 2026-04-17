@@ -659,6 +659,7 @@ img { max-width: 100%; display: block; }
     overflow-wrap: anywhere;
 }
 .rankings__rank { font-weight: 700; font-size: 1.1rem; color: var(--color-text-muted); min-width: 2.5ch; }
+.rankings__hearted-by { font-size: .68rem; color: var(--color-heart); line-height: 1.3; margin: 0; overflow-wrap: anywhere; }
 .rankings__thumb { width: 48px; height: 48px; object-fit: cover; border-radius: 4px; flex-shrink: 0; }
 .rankings__info { flex: 1; display: flex; flex-wrap: wrap; gap: .25rem .5rem; align-items: baseline; }
 .rankings__title { font-weight: 600; color: var(--color-text); }

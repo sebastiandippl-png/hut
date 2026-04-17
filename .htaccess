@@ -1,0 +1,7 @@
+Options +FollowSymLinks
+RewriteEngine On
+RewriteBase /hut/
+
+# Forward everything to public/
+RewriteCond %{REQUEST_URI} !^/hut/public/
+RewriteRule ^(.*)$ public/$1 [L]

@@ -1,0 +1,10 @@
+Options +FollowSymLinks
+RewriteEngine On
+RewriteBase /hut/public/
+
+# Serve existing static files/directories directly
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Route everything else to index.php
+RewriteRule ^ index.php [L,QSA]

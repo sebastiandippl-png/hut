@@ -17,7 +17,8 @@ class Game
         string $search = '',
         array  $selectedUsers = [],
         int    $page = 1,
-        int    $perPage = 24
+        int    $perPage = 24,
+        ?int   $currentUserId = null
     ): array {
         $pdo    = Database::getInstance();
         $where  = ['1=1'];
@@ -46,11 +47,23 @@ class Game
         $countStmt->execute($params);
         $total = (int) $countStmt->fetchColumn();
 
+        $selectedByMeSql = $currentUserId !== null
+            ? 'EXISTS(SELECT 1 FROM user_games ug_self WHERE ug_self.game_id = g.id AND ug_self.user_id = :current_user_id AND ug_self.selected = 1)'
+            : '0';
+
         $stmt = $pdo->prepare(
-            "SELECT DISTINCT g.* FROM $fromClause WHERE $whereClause ORDER BY " . self::RANK_ORDER_SQL . ' LIMIT :limit OFFSET :offset'
+            "SELECT DISTINCT g.*,
+                    EXISTS(SELECT 1 FROM user_games ug_any WHERE ug_any.game_id = g.id AND ug_any.selected = 1) AS in_hut,
+                    {$selectedByMeSql} AS selected_by_me
+             FROM $fromClause
+             WHERE $whereClause
+             ORDER BY " . self::RANK_ORDER_SQL . ' LIMIT :limit OFFSET :offset'
         );
         foreach ($params as $k => $v) {
             $stmt->bindValue($k, $v);
+        }
+        if ($currentUserId !== null) {
+            $stmt->bindValue(':current_user_id', $currentUserId, PDO::PARAM_INT);
         }
         $stmt->bindValue(':limit',  $perPage, PDO::PARAM_INT);
         $stmt->bindValue(':offset', $offset,  PDO::PARAM_INT);

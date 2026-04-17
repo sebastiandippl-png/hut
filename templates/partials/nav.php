@@ -8,7 +8,7 @@
     </button>
     <?php if ($user): ?>
         <div class="nav__links">
-            <a href="/games" class="nav__link">Browse</a>
+            <a href="/games" class="nav__link">Suggest</a>
             <a href="/collection" class="nav__link">Hut Choice</a>
             <a href="/rankings" class="nav__link">Rankings</a>
             <?php if ($user['is_admin']): ?>

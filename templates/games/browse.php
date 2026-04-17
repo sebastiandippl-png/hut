@@ -1,7 +1,7 @@
-<?php $pageTitle = 'Browse Games'; require __DIR__ . '/../partials/header.php'; ?>
+<?php $pageTitle = 'Suggest Games'; require __DIR__ . '/../partials/header.php'; ?>
 
 <div class="page-header">
-    <h1>Browse Games</h1>
+    <h1>Suggest Games</h1>
 </div>
 
 <form class="filters" method="GET" action="/games" data-browse-filters>
@@ -14,7 +14,7 @@
 
     <?php if (!empty($availableUsers)): ?>
         <div class="filters__users-group">
-            <span class="filters__label">In Hut Choice</span>
+            <span class="filters__label">In Collection of</span>
             <div class="filters__pills">
                 <?php foreach ($availableUsers as $filterUser): ?>
                     <label class="filters__pill">
@@ -38,7 +38,8 @@
     <div class="game-grid">
         <?php foreach ($games as $game): ?>
             <?php
-            $isSelected = in_array($game['id'], $selected, true);
+            $isSelected = (int) ($game['selected_by_me'] ?? 0) === 1;
+            $isInHut = (int) ($game['in_hut'] ?? 0) === 1;
             $rank = (int) ($game['rank'] ?? 0);
             ?>
             <article class="game-card" data-id="<?= $game['id'] ?>">
@@ -77,10 +78,10 @@
                         <?php endif; ?>
                     </div>
 
-                    <button class="btn btn--select <?= $isSelected ? 'btn--select--active' : '' ?>"
+                    <button class="btn btn--select <?= $isInHut ? 'btn--select--active' : '' ?>"
                             data-game-id="<?= $game['id'] ?>"
                             title="<?= $isSelected ? 'Remove from hut' : 'Add to hut' ?>">
-                        <?= $isSelected ? '✓ In hut' : '+ Add to hut' ?>
+                        <?= $isInHut ? '✓ In hut' : '+ Add to hut' ?>
                     </button>
                 </div>
             </article>

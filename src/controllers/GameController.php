@@ -26,8 +26,8 @@ class GameController
         $usersStmt = $pdo->query('SELECT DISTINCT bgg_user FROM user_collection ORDER BY bgg_user');
         $availableUsers = array_map(static fn ($row) => $row['bgg_user'], $usersStmt->fetchAll(\PDO::FETCH_ASSOC));
 
-        $result = Game::browse($search, $selectedUsers, $page);
-        $selected = UserGame::selectedGameIds(Auth::user()['id']);
+        $userId = (int) Auth::user()['id'];
+        $result = Game::browse($search, $selectedUsers, $page, 24, $userId);
 
         extract($result); // $games, $total, $page, $perPage
         BggThingFetcher::ensureForPage(array_column($games, 'id'));
@@ -75,11 +75,15 @@ class GameController
 
         $gameId  = (int) $params['id'];
         $userId  = Auth::user()['id'];
-        $selected = UserGame::toggle($userId, $gameId);
+        UserGame::toggle($userId, $gameId);
+        $selectionState = UserGame::selectionState($userId, $gameId);
 
         // AJAX-friendly response
         header('Content-Type: application/json');
-        echo json_encode(['selected' => $selected]);
+        echo json_encode([
+            'selectedByMe' => $selectionState['selected_by_me'],
+            'inHut' => $selectionState['in_hut'],
+        ]);
     }
 
     public static function collection(array $params): void

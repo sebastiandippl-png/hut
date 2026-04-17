@@ -6,7 +6,7 @@
 </div>
 
 <?php if (empty($games)): ?>
-    <p class="empty-state">No games selected yet. <a href="/games">Browse games</a> and add some!</p>
+    <p class="empty-state">No games selected yet. <a href="/games">Suggest games</a> and add some!</p>
 <?php else: ?>
 
     <div class="collection-filters">

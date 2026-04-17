@@ -203,13 +203,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     },
                 });
                 const data = await res.json();
-                if (data.selected) {
+
+                if (data.inHut) {
                     btn.textContent = '✓ In hut';
                     btn.classList.add('btn--select--active');
                 } else {
                     btn.textContent = '+ Add to hut';
                     btn.classList.remove('btn--select--active');
                 }
+
+                btn.title = data.selectedByMe ? 'Remove from hut' : 'Add to hut';
             } catch (e) {
                 console.error('Select toggle failed', e);
             }

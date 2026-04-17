@@ -138,11 +138,11 @@
 
                     <div class="collection-card__meta">
                         <p class="meta-row meta-row--owners">
-                            <span class="meta-row__label">Owned by</span>
+                            <span class="meta-row__icon" title="Owned by">🏠</span>
                             <span class="meta-row__value"><?= !empty($game['bgg_owned_by']) ? htmlspecialchars((string) $game['bgg_owned_by']) : 'No tracked owners' ?></span>
                         </p>
                         <p class="meta-row meta-row--hearts">
-                            <span class="meta-row__label">Hearted by</span>
+                            <span class="meta-row__icon" title="Hearted by">♥</span>
                             <span class="meta-row__value" data-hearted-by="<?= $game['id'] ?>" data-hearted-mode="names"><?= htmlspecialchars((string) ($game['hearted_by'] ?: 'No hearts yet')) ?></span>
                         </p>
                     </div>

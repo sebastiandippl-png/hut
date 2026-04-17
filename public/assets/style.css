@@ -384,16 +384,16 @@ img { max-width: 100%; display: block; }
 
 .game-card__thumb {
     width: 100%;
-    aspect-ratio: 1;
+    aspect-ratio: 2 / 1;
     object-fit: cover;
 }
 .game-card__thumb-placeholder {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2.5rem;
+    font-size: 2rem;
     background: rgba(180, 211, 217, .28);
-    aspect-ratio: 1;
+    aspect-ratio: 2 / 1;
     text-decoration: none;
 }
 
@@ -401,7 +401,7 @@ img { max-width: 100%; display: block; }
 .game-card__title { font-size: .95rem; font-weight: 600; line-height: 1.3; }
 .game-card__title a { color: var(--color-text); }
 .game-card__year { color: var(--color-text-muted); font-weight: 400; font-size: .85em; }
-.game-card__meta { display: flex; flex-wrap: wrap; gap: .4rem; font-size: .78rem; color: var(--color-text-muted); }
+.game-card__meta { display: flex; flex-wrap: wrap; gap: .35rem; font-size: .72rem; color: var(--color-text-muted); }
 .game-card__selectors { font-size: .78rem; color: var(--color-text-muted); }
 
 /* ── Pagination ──────────────────────────────────────────────────────────── */
@@ -427,15 +427,17 @@ img { max-width: 100%; display: block; }
 /* ── Detail page ─────────────────────────────────────────────────────────── */
 .detail {
     display: grid;
-    grid-template-columns: 280px 1fr;
+    grid-template-columns: minmax(140px, 160px) 1fr;
     gap: 2rem;
     align-items: start;
 }
 @media (max-width: 640px) {
     .detail { grid-template-columns: 1fr; }
+    .detail__media { max-width: 220px; margin: 0 auto; }
 }
-.detail__image { width: 100%; border-radius: var(--radius); box-shadow: var(--shadow); }
-.detail__image-placeholder { font-size: 5rem; text-align: center; padding: 2rem; background: rgba(180, 211, 217, .28); border-radius: var(--radius); }
+.detail__media { width: 100%; max-width: 160px; }
+.detail__image { width: 100%; border-radius: var(--radius); box-shadow: var(--shadow); display: block; }
+.detail__image-placeholder { font-size: 3rem; text-align: center; padding: 1.5rem; background: rgba(180, 211, 217, .28); border-radius: var(--radius); }
 .detail__title { font-size: 1.6rem; line-height: 1.2; }
 .detail__year  { font-weight: 400; font-size: .8em; color: var(--color-text-muted); }
 .detail__meta-row { display: flex; flex-wrap: wrap; gap: .75rem; font-size: .9rem; color: var(--color-text-muted); margin: .75rem 0; }
@@ -595,7 +597,7 @@ img { max-width: 100%; display: block; }
 .collection-card:hover { box-shadow: 0 18px 36px rgba(117, 105, 137, .16); transform: translateY(-2px); }
 .collection-card__thumb {
     width: 100%;
-    aspect-ratio: 1;
+    aspect-ratio: 2 / 1;
     object-fit: cover;
     display: block;
 }
@@ -603,9 +605,8 @@ img { max-width: 100%; display: block; }
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2rem;
     background: rgba(180, 211, 217, .28);
-    aspect-ratio: 1;
+    aspect-ratio: 2 / 1;
     text-decoration: none;
     color: var(--color-text-muted);
     font-weight: 700;
@@ -625,29 +626,35 @@ img { max-width: 100%; display: block; }
     margin-top: auto;
     display: flex;
     flex-direction: column;
-    gap: .35rem;
+    gap: .3rem;
 }
 .meta-row {
     display: flex;
-    flex-direction: column;
-    gap: .15rem;
+    flex-direction: row;
+    align-items: baseline;
+    gap: .35rem;
     border-radius: 6px;
-    padding: .35rem .45rem;
+    padding: .28rem .4rem;
     border: 1px solid var(--color-border);
-    background: var(--color-surface-strong);
+    background: color-mix(in srgb, var(--color-surface-strong) 82%, white);
 }
-.meta-row--owners { background: rgba(180, 211, 217, .17); }
-.meta-row--hearts { background: rgba(201, 53, 69, .08); }
-.meta-row__label {
-    font-size: .66rem;
-    text-transform: uppercase;
-    letter-spacing: .04em;
-    font-weight: 700;
+.meta-row--owners {
+    background: rgba(180, 211, 217, .11);
+    border-left: 2px solid rgba(87, 150, 160, .45);
+}
+.meta-row--hearts {
+    background: rgba(201, 53, 69, .05);
+    border-left: 2px solid rgba(201, 53, 69, .4);
+}
+.meta-row__icon {
+    font-size: .75rem;
+    flex-shrink: 0;
+    line-height: 1;
     color: var(--color-text-muted);
 }
 .meta-row__value {
-    font-size: .76rem;
-    line-height: 1.35;
+    font-size: .68rem;
+    line-height: 1.3;
     color: var(--color-text);
     overflow-wrap: anywhere;
 }

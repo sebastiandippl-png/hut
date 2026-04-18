@@ -91,6 +91,7 @@ class Auth
 
     /**
      * Attempt local login. Returns user array on success, null on failure.
+     * Does not login if user is not approved.
      */
     public static function attemptLogin(string $email, string $password): ?array
     {
@@ -106,7 +107,26 @@ class Auth
             return null;
         }
 
+        // Check if user is approved (default to approved for backward compatibility)
+        if (!((int)($user['is_approved'] ?? 1) === 1)) {
+            return null;
+        }
+
         return $user;
+    }
+
+    /**
+     * Check if a user exists with email but is not yet approved.
+     * Used to show a different message on login failure.
+     */
+    public static function isUserPendingApproval(string $email): bool
+    {
+        $pdo  = Database::getInstance();
+        $stmt = $pdo->prepare('SELECT is_approved FROM users WHERE email = ? LIMIT 1');
+        $stmt->execute([strtolower(trim($email))]);
+        $user = $stmt->fetch();
+
+        return $user && !((int)($user['is_approved'] ?? 1) === 1);
     }
 
     /**
@@ -126,10 +146,11 @@ class Auth
 
         $hash = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
         $isAdmin = self::isAlwaysAdminEmail($email) ? 1 : 0;
+        $isApproved = $isAdmin ? 1 : 0; // Admins are auto-approved, others need approval
         $stmt = $pdo->prepare(
-            'INSERT INTO users (name, email, password_hash, is_admin) VALUES (?, ?, ?, ?)'
+            'INSERT INTO users (name, email, password_hash, is_admin, is_approved) VALUES (?, ?, ?, ?, ?)'
         );
-        $stmt->execute([trim($name), $email, $hash, $isAdmin]);
+        $stmt->execute([trim($name), $email, $hash, $isAdmin, $isApproved]);
         $id = (int) $pdo->lastInsertId();
 
         $user = $pdo->prepare('SELECT * FROM users WHERE id = ?');
@@ -177,9 +198,10 @@ class Auth
 
         // Create new
         $stmt = $pdo->prepare(
-            'INSERT INTO users (name, email, google_id, is_admin) VALUES (?, ?, ?, ?)'
+            'INSERT INTO users (name, email, google_id, is_admin, is_approved) VALUES (?, ?, ?, ?, ?)'
         );
-        $stmt->execute([$name, $email, $googleId, $forceAdmin ? 1 : 0]);
+        $isApproved = $forceAdmin ? 1 : 0; // Admins are auto-approved, others need approval
+        $stmt->execute([$name, $email, $googleId, $forceAdmin ? 1 : 0, $isApproved]);
         $id = (int) $pdo->lastInsertId();
         $stmt = $pdo->prepare('SELECT * FROM users WHERE id = ?');
         $stmt->execute([$id]);

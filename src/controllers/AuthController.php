@@ -26,7 +26,12 @@ class AuthController
 
         $user = Auth::attemptLogin($email, $password);
         if (!$user) {
-            $_SESSION['flash_error'] = 'Invalid email or password.';
+            // Check if user is pending approval (credentials correct but not approved)
+            if (Auth::isUserPendingApproval($email)) {
+                $_SESSION['flash_error'] = 'Your account is pending admin approval. Please wait for your account to be activated.';
+            } else {
+                $_SESSION['flash_error'] = 'Invalid email or password.';
+            }
             header('Location: ' . \Hut\Url::to('/login')); exit;
         }
 

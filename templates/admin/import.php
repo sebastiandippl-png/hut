@@ -72,6 +72,7 @@ require __DIR__ . '/../partials/header.php';
                         <th>Name</th>
                         <th>Email</th>
                         <th>Role</th>
+                        <th>Status</th>
                         <th>Collection</th>
                         <th>Votes</th>
                         <th>Created</th>
@@ -89,6 +90,7 @@ require __DIR__ . '/../partials/header.php';
                             <td><?= $safeName ?></td>
                             <td><?= $safeEmail ?></td>
                             <td><?= (int) $managedUser['is_admin'] === 1 ? 'Admin' : 'User' ?></td>
+                            <td><?= (int) $managedUser['is_approved'] === 1 ? 'Approved' : 'Pending' ?></td>
                             <td><?= (int) $managedUser['selected_games'] ?></td>
                             <td><?= (int) $managedUser['votes_count'] ?></td>
                             <td><?= htmlspecialchars((string) $managedUser['created_at']) ?></td>
@@ -96,10 +98,23 @@ require __DIR__ . '/../partials/header.php';
                                 <?php if ($isCurrentUser): ?>
                                     <span class="admin-table__self">Current user</span>
                                 <?php else: ?>
-                                    <form method="POST" action="/admin/users/<?= (int) $managedUser['id'] ?>/delete" onsubmit="return confirm('Delete this user account? This cannot be undone.');">
-                                        <input type="hidden" name="_csrf" value="<?= htmlspecialchars(\Hut\Auth::csrfToken()) ?>">
-                                        <button class="btn btn--danger" type="submit">Delete</button>
-                                    </form>
+                                    <div class="admin-table__actions">
+                                        <?php if ((int) $managedUser['is_approved'] === 0): ?>
+                                            <form method="POST" action="/admin/users/<?= (int) $managedUser['id'] ?>/approve" style="display: inline;">
+                                                <input type="hidden" name="_csrf" value="<?= htmlspecialchars(\Hut\Auth::csrfToken()) ?>">
+                                                <button class="btn btn--success btn--small" type="submit">Approve</button>
+                                            </form>
+                                        <?php else: ?>
+                                            <form method="POST" action="/admin/users/<?= (int) $managedUser['id'] ?>/disapprove" style="display: inline;">
+                                                <input type="hidden" name="_csrf" value="<?= htmlspecialchars(\Hut\Auth::csrfToken()) ?>">
+                                                <button class="btn btn--warning btn--small" type="submit">Disapprove</button>
+                                            </form>
+                                        <?php endif; ?>
+                                        <form method="POST" action="/admin/users/<?= (int) $managedUser['id'] ?>/delete" onsubmit="return confirm('Delete this user account? This cannot be undone.');" style="display: inline;">
+                                            <input type="hidden" name="_csrf" value="<?= htmlspecialchars(\Hut\Auth::csrfToken()) ?>">
+                                            <button class="btn btn--danger btn--small" type="submit">Delete</button>
+                                        </form>
+                                    </div>
                                 <?php endif; ?>
                             </td>
                         </tr>

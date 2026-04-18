@@ -27,6 +27,7 @@ class AdminController
                 u.name,
                 u.email,
                 u.is_admin,
+                u.is_approved,
                 u.created_at,
                 (SELECT COUNT(*) FROM user_games ug WHERE ug.user_id = u.id AND ug.selected = 1) AS selected_games,
                 (SELECT COUNT(*) FROM votes v WHERE v.user_id = u.id) AS votes_count
@@ -346,6 +347,70 @@ class AdminController
         }
 
         $_SESSION['flash_success'] = 'Deleted user: ' . $user['name'] . ' (' . $user['email'] . ') including selected games and votes.';
+        header('Location: ' . \Hut\Url::to('/admin')); exit;
+    }
+
+    public static function approveUser(array $params): void
+    {
+        Auth::requireAdmin();
+        Auth::requireCsrf();
+
+        $id = isset($params['id']) ? (int) $params['id'] : 0;
+        if ($id <= 0) {
+            $_SESSION['flash_error'] = 'Invalid user id.';
+            header('Location: ' . \Hut\Url::to('/admin')); exit;
+        }
+
+        $pdo = Database::getInstance();
+        $userStmt = $pdo->prepare('SELECT id, name, email, is_approved FROM users WHERE id = ? LIMIT 1');
+        $userStmt->execute([$id]);
+        $user = $userStmt->fetch();
+
+        if (!$user) {
+            $_SESSION['flash_error'] = 'User not found.';
+            header('Location: ' . \Hut\Url::to('/admin')); exit;
+        }
+
+        // Update approval status
+        $updateStmt = $pdo->prepare('UPDATE users SET is_approved = 1 WHERE id = ?');
+        $updateStmt->execute([$id]);
+
+        $_SESSION['flash_success'] = 'Approved user: ' . $user['name'] . ' (' . $user['email'] . ')';
+        header('Location: ' . \Hut\Url::to('/admin')); exit;
+    }
+
+    public static function disapproveUser(array $params): void
+    {
+        Auth::requireAdmin();
+        Auth::requireCsrf();
+
+        $id = isset($params['id']) ? (int) $params['id'] : 0;
+        if ($id <= 0) {
+            $_SESSION['flash_error'] = 'Invalid user id.';
+            header('Location: ' . \Hut\Url::to('/admin')); exit;
+        }
+
+        $currentUser = Auth::user();
+        if ($currentUser !== null && (int) $currentUser['id'] === $id) {
+            $_SESSION['flash_error'] = 'You cannot disapprove your own account.';
+            header('Location: ' . \Hut\Url::to('/admin')); exit;
+        }
+
+        $pdo = Database::getInstance();
+        $userStmt = $pdo->prepare('SELECT id, name, email, is_approved FROM users WHERE id = ? LIMIT 1');
+        $userStmt->execute([$id]);
+        $user = $userStmt->fetch();
+
+        if (!$user) {
+            $_SESSION['flash_error'] = 'User not found.';
+            header('Location: ' . \Hut\Url::to('/admin')); exit;
+        }
+
+        // Update approval status
+        $updateStmt = $pdo->prepare('UPDATE users SET is_approved = 0 WHERE id = ?');
+        $updateStmt->execute([$id]);
+
+        $_SESSION['flash_success'] = 'Disapproved user: ' . $user['name'] . ' (' . $user['email'] . ')';
         header('Location: ' . \Hut\Url::to('/admin')); exit;
     }
 

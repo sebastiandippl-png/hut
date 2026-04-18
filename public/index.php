@@ -83,6 +83,8 @@ $router->get('/games',              [GameController::class, 'browse']);
 $router->get('/games/suggestions',  [GameController::class, 'suggestions']);
 $router->get('/games/{id}',         [GameController::class, 'detail']);
 $router->post('/games/{id}/select', [GameController::class, 'toggleSelect']);
+$router->post('/games/{id}/add-to-collection', [GameController::class, 'addToMyCollection']);
+$router->post('/games/{id}/remove-from-collection', [GameController::class, 'removeFromMyCollection']);
 $router->get('/collection',         [GameController::class, 'collection']);
 $router->get('/rankings',           [VoteController::class, 'rankings']);
 $router->post('/games/{id}/heart',  [VoteController::class, 'heart']);

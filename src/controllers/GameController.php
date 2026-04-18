@@ -7,6 +7,7 @@ namespace Hut\controllers;
 use Hut\Auth;
 use Hut\BggThingFetcher;
 use Hut\Game;
+use Hut\PersonalCollection;
 use Hut\UserGame;
 
 class GameController
@@ -21,10 +22,20 @@ class GameController
             : [];
         $page = max(1, (int) ($_GET['page'] ?? 1));
 
-        // Get available users from user_collection
+        // Offer all known owner labels from BGG imports and manual personal ownership.
         $pdo = \Hut\Database::getInstance();
-        $usersStmt = $pdo->query('SELECT DISTINCT bgg_user FROM user_collection ORDER BY bgg_user');
-        $availableUsers = array_map(static fn ($row) => $row['bgg_user'], $usersStmt->fetchAll(\PDO::FETCH_ASSOC));
+        $usersStmt = $pdo->query(
+            'SELECT owner_name
+             FROM (
+                 SELECT bgg_user AS owner_name FROM user_collection
+                 UNION
+                 SELECT u.name AS owner_name
+                 FROM user_personal_collection upc
+                 JOIN users u ON u.id = upc.user_id
+             ) owners
+             ORDER BY owner_name'
+        );
+        $availableUsers = array_map(static fn ($row) => $row['owner_name'], $usersStmt->fetchAll(\PDO::FETCH_ASSOC));
 
         $userId = (int) Auth::user()['id'];
 
@@ -74,6 +85,7 @@ class GameController
         $hearted    = \Hut\Vote::userHearted($userId, $game['id']);
         $hearts     = Game::getHeartCount($game['id']);
         $heartedBy  = \Hut\Vote::heartedBy($game['id']);
+        $isInMyCollection = PersonalCollection::has($userId, $gameId);
 
         require __DIR__ . '/../../templates/games/detail.php';
     }
@@ -115,5 +127,53 @@ class GameController
         $games = Game::collection(Auth::user()['id']);
         BggThingFetcher::ensureForPage(array_column($games, 'id'));
         require __DIR__ . '/../../templates/games/collection.php';
+    }
+
+    public static function addToMyCollection(array $params): void
+    {
+        Auth::requireLogin();
+        Auth::requireCsrf();
+
+        $gameId = (int) $params['id'];
+        $game = Game::find($gameId);
+        if (!$game) {
+            http_response_code(404);
+            require __DIR__ . '/../../templates/404.php';
+            return;
+        }
+
+        $userId = (int) Auth::user()['id'];
+        $added = PersonalCollection::add($userId, $gameId);
+
+        $_SESSION['flash_success'] = $added
+            ? 'Added to your personal collection.'
+            : 'This game is already in your personal collection.';
+
+        header('Location: ' . \Hut\Url::to('/games/' . $gameId));
+        exit;
+    }
+
+    public static function removeFromMyCollection(array $params): void
+    {
+        Auth::requireLogin();
+        Auth::requireCsrf();
+
+        $gameId = (int) $params['id'];
+        $game = Game::find($gameId);
+        if (!$game) {
+            http_response_code(404);
+            require __DIR__ . '/../../templates/404.php';
+            return;
+        }
+
+        $userId = (int) Auth::user()['id'];
+        $removed = PersonalCollection::remove($userId, $gameId);
+
+        $_SESSION['flash_success'] = $removed
+            ? 'Removed from your personal collection.'
+            : 'This game is not in your personal collection.';
+
+        header('Location: ' . \Hut\Url::to('/games/' . $gameId));
+        exit;
     }
 }

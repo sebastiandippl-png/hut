@@ -193,6 +193,15 @@ if [ "$BUILD_RELEASE" = "1" ]; then
                 echo -e "${RED}Error: vendor directory not found and BUILD_VENDOR=0${NC}"
                 exit 1
             fi
+            if command -v composer >/dev/null 2>&1; then
+                echo -e "${GREEN}Refreshing Composer autoload metadata for existing vendor...${NC}"
+                (
+                    cd "$SCRIPT_DIR"
+                    composer dump-autoload --optimize --classmap-authoritative --no-interaction --no-progress
+                )
+            else
+                echo -e "${YELLOW}Warning: composer not available; existing vendor autoload metadata will be reused.${NC}"
+            fi
             echo -e "${GREEN}Copying existing vendor directory into release...${NC}"
             run_rsync "$SCRIPT_DIR/vendor/" "$RELEASE_DIR/vendor/" -a
         fi

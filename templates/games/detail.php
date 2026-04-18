@@ -81,6 +81,8 @@ if (!empty($game['thing_usersrated'])) {
 if ($thingBestPlayerCount !== '') {
     $detailFacts['Best player count'] = $thingBestPlayerCount;
 }
+
+$collectionOwners = trim((string) ($game['bgg_owned_by'] ?? ''));
 ?>
 
 <div class="detail">
@@ -128,7 +130,19 @@ if ($thingBestPlayerCount !== '') {
             </div>
 
             <span class="game-card__selectors" data-hearted-by="<?= $game['id'] ?>">Hearted by: <?= htmlspecialchars($heartedBy) ?></span>
-            <span class="game-card__selectors">In BGG collections: <?= !empty($game['bgg_owned_by']) ? htmlspecialchars((string) $game['bgg_owned_by']) : 'No tracked owners' ?></span>
+            <span class="game-card__selectors">In collections: <?= $collectionOwners !== '' ? htmlspecialchars($collectionOwners) : 'No tracked owners yet' ?></span>
+
+            <?php if (!empty($isInMyCollection)): ?>
+                <form method="POST" action="/games/<?= (int) $game['id'] ?>/remove-from-collection">
+                    <input type="hidden" name="_csrf" value="<?= htmlspecialchars(\Hut\Auth::csrfToken()) ?>">
+                    <button class="btn btn--ghost" type="submit">− Remove from my collection</button>
+                </form>
+            <?php elseif ($collectionOwners === ''): ?>
+                <form method="POST" action="/games/<?= (int) $game['id'] ?>/add-to-collection">
+                    <input type="hidden" name="_csrf" value="<?= htmlspecialchars(\Hut\Auth::csrfToken()) ?>">
+                    <button class="btn btn--ghost" type="submit">+ Add to my collection</button>
+                </form>
+            <?php endif; ?>
 
             <a class="btn btn--ghost"
                     href="https://boardgamegeek.com/boardgame/<?= $game['id'] ?>"

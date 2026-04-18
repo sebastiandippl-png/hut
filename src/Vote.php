@@ -84,12 +84,6 @@ class Vote
                 WHERE selected = 1
                 GROUP BY game_id
             ),
-            bgg_owners AS (
-                SELECT bgg_game_id,
-                       GROUP_CONCAT(bgg_user, ', ') AS bgg_owned_by
-                FROM user_collection
-                GROUP BY bgg_game_id
-            ),
             hearts AS (
                 SELECT v.game_id,
                        COUNT(DISTINCT v.user_id) AS hearts,
@@ -104,13 +98,12 @@ class Vote
                    g.rank,
                    bt.averageweight,
                    s.selectors,
-                   COALESCE(bo.bgg_owned_by, '') AS bgg_owned_by,
+                   '' AS bgg_owned_by,
                    COALESCE(h.hearts, 0) AS hearts,
                    COALESCE(h.hearted_by, '') AS hearted_by
             FROM games g
             LEFT JOIN bgg_thing bt ON bt.bgg_id = g.id
             JOIN selectors s ON s.game_id = g.id
-            LEFT JOIN bgg_owners bo ON bo.bgg_game_id = g.id
             LEFT JOIN hearts h ON h.game_id = g.id
             ORDER BY hearts DESC,
                      CASE WHEN g.rank IS NULL OR g.rank <= 0 THEN 1 ELSE 0 END ASC,
@@ -118,10 +111,13 @@ class Vote
                      g.name ASC
         SQL)->fetchAll();
 
-        return array_map(static function (array $row): array {
+        $ownerRows = Game::collectionOwnersMap(array_column($rows, 'id'));
+
+        return array_map(static function (array $row) use ($ownerRows): array {
             if ($row['hearted_by'] !== '') {
                 $row['hearted_by'] = Auth::firstNames($row['hearted_by']);
             }
+            $row['bgg_owned_by'] = $ownerRows[(int) $row['id']] ?? '';
             return $row;
         }, $rows);
     }

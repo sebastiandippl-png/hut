@@ -29,12 +29,22 @@ class Game
             $params[':search'] = '%' . $search . '%';
         }
 
-        // If users are selected, filter to games in user_collection for those users
-        $fromClause = 'games g';
+        // If users are selected, filter by all known owners (BGG imports + manual owners).
         if (!empty($selectedUsers)) {
-            $fromClause = 'games g INNER JOIN user_collection uc ON uc.bgg_game_id = g.id';
             $placeholders = implode(',', array_map(static fn ($i) => ":user_$i", range(0, count($selectedUsers) - 1)));
-            $where[] = "uc.bgg_user IN ($placeholders)";
+            $where[] = "EXISTS (
+                SELECT 1
+                FROM (
+                    SELECT uc.bgg_game_id AS game_id, uc.bgg_user AS owner_name
+                    FROM user_collection uc
+                    UNION ALL
+                    SELECT upc.game_id AS game_id, u.name AS owner_name
+                    FROM user_personal_collection upc
+                    JOIN users u ON u.id = upc.user_id
+                ) owners
+                WHERE owners.game_id = g.id
+                  AND owners.owner_name IN ($placeholders)
+            )";
             foreach ($selectedUsers as $i => $user) {
                 $params[":user_$i"] = $user;
             }
@@ -43,7 +53,7 @@ class Game
         $whereClause = implode(' AND ', $where);
         $offset      = ($page - 1) * $perPage;
 
-        $countStmt = $pdo->prepare("SELECT COUNT(DISTINCT g.id) FROM $fromClause WHERE $whereClause");
+        $countStmt = $pdo->prepare("SELECT COUNT(DISTINCT g.id) FROM games g WHERE $whereClause");
         $countStmt->execute($params);
         $total = (int) $countStmt->fetchColumn();
 
@@ -55,7 +65,7 @@ class Game
             "SELECT DISTINCT g.*,
                     EXISTS(SELECT 1 FROM user_games ug_any WHERE ug_any.game_id = g.id AND ug_any.selected = 1) AS in_hut,
                     {$selectedByMeSql} AS selected_by_me
-             FROM $fromClause
+                  FROM games g
              WHERE $whereClause
              ORDER BY " . self::RANK_ORDER_SQL . ' LIMIT :limit OFFSET :offset'
         );
@@ -70,14 +80,10 @@ class Game
         $stmt->execute();
         $games = $stmt->fetchAll();
 
-        // Attach collection owners to each game
         if (!empty($games)) {
-            $ids = implode(',', array_map('intval', array_column($games, 'id')));
-            $ownerRows = Database::getInstance()
-                ->query("SELECT bgg_game_id, GROUP_CONCAT(bgg_user, ', ') AS owners FROM user_collection WHERE bgg_game_id IN ($ids) GROUP BY bgg_game_id")
-                ->fetchAll(PDO::FETCH_KEY_PAIR);
+            $ownerRows = self::collectionOwnersMap(array_column($games, 'id'));
             foreach ($games as &$game) {
-                $game['collection_owners'] = $ownerRows[$game['id']] ?? null;
+                $game['collection_owners'] = $ownerRows[(int) $game['id']] ?? null;
             }
             unset($game);
         }
@@ -97,11 +103,13 @@ class Game
         $stmt = $pdo->prepare(
             "SELECT DISTINCT g.*,
                     EXISTS(SELECT 1 FROM user_games ug_any WHERE ug_any.game_id = g.id AND ug_any.selected = 1) AS in_hut,
-                    {$selectedByMeSql} AS selected_by_me,
-                    (SELECT GROUP_CONCAT(uc2.bgg_user, ', ') FROM user_collection uc2 WHERE uc2.bgg_game_id = g.id) AS collection_owners
+                    {$selectedByMeSql} AS selected_by_me
              FROM games g
-             INNER JOIN user_collection uc ON uc.bgg_game_id = g.id
              WHERE (g.is_expansion IS NULL OR g.is_expansion = 0)
+                AND (
+                    EXISTS(SELECT 1 FROM user_collection uc WHERE uc.bgg_game_id = g.id)
+                    OR EXISTS(SELECT 1 FROM user_personal_collection upc WHERE upc.game_id = g.id)
+                )
                ORDER BY {$randomOrderExpr}
              LIMIT :limit"
         );
@@ -110,8 +118,19 @@ class Game
         }
         $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
         $stmt->execute();
+        $rows = $stmt->fetchAll();
 
-        return $stmt->fetchAll();
+        if (empty($rows)) {
+            return [];
+        }
+
+        $ownerRows = self::collectionOwnersMap(array_column($rows, 'id'));
+        foreach ($rows as &$row) {
+            $row['collection_owners'] = $ownerRows[(int) $row['id']] ?? null;
+        }
+        unset($row);
+
+        return $rows;
     }
 
     public static function suggestions(string $search, int $limit = 8): array
@@ -185,6 +204,10 @@ class Game
         );
         $stmt->execute([$id]);
         $row = $stmt->fetch();
+        if ($row) {
+            $ownerRows = self::collectionOwnersMap([$id]);
+            $row['bgg_owned_by'] = $ownerRows[$id] ?? '';
+        }
         return $row ?: null;
     }
 
@@ -257,13 +280,83 @@ class Game
         $stmt = $pdo->prepare($sql);
         $stmt->execute([':user_id' => $currentUserId]);
         $rows = $stmt->fetchAll();
+        $ownerRows = self::collectionOwnersMap(array_column($rows, 'id'));
 
-        return array_map(static function (array $row): array {
+        return array_map(static function (array $row) use ($ownerRows): array {
             if (isset($row['hearted_by']) && $row['hearted_by'] !== 'No hearts yet' && $row['hearted_by'] !== '') {
                 $row['hearted_by'] = Auth::firstNames($row['hearted_by']);
             }
+            $row['bgg_owned_by'] = $ownerRows[(int) $row['id']] ?? '';
             return $row;
         }, $rows);
+    }
+
+    /**
+     * @param array<int, int|string> $gameIds
+     * @return array<int, string>
+     */
+    public static function collectionOwnersMap(array $gameIds): array
+    {
+        $ids = array_values(array_unique(array_map('intval', $gameIds)));
+        $ids = array_values(array_filter($ids, static fn (int $id): bool => $id > 0));
+        if ($ids === []) {
+            return [];
+        }
+
+        $pdo = Database::getInstance();
+        $placeholders = implode(',', array_map(static fn (int $index): string => ':id_' . $index, array_keys($ids)));
+
+        $bggStmt = $pdo->prepare(
+            "SELECT bgg_game_id AS game_id, bgg_user AS owner_name
+             FROM user_collection
+             WHERE bgg_game_id IN ($placeholders)"
+        );
+        self::bindGameIds($bggStmt, $ids);
+        $bggStmt->execute();
+
+        $manualStmt = $pdo->prepare(
+            "SELECT upc.game_id AS game_id, u.name AS owner_name, 1 AS is_manual
+             FROM user_personal_collection upc
+             JOIN users u ON u.id = upc.user_id
+             WHERE upc.game_id IN ($placeholders)"
+        );
+        self::bindGameIds($manualStmt, $ids);
+        $manualStmt->execute();
+
+        $ownerSetsByGame = [];
+        foreach (array_merge($bggStmt->fetchAll(), $manualStmt->fetchAll()) as $row) {
+            $gameId = (int) ($row['game_id'] ?? 0);
+            $ownerName = trim((string) ($row['owner_name'] ?? ''));
+            if ((int) ($row['is_manual'] ?? 0) === 1) {
+                $ownerName = trim(Auth::firstName($ownerName));
+            }
+            if ($gameId <= 0 || $ownerName === '') {
+                continue;
+            }
+            if (!isset($ownerSetsByGame[$gameId])) {
+                $ownerSetsByGame[$gameId] = [];
+            }
+            $ownerSetsByGame[$gameId][$ownerName] = true;
+        }
+
+        $ownersByGame = [];
+        foreach ($ownerSetsByGame as $gameId => $ownerSet) {
+            $names = array_keys($ownerSet);
+            sort($names, SORT_NATURAL | SORT_FLAG_CASE);
+            $ownersByGame[(int) $gameId] = implode(', ', $names);
+        }
+
+        return $ownersByGame;
+    }
+
+    /**
+     * @param array<int, int> $ids
+     */
+    private static function bindGameIds(\PDOStatement $stmt, array $ids): void
+    {
+        foreach ($ids as $index => $id) {
+            $stmt->bindValue(':id_' . $index, $id, PDO::PARAM_INT);
+        }
     }
 
     private static function groupConcatNamesExpr(\PDO $pdo, bool $distinct): string

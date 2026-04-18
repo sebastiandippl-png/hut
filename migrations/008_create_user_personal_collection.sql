@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS user_personal_collection (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    game_id     INTEGER NOT NULL REFERENCES games(id) ON DELETE CASCADE,
+    created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (user_id, game_id)
+);

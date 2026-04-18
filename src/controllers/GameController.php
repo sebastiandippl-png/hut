@@ -97,7 +97,16 @@ class GameController
 
         $gameId  = (int) $params['id'];
         $userId  = (int) Auth::user()['id'];
-        UserGame::toggle($userId, $gameId);
+        $selectedByMe = UserGame::toggle($userId, $gameId);
+
+        // Keep hearts in sync with hut selection for this user.
+        $isHearted = \Hut\Vote::userHearted($userId, $gameId);
+        if ($selectedByMe && !$isHearted) {
+            \Hut\Vote::toggleHeart($userId, $gameId);
+        } elseif (!$selectedByMe && $isHearted) {
+            \Hut\Vote::toggleHeart($userId, $gameId);
+        }
+
         $selectionState = UserGame::selectionState($userId, $gameId);
 
         // AJAX-friendly response

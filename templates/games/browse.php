@@ -2,6 +2,7 @@
 
 <div class="page-header">
     <h1>Suggest Games</h1>
+    <p class="page-header__sub">Get inspired by a random choice of games that are owned by a fellow hut lover. Or search across BoardGameGeek to find a game for the menu…</p>
 </div>
 
 <form class="filters" method="GET" action="/games" data-browse-filters>
@@ -38,7 +39,7 @@
     <div class="game-grid">
         <?php foreach ($games as $game): ?>
             <?php
-            $isSelected = (int) ($game['selected_by_me'] ?? 0) === 1;
+            $isSelectedByMe = (int) ($game['selected_by_me'] ?? 0) === 1;
             $isInHut = (int) ($game['in_hut'] ?? 0) === 1;
             $rank = (int) ($game['rank'] ?? 0);
             ?>
@@ -83,8 +84,9 @@
 
                     <button class="btn btn--select <?= $isInHut ? 'btn--select--active' : '' ?>"
                             data-game-id="<?= $game['id'] ?>"
-                            title="<?= $isSelected ? 'Remove from hut' : 'Add to hut' ?>">
-                        <?= $isInHut ? '🏠 In hut' : '+ Add to hut' ?>
+                            title="<?= $isSelectedByMe ? 'Remove your hut selection' : ($isInHut ? 'In hut (added by another user)' : 'Add to hut') ?>"
+                            <?= $isInHut && !$isSelectedByMe ? 'disabled' : '' ?>>
+                        <?= $isSelectedByMe ? '− Remove from hut' : ($isInHut ? '🏠 In hut' : '+ Add to hut') ?>
                     </button>
                 </div>
             </article>

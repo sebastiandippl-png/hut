@@ -75,6 +75,10 @@ class AuthController
 
         try {
             $user = Auth::register($name, $email, $password);
+            if (!((int)($user['is_approved'] ?? 1) === 1)) {
+                $_SESSION['flash_success'] = 'Registration successful. Your account is pending admin approval.';
+                header('Location: ' . \Hut\Url::to('/login')); exit;
+            }
             Auth::login($user);
             header('Location: ' . \Hut\Url::to('/games')); exit;
         } catch (\RuntimeException $e) {
@@ -132,6 +136,10 @@ class AuthController
                 $info->getEmail(),
                 $info->getName()
             );
+            if (!((int)($user['is_approved'] ?? 1) === 1)) {
+                $_SESSION['flash_success'] = 'Google account linked. Your account is pending admin approval.';
+                header('Location: ' . \Hut\Url::to('/login')); exit;
+            }
             Auth::login($user);
             header('Location: ' . \Hut\Url::to('/games')); exit;
         } catch (\Exception $e) {

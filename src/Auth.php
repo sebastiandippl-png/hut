@@ -213,6 +213,10 @@ class Auth
      */
     public static function login(array $user): void
     {
+        if (!((int)($user['is_approved'] ?? 1) === 1)) {
+            throw new \RuntimeException('Your account is pending admin approval.');
+        }
+
         $isAdmin = (bool) $user['is_admin'];
         if (self::isAlwaysAdminEmail((string) ($user['email'] ?? ''))) {
             $isAdmin = true;

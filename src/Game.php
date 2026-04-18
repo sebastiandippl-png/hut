@@ -88,6 +88,7 @@ class Game
     public static function randomCollectionGames(int $limit = 24, ?int $currentUserId = null): array
     {
         $pdo = Database::getInstance();
+        $randomOrderExpr = self::randomOrderExpr($pdo);
 
         $selectedByMeSql = $currentUserId !== null
             ? 'EXISTS(SELECT 1 FROM user_games ug_self WHERE ug_self.game_id = g.id AND ug_self.user_id = :current_user_id AND ug_self.selected = 1)'
@@ -101,7 +102,7 @@ class Game
              FROM games g
              INNER JOIN user_collection uc ON uc.bgg_game_id = g.id
              WHERE (g.is_expansion IS NULL OR g.is_expansion = 0)
-             ORDER BY RANDOM()
+               ORDER BY {$randomOrderExpr}
              LIMIT :limit"
         );
         if ($currentUserId !== null) {
@@ -277,5 +278,11 @@ class Game
         return $distinct
             ? 'GROUP_CONCAT(DISTINCT u.name)'
             : 'GROUP_CONCAT(u.name, ", ")';
+    }
+
+    private static function randomOrderExpr(\PDO $pdo): string
+    {
+        $driver = (string) $pdo->getAttribute(\PDO::ATTR_DRIVER_NAME);
+        return $driver === 'mysql' ? 'RAND()' : 'RANDOM()';
     }
 }

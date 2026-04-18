@@ -193,6 +193,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // ── Select / deselect game ──────────────────────────────────────────────
     document.querySelectorAll('.btn--select').forEach(btn => {
         btn.addEventListener('click', async () => {
+            if (btn.disabled) {
+                return;
+            }
+
             const gameId = btn.dataset.gameId;
             try {
                 const res  = await fetch(withBase(`/games/${gameId}/select`), {
@@ -204,15 +208,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 const data = await res.json();
 
-                if (data.inHut) {
+                if (data.selectedByMe) {
+                    btn.textContent = '− Remove from hut';
+                    btn.classList.add('btn--select--active');
+                    btn.disabled = false;
+                    btn.title = 'Remove your hut selection';
+                } else if (data.inHut) {
                     btn.textContent = '🏠 In hut';
                     btn.classList.add('btn--select--active');
+                    btn.disabled = true;
+                    btn.title = 'In hut (added by another user)';
                 } else {
                     btn.textContent = '+ Add to hut';
                     btn.classList.remove('btn--select--active');
+                    btn.disabled = false;
+                    btn.title = 'Add to hut';
                 }
-
-                btn.title = data.selectedByMe ? 'Remove from hut' : 'Add to hut';
             } catch (e) {
                 console.error('Select toggle failed', e);
             }

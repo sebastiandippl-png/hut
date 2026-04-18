@@ -104,10 +104,19 @@ if ($thingBestPlayerCount !== '') {
         </h1>
 
         <div class="detail__actions">
-            <button class="btn btn--select <?= $isSelected ? 'btn--select--active' : '' ?>"
-                    data-game-id="<?= $game['id'] ?>">
-                <?= $isSelected ? '✓ In hut' : '+ Add to hut' ?>
+            <button class="btn btn--select <?= $isInHut ? 'btn--select--active' : '' ?>"
+                    data-game-id="<?= $game['id'] ?>"
+                    title="<?= $isSelectedByMe ? 'Remove your hut selection' : ($isInHut ? 'In hut (added by another user)' : 'Add to hut') ?>"
+                    <?= $isInHut && !$isSelectedByMe ? 'disabled' : '' ?>>
+                <?= $isSelectedByMe ? '− Remove from hut' : ($isInHut ? '🏠 In hut' : '+ Add to hut') ?>
             </button>
+
+            <?php if (!empty(\Hut\Auth::user()['is_admin']) && $isInHut): ?>
+                <form method="POST" action="/admin/games/<?= (int) $game['id'] ?>/remove-from-hut">
+                    <input type="hidden" name="_csrf" value="<?= htmlspecialchars(\Hut\Auth::csrfToken()) ?>">
+                    <button class="btn btn--danger" type="submit">Remove From Hut Menu (All Users)</button>
+                </form>
+            <?php endif; ?>
 
             <div class="heart-controls" data-game-id="<?= $game['id'] ?>">
                 <button class="btn btn--heart <?= $hearted ? 'btn--heart--active' : '' ?>"

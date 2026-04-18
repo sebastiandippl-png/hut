@@ -2,7 +2,7 @@
 
 <div class="page-header">
     <h1>Hut Menu</h1>
-    <p class="page-header__sub">Games we want to play at the hut</p>
+    <p class="page-header__sub">This is the huts boardgame menu. Give some hearts to games you want to play to make sure it'll be taken to the hut.</p>
 </div>
 
 <?php if (empty($games)): ?>

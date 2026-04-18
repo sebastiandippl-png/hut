@@ -7,8 +7,8 @@ namespace Hut;
 class UserGame
 {
     /**
-     * Toggle: if not selected → select, if selected → deselect.
-     * Returns true if now selected, false if deselected.
+     * Toggle selection for the given user.
+     * Returns true if selected by this user after the action.
      */
     public static function toggle(int $userId, int $gameId): bool
     {
@@ -26,11 +26,22 @@ class UserGame
             return true;
         }
 
-        $newValue = $row['selected'] ? 0 : 1;
+        $newValue = (int) $row['selected'] === 1 ? 0 : 1;
         $pdo->prepare(
             'UPDATE user_games SET selected = ? WHERE user_id = ? AND game_id = ?'
         )->execute([$newValue, $userId, $gameId]);
-        return (bool) $newValue;
+
+        return $newValue === 1;
+    }
+
+    /**
+     * Remove a game from the hut menu for all users.
+     */
+    public static function clearForAll(int $gameId): void
+    {
+        $pdo = Database::getInstance();
+        $stmt = $pdo->prepare('UPDATE user_games SET selected = 0 WHERE game_id = ? AND selected = 1');
+        $stmt->execute([$gameId]);
     }
 
     /**

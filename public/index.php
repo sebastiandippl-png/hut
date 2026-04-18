@@ -98,6 +98,7 @@ $router->post('/admin/collections/fetch', [AdminController::class, 'fetchConfigu
 $router->post('/admin/users/{id}/delete', [AdminController::class, 'deleteUser']);
 $router->post('/admin/users/{id}/approve', [AdminController::class, 'approveUser']);
 $router->post('/admin/users/{id}/disapprove', [AdminController::class, 'disapproveUser']);
+$router->post('/admin/games/{id}/remove-from-hut', [GameController::class, 'adminRemoveFromHut']);
 
 // ─── Dispatch ────────────────────────────────────────────────────────────────
 $method = $_SERVER['REQUEST_METHOD'];

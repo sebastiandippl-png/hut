@@ -67,8 +67,10 @@ class GameController
         BggThingFetcher::ensureForPage([$gameId]);
         $game = Game::find($gameId) ?? $game;
 
-        $userId     = Auth::user()['id'];
-        $isSelected = in_array($game['id'], UserGame::selectedGameIds($userId), true);
+        $userId = (int) Auth::user()['id'];
+        $selectionState = UserGame::selectionState($userId, (int) $game['id']);
+        $isSelectedByMe = $selectionState['selected_by_me'];
+        $isInHut = $selectionState['in_hut'];
         $hearted    = \Hut\Vote::userHearted($userId, $game['id']);
         $hearts     = Game::getHeartCount($game['id']);
         $heartedBy  = \Hut\Vote::heartedBy($game['id']);
@@ -82,7 +84,7 @@ class GameController
         Auth::requireCsrf(true);
 
         $gameId  = (int) $params['id'];
-        $userId  = Auth::user()['id'];
+        $userId  = (int) Auth::user()['id'];
         UserGame::toggle($userId, $gameId);
         $selectionState = UserGame::selectionState($userId, $gameId);
 
@@ -92,6 +94,19 @@ class GameController
             'selectedByMe' => $selectionState['selected_by_me'],
             'inHut' => $selectionState['in_hut'],
         ]);
+    }
+
+    public static function adminRemoveFromHut(array $params): void
+    {
+        Auth::requireAdmin();
+        Auth::requireCsrf();
+
+        $gameId = (int) $params['id'];
+        UserGame::clearForAll($gameId);
+
+        $_SESSION['flash_success'] = 'Game removed from hut menu for all users.';
+        header('Location: ' . \Hut\Url::to('/games/' . $gameId));
+        exit;
     }
 
     public static function collection(array $params): void

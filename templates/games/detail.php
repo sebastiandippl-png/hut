@@ -119,6 +119,7 @@ if ($thingBestPlayerCount !== '') {
             </div>
 
             <span class="game-card__selectors" data-hearted-by="<?= $game['id'] ?>">Hearted by: <?= htmlspecialchars($heartedBy) ?></span>
+            <span class="game-card__selectors">In BGG collections: <?= !empty($game['bgg_owned_by']) ? htmlspecialchars((string) $game['bgg_owned_by']) : 'No tracked owners' ?></span>
 
             <a class="btn btn--ghost"
                     href="https://boardgamegeek.com/boardgame/<?= $game['id'] ?>"

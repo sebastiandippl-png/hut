@@ -129,9 +129,16 @@ class Game
                     bt.player_best_values AS thing_player_best_values,
                     bt.player_recommended_values AS thing_player_recommended_values,
                     bt.player_not_recommended_values AS thing_player_not_recommended_values,
-                    bt.last_updated AS thing_last_updated
+                          bt.last_updated AS thing_last_updated,
+                          COALESCE(bo.bgg_owned_by, \'\') AS bgg_owned_by
              FROM games g
              LEFT JOIN bgg_thing bt ON bt.bgg_id = g.id
+                      LEFT JOIN (
+                       SELECT bgg_game_id,
+                                GROUP_CONCAT(bgg_user, \', \') AS bgg_owned_by
+                       FROM user_collection
+                       GROUP BY bgg_game_id
+                      ) bo ON bo.bgg_game_id = g.id
              WHERE g.id = ?
              LIMIT 1'
         );

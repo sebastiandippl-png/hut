@@ -205,7 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await res.json();
 
                 if (data.inHut) {
-                    btn.textContent = '✓ In hut';
+                    btn.textContent = '🏠 In hut';
                     btn.classList.add('btn--select--active');
                 } else {
                     btn.textContent = '+ Add to hut';

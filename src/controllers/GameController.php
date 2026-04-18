@@ -27,9 +27,17 @@ class GameController
         $availableUsers = array_map(static fn ($row) => $row['bgg_user'], $usersStmt->fetchAll(\PDO::FETCH_ASSOC));
 
         $userId = (int) Auth::user()['id'];
-        $result = Game::browse($search, $selectedUsers, $page, 24, $userId);
 
-        extract($result); // $games, $total, $page, $perPage
+        $isDefaultView = $search === '' && empty($selectedUsers);
+        if ($isDefaultView) {
+            $games = Game::randomCollectionGames(24, $userId);
+            $total = count($games);
+            $perPage = 24;
+        } else {
+            $result = Game::browse($search, $selectedUsers, $page, 24, $userId);
+            extract($result); // $games, $total, $page, $perPage
+        }
+
         BggThingFetcher::ensureForPage(array_column($games, 'id'));
         require __DIR__ . '/../../templates/games/browse.php';
     }

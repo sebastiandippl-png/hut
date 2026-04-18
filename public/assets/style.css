@@ -149,9 +149,36 @@ img { max-width: 100%; display: block; }
 .btn--danger { background: var(--color-danger); color: #fff; }
 .btn--danger:hover { background: #8e5f87; text-decoration: none; color: #fff; }
 
-.btn--select { background: rgba(180, 211, 217, .18); border: 1px solid var(--color-border); color: var(--color-text); font-size: .82rem; padding: .35rem .7rem; }
-.btn--select--active { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
-.btn--select:hover { text-decoration: none; }
+.btn--select {
+    background: rgba(180, 211, 217, .18);
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    font-size: .82rem;
+    padding: .35rem .85rem;
+    gap: .35rem;
+    transition: background .18s, border-color .18s, color .18s, box-shadow .18s, transform .12s;
+}
+.btn--select:hover {
+    background: rgba(155, 142, 199, .18);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(155, 142, 199, .18);
+    text-decoration: none;
+    transform: translateY(-1px);
+}
+.btn--select:active { transform: translateY(0); }
+.btn--select--active {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: #fff;
+    box-shadow: 0 3px 10px rgba(155, 142, 199, .4);
+}
+.btn--select--active:hover {
+    background: var(--color-primary-h);
+    border-color: var(--color-primary-h);
+    color: #fff;
+    box-shadow: 0 3px 14px rgba(155, 142, 199, .55);
+}
 
 .btn--vote { background: transparent; border: 1px solid var(--color-border); padding: .25rem .5rem; font-size: 1rem; line-height: 1; }
 .btn--upvote.btn--vote--active   { background: var(--color-success); border-color: var(--color-success); color: #fff; }

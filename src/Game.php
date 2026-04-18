@@ -70,7 +70,47 @@ class Game
         $stmt->execute();
         $games = $stmt->fetchAll();
 
+        // Attach collection owners to each game
+        if (!empty($games)) {
+            $ids = implode(',', array_map('intval', array_column($games, 'id')));
+            $ownerRows = Database::getInstance()
+                ->query("SELECT bgg_game_id, GROUP_CONCAT(bgg_user, ', ') AS owners FROM user_collection WHERE bgg_game_id IN ($ids) GROUP BY bgg_game_id")
+                ->fetchAll(PDO::FETCH_KEY_PAIR);
+            foreach ($games as &$game) {
+                $game['collection_owners'] = $ownerRows[$game['id']] ?? null;
+            }
+            unset($game);
+        }
+
         return ['games' => $games, 'total' => $total, 'page' => $page, 'perPage' => $perPage];
+    }
+
+    public static function randomCollectionGames(int $limit = 24, ?int $currentUserId = null): array
+    {
+        $pdo = Database::getInstance();
+
+        $selectedByMeSql = $currentUserId !== null
+            ? 'EXISTS(SELECT 1 FROM user_games ug_self WHERE ug_self.game_id = g.id AND ug_self.user_id = :current_user_id AND ug_self.selected = 1)'
+            : '0';
+
+        $stmt = $pdo->prepare(
+            "SELECT DISTINCT g.*,
+                    EXISTS(SELECT 1 FROM user_games ug_any WHERE ug_any.game_id = g.id AND ug_any.selected = 1) AS in_hut,
+                    {$selectedByMeSql} AS selected_by_me,
+                    (SELECT GROUP_CONCAT(uc2.bgg_user, ', ') FROM user_collection uc2 WHERE uc2.bgg_game_id = g.id) AS collection_owners
+             FROM games g
+             INNER JOIN user_collection uc ON uc.bgg_game_id = g.id
+             WHERE (g.is_expansion IS NULL OR g.is_expansion = 0)
+             ORDER BY RANDOM()
+             LIMIT :limit"
+        );
+        if ($currentUserId !== null) {
+            $stmt->bindValue(':current_user_id', $currentUserId, PDO::PARAM_INT);
+        }
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
     }
 
     public static function suggestions(string $search, int $limit = 8): array

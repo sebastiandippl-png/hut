@@ -76,12 +76,15 @@
                         <?php if ((int) ($game['is_expansion'] ?? 0) === 1): ?>
                             <span title="Expansion">🧩 Expansion</span>
                         <?php endif; ?>
+                        <?php if (!empty($game['collection_owners'])): ?>
+                            <span title="In collection of">📦 <?= htmlspecialchars($game['collection_owners']) ?></span>
+                        <?php endif; ?>
                     </div>
 
                     <button class="btn btn--select <?= $isInHut ? 'btn--select--active' : '' ?>"
                             data-game-id="<?= $game['id'] ?>"
                             title="<?= $isSelected ? 'Remove from hut' : 'Add to hut' ?>">
-                        <?= $isInHut ? '✓ In hut' : '+ Add to hut' ?>
+                        <?= $isInHut ? '🏠 In hut' : '+ Add to hut' ?>
                     </button>
                 </div>
             </article>

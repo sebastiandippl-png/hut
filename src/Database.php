@@ -20,6 +20,15 @@ class Database
         return self::$instance;
     }
 
+    /**
+     * Release the current connection. The next call to getInstance() will open a fresh one.
+     * Useful to free a connection early (e.g. before long-running non-DB work).
+     */
+    public static function close(): void
+    {
+        self::$instance = null;
+    }
+
     private static function connect(): PDO
     {
         $dsn      = $_ENV['DB_DSN']      ?? throw new RuntimeException('DB_DSN not set');

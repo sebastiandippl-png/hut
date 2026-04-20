@@ -18,8 +18,53 @@ use Hut\controllers\VoteController;
 $dotenv = Dotenv::createImmutable(__DIR__ . '/..');
 $dotenv->load();
 
-// Run migrations on first boot / after deploy
-Database::migrate(__DIR__ . '/../migrations');
+// Global exception handler: log full details, return a safe 500 page.
+set_exception_handler(static function (\Throwable $e): void {
+    $debug   = ($_ENV['APP_DEBUG'] ?? 'false') === 'true';
+    $refId   = bin2hex(random_bytes(6));
+
+    $logEntry = sprintf(
+        '[%s] [500] ref=%s %s: %s in %s:%d' . PHP_EOL . '%s' . PHP_EOL,
+        date('Y-m-d H:i:s'),
+        $refId,
+        get_class($e),
+        $e->getMessage(),
+        $e->getFile(),
+        $e->getLine(),
+        $e->getTraceAsString()
+    );
+
+    // Write to a project-local log file so it's accessible on shared hosting
+    // where PHP's error_log destination may be inaccessible.
+    $logFile = dirname(__DIR__) . '/storage/error.log';
+    @file_put_contents($logFile, $logEntry, FILE_APPEND | LOCK_EX);
+    // Also attempt the system error log as a fallback.
+    error_log(rtrim($logEntry));
+
+    // Discard any partial output already buffered.
+    while (ob_get_level() > 0) {
+        ob_end_clean();
+    }
+
+    if (!headers_sent()) {
+        http_response_code(500);
+        header('Content-Type: text/html; charset=utf-8');
+    }
+
+    $errorRefId = $refId;
+    $debugInfo  = $debug
+        ? get_class($e) . ': ' . $e->getMessage() . "\n" . $e->getTraceAsString()
+        : null;
+
+    require __DIR__ . '/../templates/500.php';
+});
+
+// Run migrations on first boot / after deploy.
+// Set DB_AUTO_MIGRATE=false in production once the initial deploy is done;
+// re-enable only when rolling out schema changes.
+if (($_ENV['DB_AUTO_MIGRATE'] ?? 'true') === 'true') {
+    Database::migrate(__DIR__ . '/../migrations');
+}
 
 // Session
 $sessionName = $_ENV['SESSION_NAME'] ?? 'hut_session';

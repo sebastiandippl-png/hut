@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS links_new (
     url TEXT NOT NULL,
     description TEXT NOT NULL DEFAULT '',
     sort_order INTEGER NOT NULL DEFAULT 0,
-    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 INSERT OR IGNORE INTO links_new (id, title, url, description, sort_order, created_at)
     SELECT id, title, url, description, sort_order, created_at FROM links;

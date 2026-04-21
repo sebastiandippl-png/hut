@@ -1,7 +1,15 @@
 {
-    "generated_at": "2026-04-21T20:02:11Z",
+    "generated_at": "2026-04-21T20:24:03Z",
     "repo_url": "https://github.com/sebastiandippl-png/hut",
     "entries": [
+        {
+            "hash": "e7df887022d10cc589a5a41e3048d56ee7bbbcb1",
+            "short_hash": "e7df887",
+            "date": "2026-04-21",
+            "author": "Sebastian",
+            "subject": "feat: add links management feature with admin interface and display",
+            "url": "https://github.com/sebastiandippl-png/hut/commit/e7df887022d10cc589a5a41e3048d56ee7bbbcb1"
+        },
         {
             "hash": "751367ddbcae6c89279191884dc1e26f5230e7f6",
             "short_hash": "751367d",

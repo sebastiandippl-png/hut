@@ -151,7 +151,6 @@ If you need to promote a user to admin, update the users table and set is_admin 
 - POST /games/{id}/heart
 - GET /games/suggestions
 - GET /collection
-- GET /rankings
 - GET /changelog
 - GET /admin
 - GET /admin/import

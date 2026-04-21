@@ -24,10 +24,4 @@ class VoteController
         echo json_encode(['hearted' => $hearted, 'hearts' => $hearts, 'heartedBy' => $heartedBy]);
     }
 
-    public static function rankings(array $params): void
-    {
-        Auth::requireLogin();
-        $rankings = Vote::rankings();
-        require __DIR__ . '/../../templates/rankings.php';
-    }
 }

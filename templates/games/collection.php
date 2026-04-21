@@ -1,8 +1,8 @@
 <?php $pageTitle = 'Hut Choice'; require __DIR__ . '/../partials/header.php'; ?>
 
 <div class="page-header">
-    <h1>Hut Menu</h1>
-    <p class="page-header__sub">This is the huts boardgame menu. Give some hearts to games you want to play to make sure it'll be taken to the hut.</p>
+    <h1>Hut Collection</h1>
+    <p class="page-header__sub">This is the huts boardgame collection you chose. Give some hearts to games you want to play to make sure it'll be taken to the hut.</p>
 </div>
 
 <?php if (empty($games)): ?>

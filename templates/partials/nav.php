@@ -4,10 +4,9 @@ use Hut\Auth;
 $user = Auth::user();
 $currentPath = strtok((string) ($_SERVER['REQUEST_URI'] ?? '/'), '?') ?: '/';
 
-$isGamesSuggest = $currentPath === '/' || $currentPath === '/games';
-$isGamesCollection = $currentPath === '/collection';
-$isGamesRanking = $currentPath === '/rankings';
-$isGamesGroupActive = $isGamesSuggest || $isGamesCollection || $isGamesRanking || str_starts_with($currentPath, '/games/');
+$isGamesSuggest = $currentPath === '/games';
+$isGamesCollection = $currentPath === '/' || $currentPath === '/collection';
+$isGamesGroupActive = $isGamesSuggest || $isGamesCollection || str_starts_with($currentPath, '/games/');
 
 $isNewsChangelog = $currentPath === '/changelog';
 $isNewsGroupActive = $isNewsChangelog;
@@ -22,7 +21,7 @@ $newsGroupClass = 'nav__group' . ($isNewsGroupActive ? ' nav__group--active' : '
 $adminGroupClass = 'nav__group' . ($isAdminGroupActive ? ' nav__group--active' : '');
 ?>
 <nav class="nav" id="mainNav">
-    <a class="nav__brand" href="/games">🏠 Hut Game Manager</a>
+    <a class="nav__brand" href="/">🏠 Hut Game Manager</a>
     <button class="nav__burger" aria-label="Toggle menu" aria-expanded="false" aria-controls="mainNav" data-nav-burger>
         <span class="nav__burger-bar"></span>
         <span class="nav__burger-bar"></span>
@@ -36,9 +35,8 @@ $adminGroupClass = 'nav__group' . ($isAdminGroupActive ? ' nav__group--active' :
                     <span class="nav__arrow" aria-hidden="true">▾</span>
                 </button>
                 <div class="nav__dropdown">
-                    <a href="/games" class="nav__dropdown-link<?= $isGamesSuggest ? ' nav__dropdown-link--active' : '' ?>">Suggest</a>
                     <a href="/collection" class="nav__dropdown-link<?= $isGamesCollection ? ' nav__dropdown-link--active' : '' ?>">Hut Collection</a>
-                    <a href="/rankings" class="nav__dropdown-link<?= $isGamesRanking ? ' nav__dropdown-link--active' : '' ?>">Heart Ranking</a>
+                    <a href="/games" class="nav__dropdown-link<?= $isGamesSuggest ? ' nav__dropdown-link--active' : '' ?>">Suggest</a>
                 </div>
             </div>
             <div class="<?= htmlspecialchars($newsGroupClass) ?>" data-nav-group>

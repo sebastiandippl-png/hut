@@ -1,13 +1,4 @@
--- Recreate links table without preview_image_url column.
-CREATE TABLE IF NOT EXISTS links_new (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    title TEXT NOT NULL,
-    url TEXT NOT NULL,
-    description TEXT NOT NULL DEFAULT '',
-    sort_order INTEGER NOT NULL DEFAULT 0,
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-INSERT OR IGNORE INTO links_new (id, title, url, description, sort_order, created_at)
-    SELECT id, title, url, description, sort_order, created_at FROM links;
-DROP TABLE links;
-ALTER TABLE links_new RENAME TO links;
+-- Drop preview_image_url from links if it exists.
+-- Uses IF EXISTS so this is safe to run on environments where the column was
+-- never added (e.g. production where migration 009 already omits it).
+ALTER TABLE links DROP COLUMN IF EXISTS preview_image_url;

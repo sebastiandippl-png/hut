@@ -30,6 +30,12 @@
 - Avoid exposing raw internal exception messages to users; log server-side and show safe flash messages.
 - Do not edit `vendor/` directly.
 - Treat startup migration side effects as intentional: app boot may change DB schema if new migrations exist.
+- Write all SQL to be compatible with both **SQLite** (local dev) and **MariaDB** (production). Avoid dialect-specific syntax:
+  - Use `CURRENT_TIMESTAMP` for default datetime values, never `datetime('now')` (SQLite-only) or `NOW()` (MySQL-only).
+  - Use `INSERT INTO ... ON CONFLICT DO NOTHING` only if handled by `normalizeSqlForMysql()` in `src/Database.php`; prefer avoiding upserts in migrations.
+  - Do not use `INSERT OR IGNORE` (SQLite-only); use `INSERT IGNORE` only within MySQL-specific branches.
+  - `ALTER TABLE ... DROP COLUMN IF EXISTS` is safe on both SQLite 3.35+ and MariaDB 10.0.2+.
+  - `INTEGER PRIMARY KEY AUTOINCREMENT` in migrations is automatically rewritten for MariaDB by `Database::normalizeSqlForMysql()`.
 - For deep BGG API behavior, retries, and polling caveats, reference `Learnings.md` instead of re-documenting details here.
 
 ## Reference Docs

@@ -1,7 +1,15 @@
 {
-    "generated_at": "2026-04-21T20:24:03Z",
+    "generated_at": "2026-04-21T20:27:28Z",
     "repo_url": "https://github.com/sebastiandippl-png/hut",
     "entries": [
+        {
+            "hash": "32e0b56cb9ad992e4266654a9290d23f72336f4e",
+            "short_hash": "32e0b56",
+            "date": "2026-04-21",
+            "author": "Sebastian",
+            "subject": "fix: update created_at column type to DATETIME for consistency in links table",
+            "url": "https://github.com/sebastiandippl-png/hut/commit/32e0b56cb9ad992e4266654a9290d23f72336f4e"
+        },
         {
             "hash": "e7df887022d10cc589a5a41e3048d56ee7bbbcb1",
             "short_hash": "e7df887",

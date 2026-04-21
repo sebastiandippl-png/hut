@@ -1,7 +1,23 @@
 {
-    "generated_at": "2026-04-21T19:32:31Z",
+    "generated_at": "2026-04-21T20:02:11Z",
     "repo_url": "https://github.com/sebastiandippl-png/hut",
     "entries": [
+        {
+            "hash": "751367ddbcae6c89279191884dc1e26f5230e7f6",
+            "short_hash": "751367d",
+            "date": "2026-04-21",
+            "author": "Sebastian",
+            "subject": "feat: remove rankings and make collection the entry page",
+            "url": "https://github.com/sebastiandippl-png/hut/commit/751367ddbcae6c89279191884dc1e26f5230e7f6"
+        },
+        {
+            "hash": "807af1e424fccfa33bf39eaa5f61d9830efc7ebe",
+            "short_hash": "807af1e",
+            "date": "2026-04-21",
+            "author": "Sebastian",
+            "subject": "feat: add changelog feature with deployment script integration and UI display",
+            "url": "https://github.com/sebastiandippl-png/hut/commit/807af1e424fccfa33bf39eaa5f61d9830efc7ebe"
+        },
         {
             "hash": "90f38e5299f3b01e8f0a15d029e9c5da30af1776",
             "short_hash": "90f38e5",

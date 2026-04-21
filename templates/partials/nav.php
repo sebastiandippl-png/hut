@@ -9,11 +9,13 @@ $isGamesCollection = $currentPath === '/' || $currentPath === '/collection';
 $isGamesGroupActive = $isGamesSuggest || $isGamesCollection || str_starts_with($currentPath, '/games/');
 
 $isNewsChangelog = $currentPath === '/changelog';
-$isNewsGroupActive = $isNewsChangelog;
+$isNewsLinks = $currentPath === '/links';
+$isNewsGroupActive = $isNewsChangelog || $isNewsLinks;
 
 $isAdminUsers = $currentPath === '/admin' || $currentPath === '/admin/users';
 $isAdminImport = $currentPath === '/admin/import';
 $isAdminNotice = $currentPath === '/admin/notice';
+$isAdminLinks = $currentPath === '/admin/links';
 $isAdminGroupActive = str_starts_with($currentPath, '/admin');
 
 $gamesGroupClass = 'nav__group' . ($isGamesGroupActive ? ' nav__group--active' : '');
@@ -46,6 +48,7 @@ $adminGroupClass = 'nav__group' . ($isAdminGroupActive ? ' nav__group--active' :
                 </button>
                 <div class="nav__dropdown">
                     <a href="/changelog" class="nav__dropdown-link<?= $isNewsChangelog ? ' nav__dropdown-link--active' : '' ?>">Changelog</a>
+                    <a href="/links" class="nav__dropdown-link<?= $isNewsLinks ? ' nav__dropdown-link--active' : '' ?>">Links</a>
                 </div>
             </div>
             <?php if ($user['is_admin']): ?>
@@ -58,6 +61,7 @@ $adminGroupClass = 'nav__group' . ($isAdminGroupActive ? ' nav__group--active' :
                         <a href="/admin/users" class="nav__dropdown-link<?= $isAdminUsers ? ' nav__dropdown-link--active' : '' ?>">Users</a>
                         <a href="/admin/import" class="nav__dropdown-link<?= $isAdminImport ? ' nav__dropdown-link--active' : '' ?>">BGG Data</a>
                         <a href="/admin/notice" class="nav__dropdown-link<?= $isAdminNotice ? ' nav__dropdown-link--active' : '' ?>">Notification Banner</a>
+                        <a href="/admin/links" class="nav__dropdown-link<?= $isAdminLinks ? ' nav__dropdown-link--active' : '' ?>">Links</a>
                     </div>
                 </div>
             <?php endif; ?>

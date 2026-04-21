@@ -1030,4 +1030,84 @@ class AdminController
 
         return class_exists($siteNoticeClass) ? $siteNoticeClass : null;
     }
+
+    // ─── Links ────────────────────────────────────────────────────────────────
+
+    public static function showAdminLinks(array $params): void
+    {
+        Auth::requireAdmin();
+
+        $pdo = Database::getInstance();
+        $stmt = $pdo->query('SELECT * FROM links ORDER BY sort_order ASC, id DESC');
+        $links = $stmt->fetchAll();
+
+        require __DIR__ . '/../../templates/admin/links.php';
+    }
+
+    public static function addLink(array $params): void
+    {
+        Auth::requireAdmin();
+        Auth::requireCsrf();
+
+        $url = trim((string) ($_POST['url'] ?? ''));
+        $title = trim((string) ($_POST['title'] ?? ''));
+        $description = trim((string) ($_POST['description'] ?? ''));
+        $sortOrder = max(0, (int) ($_POST['sort_order'] ?? 0));
+
+        if ($url === '' || $title === '') {
+            $_SESSION['flash_error'] = 'URL and title are required.';
+            header('Location: ' . \Hut\Url::to('/admin/links')); exit;
+        }
+
+        // Basic URL validation — must be http or https.
+        if (!filter_var($url, FILTER_VALIDATE_URL) || !preg_match('/^https?:\/\//i', $url)) {
+            $_SESSION['flash_error'] = 'Please provide a valid http(s) URL.';
+            header('Location: ' . \Hut\Url::to('/admin/links')); exit;
+        }
+
+        try {
+            $pdo = Database::getInstance();
+            $stmt = $pdo->prepare(
+                'INSERT INTO links (title, url, description, sort_order)
+                 VALUES (?, ?, ?, ?)'
+            );
+            $stmt->execute([$title, $url, $description, $sortOrder]);
+            $_SESSION['flash_success'] = 'Link added successfully.';
+        } catch (\Throwable $e) {
+            error_log('Admin add link failed: ' . $e->getMessage());
+            $_SESSION['flash_error'] = 'Failed to save the link. Please try again.';
+        }
+
+        header('Location: ' . \Hut\Url::to('/admin/links')); exit;
+    }
+
+    public static function deleteLink(array $params): void
+    {
+        Auth::requireAdmin();
+        Auth::requireCsrf();
+
+        $id = isset($params['id']) ? (int) $params['id'] : 0;
+        if ($id <= 0) {
+            $_SESSION['flash_error'] = 'Invalid link id.';
+            header('Location: ' . \Hut\Url::to('/admin/links')); exit;
+        }
+
+        try {
+            $pdo = Database::getInstance();
+            $stmt = $pdo->prepare('DELETE FROM links WHERE id = ?');
+            $stmt->execute([$id]);
+
+            if ($stmt->rowCount() < 1) {
+                $_SESSION['flash_error'] = 'Link not found.';
+            } else {
+                $_SESSION['flash_success'] = 'Link deleted.';
+            }
+        } catch (\Throwable $e) {
+            error_log('Admin delete link failed: ' . $e->getMessage());
+            $_SESSION['flash_error'] = 'Failed to delete the link.';
+        }
+
+        header('Location: ' . \Hut\Url::to('/admin/links')); exit;
+    }
 }
+

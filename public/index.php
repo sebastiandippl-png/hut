@@ -14,6 +14,7 @@ use Hut\controllers\AuthController;
 use Hut\controllers\GameController;
 use Hut\controllers\AdminController;
 use Hut\controllers\VoteController;
+use Hut\controllers\LinksController;
 
 $dotenv = Dotenv::createImmutable(__DIR__ . '/..');
 $dotenv->load();
@@ -132,6 +133,7 @@ $router->post('/games/{id}/add-to-collection', [GameController::class, 'addToMyC
 $router->post('/games/{id}/remove-from-collection', [GameController::class, 'removeFromMyCollection']);
 $router->get('/collection',         [GameController::class, 'collection']);
 $router->get('/changelog',          [GameController::class, 'changelog']);
+$router->get('/links',              [LinksController::class, 'showLinks']);
 $router->post('/games/{id}/heart',  [VoteController::class, 'heart']);
 
 // ─── Admin routes ────────────────────────────────────────────────────────────
@@ -149,6 +151,9 @@ $router->post('/admin/users/{id}/delete', [AdminController::class, 'deleteUser']
 $router->post('/admin/users/{id}/approve', [AdminController::class, 'approveUser']);
 $router->post('/admin/users/{id}/disapprove', [AdminController::class, 'disapproveUser']);
 $router->post('/admin/games/{id}/remove-from-hut', [GameController::class, 'adminRemoveFromHut']);
+$router->get('/admin/links',        [AdminController::class, 'showAdminLinks']);
+$router->post('/admin/links',       [AdminController::class, 'addLink']);
+$router->post('/admin/links/{id}/delete', [AdminController::class, 'deleteLink']);
 
 // ─── Dispatch ────────────────────────────────────────────────────────────────
 $method = $_SERVER['REQUEST_METHOD'];

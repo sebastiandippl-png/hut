@@ -65,19 +65,115 @@ img { max-width: 100%; display: block; }
     font-size: 1.1rem;
     color: var(--color-primary);
     text-decoration: none;
+    margin-right: .75rem;
+}
+.nav__items {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
     margin-right: auto;
 }
-.nav__links { display: flex; gap: .75rem; }
-.nav__link { font-size: .9rem; color: var(--color-text); padding: .3rem .5rem; border-radius: 4px; }
-.nav__link:hover { background: rgba(180, 211, 217, .28); text-decoration: none; }
-.nav__link--cta {
+.nav__items--guest {
+    gap: .65rem;
+}
+.nav__group {
+    position: relative;
+}
+.nav__group-btn {
+    border: 0;
+    cursor: pointer;
+    background: transparent;
+    color: var(--color-text);
+    padding: .5rem .75rem;
+    border-radius: 999px;
+    font-size: .9rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    transition: background .2s ease, color .2s ease, box-shadow .2s ease;
+}
+.nav__group-btn:hover {
+    background: rgba(180, 211, 217, .28);
+}
+.nav__group--active .nav__group-btn {
+    background: linear-gradient(135deg, rgba(155, 142, 199, .22), rgba(180, 211, 217, .26));
+    color: var(--color-primary);
+    box-shadow: inset 0 0 0 1px rgba(155, 142, 199, .32);
+}
+.nav__arrow {
+    font-size: .75rem;
+    line-height: 1;
+    transform: translateY(1px);
+    transition: transform .2s ease;
+}
+.nav__group--open .nav__arrow {
+    transform: translateY(1px) rotate(180deg);
+}
+.nav__dropdown {
+    position: absolute;
+    top: calc(100% + .45rem);
+    left: 0;
+    min-width: 190px;
+    padding: .4rem;
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    background: rgba(252, 247, 241, .96);
+    box-shadow: 0 18px 30px rgba(117, 105, 137, .16);
+    backdrop-filter: blur(8px);
+    display: flex;
+    flex-direction: column;
+    gap: .2rem;
+    opacity: 0;
+    transform: translateY(-8px);
+    pointer-events: none;
+    transition: opacity .2s ease, transform .2s ease;
+}
+.nav__group:hover .nav__dropdown,
+.nav__group--open .nav__dropdown {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+.nav__dropdown-link {
+    font-size: .88rem;
+    color: var(--color-text);
+    text-decoration: none;
+    padding: .5rem .65rem;
+    border-radius: 8px;
+    transition: background .15s ease, color .15s ease;
+}
+.nav__dropdown-link:hover {
+    text-decoration: none;
+    background: rgba(180, 211, 217, .26);
+}
+.nav__dropdown-link--active {
+    background: linear-gradient(135deg, rgba(155, 142, 199, .2), rgba(180, 211, 217, .28));
+    color: var(--color-primary);
+    font-weight: 600;
+}
+.nav__guest-link {
+    font-size: .9rem;
+    color: var(--color-text);
+    padding: .4rem .65rem;
+    border-radius: 999px;
+    text-decoration: none;
+}
+.nav__guest-link:hover {
+    text-decoration: none;
+    background: rgba(180, 211, 217, .28);
+}
+.nav__guest-link--cta {
     background: var(--color-primary);
     color: #fff !important;
-    padding: .35rem .75rem;
 }
-.nav__link--cta:hover { background: var(--color-primary-h); }
-.nav__link--logout { color: var(--color-danger); }
-.nav__user { display: flex; align-items: center; gap: .75rem; font-size: .9rem; }
+.nav__guest-link--cta:hover { background: var(--color-primary-h); }
+.nav__right {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    font-size: .9rem;
+}
 .nav__username { color: var(--color-text-muted); }
 .nav__logout-form { margin: 0; }
 .nav__logout-button {
@@ -85,6 +181,12 @@ img { max-width: 100%; display: block; }
     border: 0;
     cursor: pointer;
     font: inherit;
+    color: var(--color-danger);
+    padding: .4rem .65rem;
+    border-radius: 999px;
+}
+.nav__logout-button:hover {
+    background: rgba(160, 111, 152, .14);
 }
 
 /* Burger button — hidden on desktop */
@@ -759,33 +861,82 @@ img { max-width: 100%; display: block; }
         height: var(--nav-h);
         display: flex;
         align-items: center;
+        margin-right: auto;
     }
     .nav__burger {
         display: flex;
         height: var(--nav-h);
     }
-    .nav__links,
-    .nav__user {
+    .nav__items,
+    .nav__right {
         display: none;
         width: 100%;
     }
-    .nav--open .nav__links {
+
+    .nav--open .nav__items,
+    .nav--open .nav__right {
         display: flex;
         flex-direction: column;
-        gap: .1rem;
-        padding: .5rem 0 .3rem;
+        gap: .45rem;
+        padding: .5rem 0 .55rem;
         border-top: 1px solid var(--color-border);
     }
-    .nav--open .nav__user {
+
+    .nav__group {
+        width: 100%;
+    }
+
+    .nav__group-btn {
+        width: 100%;
+        justify-content: space-between;
+        border-radius: 10px;
+        padding: .62rem .7rem;
+        background: rgba(180, 211, 217, .15);
+    }
+
+    .nav__group--active .nav__group-btn {
+        box-shadow: inset 0 0 0 1px rgba(155, 142, 199, .28);
+    }
+
+    .nav__dropdown {
+        position: static;
+        border: 0;
+        background: transparent;
+        box-shadow: none;
+        backdrop-filter: none;
+        min-width: 0;
+        padding: .3rem 0 0;
+        margin-left: .2rem;
+        display: none;
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
+
+    .nav__group--open .nav__dropdown {
         display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: .75rem;
-        flex-wrap: wrap;
-        padding: .3rem 0 .75rem;
-        border-top: 1px solid var(--color-border);
     }
-    .nav__link { padding: .55rem .25rem; }
+
+    .nav__dropdown-link {
+        padding: .5rem .6rem;
+        border-radius: 8px;
+    }
+
+    .nav__right {
+        align-items: flex-start;
+        gap: .45rem;
+    }
+
+    .nav__logout-button {
+        padding-left: 0;
+    }
+
+    .nav__items--guest .nav__guest-link {
+        width: 100%;
+        text-align: left;
+        border-radius: 10px;
+    }
+
     .container { padding-top: calc(var(--nav-h) + 1rem); }
     .collection-filters { gap: .6rem; }
     .collection-grid,

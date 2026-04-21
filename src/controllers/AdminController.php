@@ -15,13 +15,14 @@ class AdminController
 
     public static function showAdmin(array $params): void
     {
+        header('Location: ' . \Hut\Url::to('/admin/users')); exit;
+    }
+
+    public static function showUsers(array $params): void
+    {
         Auth::requireAdmin();
 
         $pdo = Database::getInstance();
-        $siteNotice = self::currentSiteNotice();
-        $configuredCollectionUsers = self::configuredCollectionUsers();
-        $collectionRowCount = (int) $pdo->query('SELECT COUNT(*) FROM user_collection')->fetchColumn();
-
         $usersStmt = $pdo->query(
             'SELECT
                 u.id,
@@ -37,7 +38,16 @@ class AdminController
         );
         $users = $usersStmt->fetchAll();
 
-        require __DIR__ . '/../../templates/admin/import.php';
+        require __DIR__ . '/../../templates/admin/users.php';
+    }
+
+    public static function showNotice(array $params): void
+    {
+        Auth::requireAdmin();
+
+        $siteNotice = self::currentSiteNotice();
+
+        require __DIR__ . '/../../templates/admin/notice.php';
     }
 
     public static function updateSiteNotice(array $params): void
@@ -50,7 +60,7 @@ class AdminController
 
         if ($enabled && $message === '') {
             $_SESSION['flash_error'] = 'Please provide a notice message when the notification is enabled.';
-            header('Location: ' . \Hut\Url::to('/admin')); exit;
+            header('Location: ' . \Hut\Url::to('/admin/notice')); exit;
         }
 
         try {
@@ -63,12 +73,18 @@ class AdminController
             $_SESSION['flash_error'] = 'Failed to update site notification.';
         }
 
-        header('Location: ' . \Hut\Url::to('/admin')); exit;
+        header('Location: ' . \Hut\Url::to('/admin/notice')); exit;
     }
 
     public static function showImport(array $params): void
     {
-        self::showAdmin($params);
+        Auth::requireAdmin();
+
+        $pdo = Database::getInstance();
+        $configuredCollectionUsers = self::configuredCollectionUsers();
+        $collectionRowCount = (int) $pdo->query('SELECT COUNT(*) FROM user_collection')->fetchColumn();
+
+        require __DIR__ . '/../../templates/admin/import.php';
     }
 
     public static function doImport(array $params): void
@@ -110,7 +126,7 @@ class AdminController
             $_SESSION['flash_error'] = 'Import failed. Check server logs for details.';
         }
 
-        header('Location: ' . \Hut\Url::to('/admin')); exit;
+        header('Location: ' . \Hut\Url::to('/admin/import')); exit;
     }
 
     public static function startImport(array $params): void

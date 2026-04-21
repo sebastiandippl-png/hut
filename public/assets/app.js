@@ -8,19 +8,91 @@ document.addEventListener('DOMContentLoaded', () => {
         return `${basePath}${normalizedPath}`;
     };
 
-    // ── Burger nav toggle ────────────────────────────────────────────────────
+    // ── Two-level nav interactions ───────────────────────────────────────────
     const navBurger = document.querySelector('[data-nav-burger]');
     const mainNav   = document.getElementById('mainNav');
     if (navBurger && mainNav) {
+        const navGroups = Array.from(mainNav.querySelectorAll('[data-nav-group]'));
+        const navGroupButtons = Array.from(mainNav.querySelectorAll('[data-nav-group-toggle]'));
+        const isMobileViewport = () => window.matchMedia('(max-width: 640px)').matches;
+
+        const closeGroups = (excludeGroup = null) => {
+            navGroups.forEach(group => {
+                if (excludeGroup && group === excludeGroup) {
+                    return;
+                }
+
+                group.classList.remove('nav__group--open');
+                const toggle = group.querySelector('[data-nav-group-toggle]');
+                if (toggle) {
+                    toggle.setAttribute('aria-expanded', 'false');
+                }
+            });
+        };
+
+        navGroupButtons.forEach(button => {
+            button.addEventListener('click', event => {
+                event.preventDefault();
+                event.stopPropagation();
+
+                const group = button.closest('[data-nav-group]');
+                if (!group) {
+                    return;
+                }
+
+                const willOpen = !group.classList.contains('nav__group--open');
+                closeGroups(group);
+
+                if (willOpen) {
+                    group.classList.add('nav__group--open');
+                } else {
+                    group.classList.remove('nav__group--open');
+                }
+
+                button.setAttribute('aria-expanded', String(willOpen));
+            });
+        });
+
         navBurger.addEventListener('click', () => {
             const isOpen = mainNav.classList.toggle('nav--open');
             navBurger.setAttribute('aria-expanded', String(isOpen));
+
+            if (isOpen && isMobileViewport()) {
+                const hasOpenGroup = navGroups.some(group => group.classList.contains('nav__group--open'));
+                if (!hasOpenGroup) {
+                    const activeGroup = mainNav.querySelector('.nav__group--active');
+                    if (activeGroup) {
+                        activeGroup.classList.add('nav__group--open');
+                        const toggle = activeGroup.querySelector('[data-nav-group-toggle]');
+                        if (toggle) {
+                            toggle.setAttribute('aria-expanded', 'true');
+                        }
+                    }
+                }
+            }
+
+            if (!isOpen) {
+                closeGroups();
+            }
         });
-        mainNav.querySelectorAll('.nav__link').forEach(link => {
+
+        mainNav.querySelectorAll('.nav__dropdown-link, .nav__guest-link').forEach(link => {
             link.addEventListener('click', () => {
                 mainNav.classList.remove('nav--open');
                 navBurger.setAttribute('aria-expanded', 'false');
+                closeGroups();
             });
+        });
+
+        document.addEventListener('click', event => {
+            const target = event.target;
+            if (!(target instanceof Node)) {
+                return;
+            }
+
+            if (!mainNav.contains(target)) {
+                closeGroups();
+            }
         });
     }
 

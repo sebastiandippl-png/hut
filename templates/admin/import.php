@@ -1,31 +1,12 @@
 <?php
-$pageTitle = 'Admin';
-$currentUser = \Hut\Auth::user();
+$pageTitle = 'Admin BGG Data';
 require __DIR__ . '/../partials/header.php';
 ?>
 
 <div class="page-header">
-    <h1>Admin</h1>
-    <p class="page-header__sub">Manage imports and user accounts</p>
+    <h1>BGG Data</h1>
+    <p class="page-header__sub">Manage collection sync and CSV/XML imports</p>
 </div>
-
-<section class="card admin-users">
-    <h2>Top Notification Banner</h2>
-    <p class="page-header__sub">Show, hide, and edit the message displayed globally at the top of each page.</p>
-    <form method="POST" action="/admin/site-notice" class="form">
-        <input type="hidden" name="_csrf" value="<?= htmlspecialchars(\Hut\Auth::csrfToken()) ?>">
-
-        <label class="form__label" for="site_notice_enabled" style="display:flex; align-items:center; gap:.5rem;">
-            <input type="checkbox" id="site_notice_enabled" name="site_notice_enabled" value="1" <?= !empty($siteNotice['enabled']) ? 'checked' : '' ?>>
-            Display notification banner
-        </label>
-
-        <label class="form__label" for="site_notice_message">Notification message</label>
-        <textarea class="form__input" id="site_notice_message" name="site_notice_message" rows="4" maxlength="2000"><?= htmlspecialchars((string) ($siteNotice['message'] ?? '')) ?></textarea>
-
-        <button class="btn btn--primary" type="submit">Save notification</button>
-    </form>
-</section>
 
 <section class="card admin-users">
     <h2>Fetch BGG User Collections</h2>
@@ -75,72 +56,5 @@ require __DIR__ . '/../partials/header.php';
         <div class="import-progress__message" data-import-message></div>
     </div>
 </form>
-
-<section class="card admin-users">
-    <h2>Users</h2>
-    <p class="page-header__sub">Delete user accounts from the application. Related collection and vote data is deleted automatically.</p>
-
-    <?php if (empty($users)): ?>
-        <p>No users found.</p>
-    <?php else: ?>
-        <div class="table-wrap">
-            <table class="admin-table">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Role</th>
-                        <th>Status</th>
-                        <th>Collection</th>
-                        <th>Votes</th>
-                        <th>Created</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($users as $managedUser): ?>
-                        <?php
-                        $isCurrentUser = $currentUser && (int) $currentUser['id'] === (int) $managedUser['id'];
-                        $safeName = htmlspecialchars((string) $managedUser['name']);
-                        $safeEmail = htmlspecialchars((string) $managedUser['email']);
-                        ?>
-                        <tr>
-                            <td><?= $safeName ?></td>
-                            <td><?= $safeEmail ?></td>
-                            <td><?= (int) $managedUser['is_admin'] === 1 ? 'Admin' : 'User' ?></td>
-                            <td><?= (int) $managedUser['is_approved'] === 1 ? 'Approved' : 'Pending' ?></td>
-                            <td><?= (int) $managedUser['selected_games'] ?></td>
-                            <td><?= (int) $managedUser['votes_count'] ?></td>
-                            <td><?= htmlspecialchars((string) $managedUser['created_at']) ?></td>
-                            <td>
-                                <?php if ($isCurrentUser): ?>
-                                    <span class="admin-table__self">Current user</span>
-                                <?php else: ?>
-                                    <div class="admin-table__actions">
-                                        <?php if ((int) $managedUser['is_approved'] === 0): ?>
-                                            <form method="POST" action="/admin/users/<?= (int) $managedUser['id'] ?>/approve" style="display: inline;">
-                                                <input type="hidden" name="_csrf" value="<?= htmlspecialchars(\Hut\Auth::csrfToken()) ?>">
-                                                <button class="btn btn--success btn--small" type="submit">Approve</button>
-                                            </form>
-                                        <?php else: ?>
-                                            <form method="POST" action="/admin/users/<?= (int) $managedUser['id'] ?>/disapprove" style="display: inline;">
-                                                <input type="hidden" name="_csrf" value="<?= htmlspecialchars(\Hut\Auth::csrfToken()) ?>">
-                                                <button class="btn btn--warning btn--small" type="submit">Disapprove</button>
-                                            </form>
-                                        <?php endif; ?>
-                                        <form method="POST" action="/admin/users/<?= (int) $managedUser['id'] ?>/delete" onsubmit="return confirm('Delete this user account? This cannot be undone.');" style="display: inline;">
-                                            <input type="hidden" name="_csrf" value="<?= htmlspecialchars(\Hut\Auth::csrfToken()) ?>">
-                                            <button class="btn btn--danger btn--small" type="submit">Delete</button>
-                                        </form>
-                                    </div>
-                                <?php endif; ?>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
-    <?php endif; ?>
-</section>
 
 <?php require __DIR__ . '/../partials/footer.php'; ?>

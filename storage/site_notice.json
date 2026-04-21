@@ -1,5 +1,5 @@
 {
-    "enabled": true,
+    "enabled": false,
     "message": "Ich musste die Datenbank ersetzen, komplett gecrasht ;-), Ich habe ein backup von 19.04 eingespielt. Alles vom 20.04 ist leider verloren...",
-    "updated_at": "2026-04-21T05:17:07+00:00"
+    "updated_at": "2026-04-21T19:14:15+00:00"
 }

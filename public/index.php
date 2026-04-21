@@ -136,7 +136,9 @@ $router->post('/games/{id}/heart',  [VoteController::class, 'heart']);
 
 // ─── Admin routes ────────────────────────────────────────────────────────────
 $router->get('/admin',              [AdminController::class, 'showAdmin']);
+$router->get('/admin/users',        [AdminController::class, 'showUsers']);
 $router->get('/admin/import',       [AdminController::class, 'showImport']);
+$router->get('/admin/notice',       [AdminController::class, 'showNotice']);
 $router->post('/admin/import',      [AdminController::class, 'doImport']);
 $router->post('/admin/import/start', [AdminController::class, 'startImport']);
 $router->post('/admin/import/process', [AdminController::class, 'processImport']);

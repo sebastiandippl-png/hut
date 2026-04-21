@@ -1,7 +1,15 @@
 {
-    "generated_at": "2026-04-21T20:27:28Z",
+    "generated_at": "2026-04-21T20:31:47Z",
     "repo_url": "https://github.com/sebastiandippl-png/hut",
     "entries": [
+        {
+            "hash": "45778b014d2ddeed58e14153cf5a6ce3764c6a89",
+            "short_hash": "45778b0",
+            "date": "2026-04-21",
+            "author": "Sebastian",
+            "subject": "fix: sql bug mariadb syntax",
+            "url": "https://github.com/sebastiandippl-png/hut/commit/45778b014d2ddeed58e14153cf5a6ce3764c6a89"
+        },
         {
             "hash": "32e0b56cb9ad992e4266654a9290d23f72336f4e",
             "short_hash": "32e0b56",

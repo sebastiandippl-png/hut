@@ -1,4 +1,8 @@
-<?php $pageTitle = 'Log in'; require __DIR__ . '/partials/header.php'; ?>
+<?php
+$pageTitle = 'Log in';
+$hideSiteNotice = true;
+require __DIR__ . '/partials/header.php';
+?>
 
 <div class="auth-card">
     <h1 class="auth-card__title">Log in</h1>

@@ -10,6 +10,24 @@ require __DIR__ . '/../partials/header.php';
 </div>
 
 <section class="card admin-users">
+    <h2>Top Notification Banner</h2>
+    <p class="page-header__sub">Show, hide, and edit the message displayed globally at the top of each page.</p>
+    <form method="POST" action="/admin/site-notice" class="form">
+        <input type="hidden" name="_csrf" value="<?= htmlspecialchars(\Hut\Auth::csrfToken()) ?>">
+
+        <label class="form__label" for="site_notice_enabled" style="display:flex; align-items:center; gap:.5rem;">
+            <input type="checkbox" id="site_notice_enabled" name="site_notice_enabled" value="1" <?= !empty($siteNotice['enabled']) ? 'checked' : '' ?>>
+            Display notification banner
+        </label>
+
+        <label class="form__label" for="site_notice_message">Notification message</label>
+        <textarea class="form__input" id="site_notice_message" name="site_notice_message" rows="4" maxlength="2000"><?= htmlspecialchars((string) ($siteNotice['message'] ?? '')) ?></textarea>
+
+        <button class="btn btn--primary" type="submit">Save notification</button>
+    </form>
+</section>
+
+<section class="card admin-users">
     <h2>Fetch BGG User Collections</h2>
     <p class="page-header__sub">Configured users from .env: <?= !empty($configuredCollectionUsers) ? htmlspecialchars(implode(', ', $configuredCollectionUsers)) : 'none' ?></p>
     <p class="page-header__sub">Rows currently stored in user_collection: <?= (int) $collectionRowCount ?></p>

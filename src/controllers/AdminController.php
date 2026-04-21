@@ -18,6 +18,7 @@ class AdminController
         Auth::requireAdmin();
 
         $pdo = Database::getInstance();
+        $siteNotice = self::currentSiteNotice();
         $configuredCollectionUsers = self::configuredCollectionUsers();
         $collectionRowCount = (int) $pdo->query('SELECT COUNT(*) FROM user_collection')->fetchColumn();
 
@@ -37,6 +38,32 @@ class AdminController
         $users = $usersStmt->fetchAll();
 
         require __DIR__ . '/../../templates/admin/import.php';
+    }
+
+    public static function updateSiteNotice(array $params): void
+    {
+        Auth::requireAdmin();
+        Auth::requireCsrf();
+
+        $enabled = isset($_POST['site_notice_enabled']) && (string) $_POST['site_notice_enabled'] === '1';
+        $message = trim((string) ($_POST['site_notice_message'] ?? ''));
+
+        if ($enabled && $message === '') {
+            $_SESSION['flash_error'] = 'Please provide a notice message when the notification is enabled.';
+            header('Location: ' . \Hut\Url::to('/admin')); exit;
+        }
+
+        try {
+            if (!self::updateCurrentSiteNotice($enabled, $message)) {
+                throw new \RuntimeException('SiteNotice class unavailable.');
+            }
+            $_SESSION['flash_success'] = 'Site notification updated.';
+        } catch (\Throwable $e) {
+            error_log('Admin update site notice failed: ' . $e->getMessage());
+            $_SESSION['flash_error'] = 'Failed to update site notification.';
+        }
+
+        header('Location: ' . \Hut\Url::to('/admin')); exit;
     }
 
     public static function showImport(array $params): void
@@ -936,5 +963,55 @@ class AdminController
                 }
             }
         }
+    }
+
+    /**
+     * @return array{enabled: bool, message: string}
+     */
+    private static function currentSiteNotice(): array
+    {
+        $siteNoticeClass = self::siteNoticeClassName();
+        if ($siteNoticeClass === null) {
+            return ['enabled' => false, 'message' => ''];
+        }
+
+        try {
+            $notice = $siteNoticeClass::current();
+            if (!is_array($notice)) {
+                return ['enabled' => false, 'message' => ''];
+            }
+
+            return [
+                'enabled' => !empty($notice['enabled']),
+                'message' => trim((string) ($notice['message'] ?? '')),
+            ];
+        } catch (\Throwable $e) {
+            error_log('Admin load site notice failed: ' . $e->getMessage());
+            return ['enabled' => false, 'message' => ''];
+        }
+    }
+
+    private static function updateCurrentSiteNotice(bool $enabled, string $message): bool
+    {
+        $siteNoticeClass = self::siteNoticeClassName();
+        if ($siteNoticeClass === null) {
+            return false;
+        }
+
+        $siteNoticeClass::update($enabled, $message);
+        return true;
+    }
+
+    private static function siteNoticeClassName(): ?string
+    {
+        $siteNoticeClass = 'Hut\\SiteNotice';
+        if (!class_exists($siteNoticeClass)) {
+            $siteNoticeFile = dirname(__DIR__) . '/SiteNotice.php';
+            if (is_file($siteNoticeFile)) {
+                require_once $siteNoticeFile;
+            }
+        }
+
+        return class_exists($siteNoticeClass) ? $siteNoticeClass : null;
     }
 }

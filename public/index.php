@@ -141,6 +141,7 @@ $router->post('/admin/import',      [AdminController::class, 'doImport']);
 $router->post('/admin/import/start', [AdminController::class, 'startImport']);
 $router->post('/admin/import/process', [AdminController::class, 'processImport']);
 $router->get('/admin/import/status', [AdminController::class, 'importStatus']);
+$router->post('/admin/site-notice', [AdminController::class, 'updateSiteNotice']);
 $router->post('/admin/collections/fetch', [AdminController::class, 'fetchConfiguredCollections']);
 $router->post('/admin/users/{id}/delete', [AdminController::class, 'deleteUser']);
 $router->post('/admin/users/{id}/approve', [AdminController::class, 'approveUser']);

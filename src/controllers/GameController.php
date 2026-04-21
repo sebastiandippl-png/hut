@@ -138,6 +138,47 @@ class GameController
         require __DIR__ . '/../../templates/games/collection.php';
     }
 
+    public static function changelog(array $params): void
+    {
+        Auth::requireLogin();
+
+        $changelogPath = __DIR__ . '/../../storage/changelog.json';
+        $entries = [];
+        $generatedAt = null;
+        $repoUrl = null;
+
+        if (is_file($changelogPath)) {
+            $raw = file_get_contents($changelogPath);
+            if (is_string($raw) && $raw !== '') {
+                $decoded = json_decode($raw, true);
+                if (is_array($decoded)) {
+                    $entriesRaw = $decoded['entries'] ?? [];
+                    if (is_array($entriesRaw)) {
+                        foreach ($entriesRaw as $entry) {
+                            if (!is_array($entry)) {
+                                continue;
+                            }
+
+                            $entries[] = [
+                                'hash' => (string) ($entry['hash'] ?? ''),
+                                'short_hash' => (string) ($entry['short_hash'] ?? ''),
+                                'date' => (string) ($entry['date'] ?? ''),
+                                'author' => (string) ($entry['author'] ?? ''),
+                                'subject' => (string) ($entry['subject'] ?? ''),
+                                'url' => (string) ($entry['url'] ?? ''),
+                            ];
+                        }
+                    }
+
+                    $generatedAt = isset($decoded['generated_at']) ? (string) $decoded['generated_at'] : null;
+                    $repoUrl = isset($decoded['repo_url']) ? (string) $decoded['repo_url'] : null;
+                }
+            }
+        }
+
+        require __DIR__ . '/../../templates/info/changelog.php';
+    }
+
     public static function addToMyCollection(array $params): void
     {
         Auth::requireLogin();

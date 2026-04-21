@@ -27,6 +27,8 @@ DRY_RUN="${DRY_RUN:-0}"
 BUILD_RELEASE="${BUILD_RELEASE:-1}"
 INCLUDE_VENDOR="${INCLUDE_VENDOR:-1}"
 BUILD_VENDOR="${BUILD_VENDOR:-1}"
+CHANGELOG_COMMIT_LIMIT="${CHANGELOG_COMMIT_LIMIT:-25}"
+CHANGELOG_REPO_URL="${CHANGELOG_REPO_URL:-}"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -138,6 +140,147 @@ run_rsync() {
     fi
 }
 
+normalize_github_repo_url() {
+    local raw_url="$1"
+
+    if [ -z "$raw_url" ]; then
+        echo ""
+        return 0
+    fi
+
+    # Convert common git remote formats into a browser URL.
+    raw_url="${raw_url%.git}"
+    raw_url="${raw_url#ssh://}"
+
+    if [[ "$raw_url" == git@github.com:* ]]; then
+        echo "https://github.com/${raw_url#git@github.com:}"
+        return 0
+    fi
+
+    if [[ "$raw_url" == git@www.github.com:* ]]; then
+        echo "https://github.com/${raw_url#git@www.github.com:}"
+        return 0
+    fi
+
+    if [[ "$raw_url" == git@* ]]; then
+        raw_url="${raw_url#git@}"
+        raw_url="${raw_url#github.com/}"
+        raw_url="${raw_url#www.github.com/}"
+        echo "https://github.com/$raw_url"
+        return 0
+    fi
+
+    raw_url="${raw_url#https://}"
+    raw_url="${raw_url#http://}"
+    raw_url="${raw_url#github.com/}"
+    raw_url="${raw_url#www.github.com/}"
+
+    if [ -n "$raw_url" ]; then
+        echo "https://github.com/$raw_url"
+        return 0
+    fi
+
+    echo ""
+}
+
+generate_changelog_json() {
+    local destination="$1"
+    local repo_url="$2"
+    local limit="$3"
+
+    mkdir -p "$(dirname "$destination")"
+
+    if ! command -v git >/dev/null 2>&1; then
+        cat > "$destination" <<EOF
+{
+  "generated_at": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+  "repo_url": "${repo_url}",
+  "entries": [
+    {
+      "hash": "",
+      "short_hash": "",
+      "date": "$(date -u +"%Y-%m-%d")",
+      "author": "deploy-script",
+      "subject": "git command not available - changelog links could not be generated",
+      "url": ""
+    }
+  ]
+}
+EOF
+        return 0
+    fi
+
+    local raw_log
+    if ! raw_log="$(git -C "$SCRIPT_DIR" log -n "$limit" --date=short --pretty=format:'%H%x1f%h%x1f%ad%x1f%an%x1f%s%x1e' 2>/dev/null)"; then
+        raw_log=""
+    fi
+
+    if [ -z "$raw_log" ]; then
+        cat > "$destination" <<EOF
+{
+  "generated_at": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+  "repo_url": "${repo_url}",
+  "entries": [
+    {
+      "hash": "",
+      "short_hash": "",
+      "date": "$(date -u +"%Y-%m-%d")",
+      "author": "deploy-script",
+      "subject": "no git commits found - changelog is empty",
+      "url": ""
+    }
+  ]
+}
+EOF
+        return 0
+    fi
+
+    CHANGELOG_REPO_URL_RESOLVED="$repo_url" CHANGELOG_RAW_LOG="$raw_log" php -r '
+        $repoUrl = getenv("CHANGELOG_REPO_URL_RESOLVED") ?: "";
+        $rawLog = getenv("CHANGELOG_RAW_LOG") ?: "";
+        $entries = [];
+
+        foreach (explode("\x1e", $rawLog) as $record) {
+            if ($record === "") {
+                continue;
+            }
+
+            $parts = explode("\x1f", $record);
+            if (count($parts) < 5) {
+                continue;
+            }
+
+            $hash = trim((string) $parts[0]);
+            $shortHash = trim((string) $parts[1]);
+            $date = trim((string) $parts[2]);
+            $author = trim((string) $parts[3]);
+            $subject = trim((string) $parts[4]);
+
+            $url = "";
+            if ($repoUrl !== "" && $hash !== "") {
+                $url = rtrim($repoUrl, "/") . "/commit/" . $hash;
+            }
+
+            $entries[] = [
+                "hash" => $hash,
+                "short_hash" => $shortHash,
+                "date" => $date,
+                "author" => $author,
+                "subject" => $subject,
+                "url" => $url,
+            ];
+        }
+
+        $payload = [
+            "generated_at" => gmdate("Y-m-d\\TH:i:s\\Z"),
+            "repo_url" => $repoUrl,
+            "entries" => $entries,
+        ];
+
+        echo json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) . PHP_EOL;
+    ' > "$destination"
+}
+
 echo -e "${GREEN}Validating SSH connection...${NC}"
 run_ssh "echo 'SSH connection OK'" >/dev/null
 
@@ -156,6 +299,19 @@ if [ "$BUILD_RELEASE" = "1" ]; then
     SOURCE_DIR="$RELEASE_DIR"
 
     echo -e "${GREEN}Building release package in $RELEASE_DIR...${NC}"
+
+    REMOTE_URL_RAW="$(git -C "$SCRIPT_DIR" config --get remote.origin.url 2>/dev/null || true)"
+    if [ -z "$CHANGELOG_REPO_URL" ]; then
+        CHANGELOG_REPO_URL="$(normalize_github_repo_url "$REMOTE_URL_RAW")"
+    fi
+    CHANGELOG_REPO_URL="$(normalize_github_repo_url "$CHANGELOG_REPO_URL")"
+
+    LOCAL_CHANGELOG_PATH="$SCRIPT_DIR/storage/changelog.json"
+    RELEASE_CHANGELOG_PATH="$RELEASE_DIR/storage/changelog.json"
+
+    echo -e "${GREEN}Generating changelog data (limit: $CHANGELOG_COMMIT_LIMIT)...${NC}"
+    generate_changelog_json "$LOCAL_CHANGELOG_PATH" "$CHANGELOG_REPO_URL" "$CHANGELOG_COMMIT_LIMIT"
+    generate_changelog_json "$RELEASE_CHANGELOG_PATH" "$CHANGELOG_REPO_URL" "$CHANGELOG_COMMIT_LIMIT"
 
     cp "$SCRIPT_DIR/composer.json" "$RELEASE_DIR/"
     cp "$SCRIPT_DIR/composer.lock" "$RELEASE_DIR/"

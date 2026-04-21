@@ -132,6 +132,7 @@ $router->post('/games/{id}/add-to-collection', [GameController::class, 'addToMyC
 $router->post('/games/{id}/remove-from-collection', [GameController::class, 'removeFromMyCollection']);
 $router->get('/collection',         [GameController::class, 'collection']);
 $router->get('/rankings',           [VoteController::class, 'rankings']);
+$router->get('/changelog',          [GameController::class, 'changelog']);
 $router->post('/games/{id}/heart',  [VoteController::class, 'heart']);
 
 // ─── Admin routes ────────────────────────────────────────────────────────────

@@ -9,12 +9,16 @@ $isGamesCollection = $currentPath === '/collection';
 $isGamesRanking = $currentPath === '/rankings';
 $isGamesGroupActive = $isGamesSuggest || $isGamesCollection || $isGamesRanking || str_starts_with($currentPath, '/games/');
 
+$isNewsChangelog = $currentPath === '/changelog';
+$isNewsGroupActive = $isNewsChangelog;
+
 $isAdminUsers = $currentPath === '/admin' || $currentPath === '/admin/users';
 $isAdminImport = $currentPath === '/admin/import';
 $isAdminNotice = $currentPath === '/admin/notice';
 $isAdminGroupActive = str_starts_with($currentPath, '/admin');
 
 $gamesGroupClass = 'nav__group' . ($isGamesGroupActive ? ' nav__group--active' : '');
+$newsGroupClass = 'nav__group' . ($isNewsGroupActive ? ' nav__group--active' : '');
 $adminGroupClass = 'nav__group' . ($isAdminGroupActive ? ' nav__group--active' : '');
 ?>
 <nav class="nav" id="mainNav">
@@ -35,6 +39,15 @@ $adminGroupClass = 'nav__group' . ($isAdminGroupActive ? ' nav__group--active' :
                     <a href="/games" class="nav__dropdown-link<?= $isGamesSuggest ? ' nav__dropdown-link--active' : '' ?>">Suggest</a>
                     <a href="/collection" class="nav__dropdown-link<?= $isGamesCollection ? ' nav__dropdown-link--active' : '' ?>">Hut Collection</a>
                     <a href="/rankings" class="nav__dropdown-link<?= $isGamesRanking ? ' nav__dropdown-link--active' : '' ?>">Heart Ranking</a>
+                </div>
+            </div>
+            <div class="<?= htmlspecialchars($newsGroupClass) ?>" data-nav-group>
+                <button type="button" class="nav__group-btn" data-nav-group-toggle aria-expanded="false" aria-haspopup="true">
+                    News
+                    <span class="nav__arrow" aria-hidden="true">▾</span>
+                </button>
+                <div class="nav__dropdown">
+                    <a href="/changelog" class="nav__dropdown-link<?= $isNewsChangelog ? ' nav__dropdown-link--active' : '' ?>">Changelog</a>
                 </div>
             </div>
             <?php if ($user['is_admin']): ?>

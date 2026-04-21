@@ -152,11 +152,18 @@ If you need to promote a user to admin, update the users table and set is_admin 
 - GET /games/suggestions
 - GET /collection
 - GET /rankings
+- GET /changelog
 - GET /admin
 - GET /admin/import
 - POST /admin/import
 - POST /admin/collections/fetch
 - POST /admin/users/{id}/delete
+
+## Deployment Changelog
+
+- `ionos_deploy.sh` generates `storage/changelog.json` on each run.
+- The same generated file is also written into the release artifact, so deployed environments show the latest entries.
+- Entries are taken from recent git commits and include direct links to each commit on GitHub.
 
 ## Database
 

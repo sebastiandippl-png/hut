@@ -1,0 +1,134 @@
+{
+    "generated_at": "2026-04-21T19:32:31Z",
+    "repo_url": "https://github.com/sebastiandippl-png/hut",
+    "entries": [
+        {
+            "hash": "90f38e5299f3b01e8f0a15d029e9c5da30af1776",
+            "short_hash": "90f38e5",
+            "date": "2026-04-21",
+            "author": "Sebastian",
+            "subject": "feat: switch to two level navigation",
+            "url": "https://github.com/sebastiandippl-png/hut/commit/90f38e5299f3b01e8f0a15d029e9c5da30af1776"
+        },
+        {
+            "hash": "c280b0766747b4adff49aceaf57f13ae74d68b50",
+            "short_hash": "c280b07",
+            "date": "2026-04-21",
+            "author": "Sebastian",
+            "subject": "feat: add site notice management with update functionality and display in header",
+            "url": "https://github.com/sebastiandippl-png/hut/commit/c280b0766747b4adff49aceaf57f13ae74d68b50"
+        },
+        {
+            "hash": "8dee84f66b3c73111aa8902b3c58ed17e92c5de1",
+            "short_hash": "8dee84f",
+            "date": "2026-04-20",
+            "author": "Sebastian",
+            "subject": "feat: implement global exception handler and custom 500 error page",
+            "url": "https://github.com/sebastiandippl-png/hut/commit/8dee84f66b3c73111aa8902b3c58ed17e92c5de1"
+        },
+        {
+            "hash": "5d15ad60009951c3d335942f545505c520ba1776",
+            "short_hash": "5d15ad6",
+            "date": "2026-04-18",
+            "author": "Sebastian",
+            "subject": "feat: synchronize heart status with game selection toggle",
+            "url": "https://github.com/sebastiandippl-png/hut/commit/5d15ad60009951c3d335942f545505c520ba1776"
+        },
+        {
+            "hash": "678792a50b9ad4d1097d5f37815de909d052502f",
+            "short_hash": "678792a",
+            "date": "2026-04-18",
+            "author": "Sebastian",
+            "subject": "feat: implement personal collection management with add and remove functionality",
+            "url": "https://github.com/sebastiandippl-png/hut/commit/678792a50b9ad4d1097d5f37815de909d052502f"
+        },
+        {
+            "hash": "3952efd9c7980295f5cf53754e4ae611307a0fa0",
+            "short_hash": "3952efd",
+            "date": "2026-04-18",
+            "author": "Sebastian",
+            "subject": "feat: implement game selection toggle and admin removal functionality",
+            "url": "https://github.com/sebastiandippl-png/hut/commit/3952efd9c7980295f5cf53754e4ae611307a0fa0"
+        },
+        {
+            "hash": "a6039812601e9907a4ed57d126880dc83a31a295",
+            "short_hash": "a603981",
+            "date": "2026-04-18",
+            "author": "Sebastian",
+            "subject": "feat: enhance game collection display with owners and update button text",
+            "url": "https://github.com/sebastiandippl-png/hut/commit/a6039812601e9907a4ed57d126880dc83a31a295"
+        },
+        {
+            "hash": "0c57d6fc144fe243dce078c6d6ffe470fc5a68de",
+            "short_hash": "0c57d6f",
+            "date": "2026-04-18",
+            "author": "Sebastian",
+            "subject": "feat: add user approval",
+            "url": "https://github.com/sebastiandippl-png/hut/commit/0c57d6fc144fe243dce078c6d6ffe470fc5a68de"
+        },
+        {
+            "hash": "8aebece1365186bcea7e6b5144ad432d5b667602",
+            "short_hash": "8aebece",
+            "date": "2026-04-18",
+            "author": "Sebastian",
+            "subject": "feat: owners in detail view",
+            "url": "https://github.com/sebastiandippl-png/hut/commit/8aebece1365186bcea7e6b5144ad432d5b667602"
+        },
+        {
+            "hash": "8cb431760c0f7db573fbe2573bba360afc3a62a5",
+            "short_hash": "8cb4317",
+            "date": "2026-04-17",
+            "author": "Sebastian",
+            "subject": "feat: add first name extraction methods and update UI to display first names",
+            "url": "https://github.com/sebastiandippl-png/hut/commit/8cb431760c0f7db573fbe2573bba360afc3a62a5"
+        },
+        {
+            "hash": "6aa2accef3dae03d068590e602e30af9dfbea7c2",
+            "short_hash": "6aa2acc",
+            "date": "2026-04-17",
+            "author": "Sebastian",
+            "subject": "feat add heart animation",
+            "url": "https://github.com/sebastiandippl-png/hut/commit/6aa2accef3dae03d068590e602e30af9dfbea7c2"
+        },
+        {
+            "hash": "c0fa3c76a6655a045ee9fed39f2f7f391d95f18d",
+            "short_hash": "c0fa3c7",
+            "date": "2026-04-17",
+            "author": "Sebastian",
+            "subject": "Rename \"Hut Choice\" to \"Hut Menu\" in various templates and update SQL query parameter binding for consistency",
+            "url": "https://github.com/sebastiandippl-png/hut/commit/c0fa3c76a6655a045ee9fed39f2f7f391d95f18d"
+        },
+        {
+            "hash": "6aee08ba0acb7865e76db65e69af7c60304738e4",
+            "short_hash": "6aee08b",
+            "date": "2026-04-17",
+            "author": "Sebastian",
+            "subject": "Enhance rankings feature with complexity filters and update UI for hearted games display",
+            "url": "https://github.com/sebastiandippl-png/hut/commit/6aee08ba0acb7865e76db65e69af7c60304738e4"
+        },
+        {
+            "hash": "7f9654cf33bdc1aaf593d54f287756761876b525",
+            "short_hash": "7f9654c",
+            "date": "2026-04-17",
+            "author": "Sebastian",
+            "subject": "Update game card metadata display with icons for owners and hearted by",
+            "url": "https://github.com/sebastiandippl-png/hut/commit/7f9654cf33bdc1aaf593d54f287756761876b525"
+        },
+        {
+            "hash": "00ba8db5151fbe8fabd556c4f151791ef3c25437",
+            "short_hash": "00ba8db",
+            "date": "2026-04-17",
+            "author": "Sebastian",
+            "subject": "Refactor game selection logic and update UI for game suggestions",
+            "url": "https://github.com/sebastiandippl-png/hut/commit/00ba8db5151fbe8fabd556c4f151791ef3c25437"
+        },
+        {
+            "hash": "5f733fa95bbb9bfa56bbd210a0b84415d3244f08",
+            "short_hash": "5f733fa",
+            "date": "2026-04-17",
+            "author": "Sebastian",
+            "subject": "initial release commit",
+            "url": "https://github.com/sebastiandippl-png/hut/commit/5f733fa95bbb9bfa56bbd210a0b84415d3244f08"
+        }
+    ]
+}

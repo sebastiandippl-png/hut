@@ -7,7 +7,7 @@
     <title><?= htmlspecialchars($pageTitle ?? 'Hut') ?> — Hut</title>
     <script>window.HUT_BASE_PATH = <?= json_encode(\Hut\Url::basePath(), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;</script>
     <?php $styleVersion = @filemtime(dirname(__DIR__, 2) . '/public/assets/style.css') ?: time(); ?>
-    <link rel="icon" href="<?= htmlspecialchars(\Hut\Url::basePath()) ?>/favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="/assets/style.css?v=<?= $styleVersion ?>">
 </head>
 <body>

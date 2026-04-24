@@ -1,7 +1,15 @@
 {
-    "generated_at": "2026-04-24T06:21:11Z",
+    "generated_at": "2026-04-24T06:24:15Z",
     "repo_url": "https://github.com/sebastiandippl-png/hut",
     "entries": [
+        {
+            "hash": "d72fb2150474587e27736e88dad9b9199a88c055",
+            "short_hash": "d72fb21",
+            "date": "2026-04-24",
+            "author": "Sebastian",
+            "subject": "fix: wrong filepathes",
+            "url": "https://github.com/sebastiandippl-png/hut/commit/d72fb2150474587e27736e88dad9b9199a88c055"
+        },
         {
             "hash": "dbedd5396c3b53b814201caf438d282a91830bc1",
             "short_hash": "dbedd53",

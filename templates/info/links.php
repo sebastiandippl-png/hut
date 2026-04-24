@@ -23,6 +23,11 @@
                 $hue  = $hues[abs(crc32($domain)) % count($hues)];
             ?>
             <a class="link-card" href="<?= htmlspecialchars((string) $link['url']) ?>" target="_blank" rel="noopener noreferrer" style="--card-hue:<?= $hue ?>">
+                <?php if (!empty($link['preview_image_url'])): ?>
+                    <div class="link-card__preview">
+                        <img src="<?= htmlspecialchars((string) $link['preview_image_url']) ?>" alt="" loading="lazy">
+                    </div>
+                <?php endif; ?>
                 <div class="link-card__body">
                     <div class="link-card__header">
                         <span class="link-card__icon" aria-hidden="true"><?= htmlspecialchars($initial) ?></span>

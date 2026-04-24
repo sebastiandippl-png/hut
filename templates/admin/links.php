@@ -43,9 +43,18 @@ require __DIR__ . '/../partials/header.php';
     <?php if (empty($links)): ?>
         <p class="empty-state">No links yet. Add one above.</p>
     <?php else: ?>
+        <div class="admin-links__toolbar">
+            <form method="POST" action="/admin/links/refetch-all-previews">
+                <input type="hidden" name="_csrf" value="<?= htmlspecialchars(\Hut\Auth::csrfToken()) ?>">
+                <button type="submit" class="btn btn--ghost">↺ Refetch all previews</button>
+            </form>
+        </div>
         <div class="admin-links__list">
             <?php foreach ($links as $link): ?>
                 <div class="admin-links__item">
+                    <?php if (!empty($link['preview_image_url'])): ?>
+                        <img class="admin-links__preview" src="<?= htmlspecialchars((string) $link['preview_image_url']) ?>" alt="" loading="lazy">
+                    <?php endif; ?>
                     <div class="admin-links__info">
                         <a class="admin-links__title" href="<?= htmlspecialchars((string) $link['url']) ?>" target="_blank" rel="noopener noreferrer">
                             <?= htmlspecialchars((string) $link['title']) ?>
@@ -54,11 +63,22 @@ require __DIR__ . '/../partials/header.php';
                             <span class="admin-links__desc"><?= htmlspecialchars((string) $link['description']) ?></span>
                         <?php endif; ?>
                         <span class="admin-links__url tag tag--muted"><?= htmlspecialchars((string) $link['url']) ?></span>
+                        <?php if ($link['preview_image_url'] === null): ?>
+                            <span class="tag tag--muted">preview: not fetched</span>
+                        <?php elseif ($link['preview_image_url'] === ''): ?>
+                            <span class="tag tag--muted">preview: none found</span>
+                        <?php endif; ?>
                     </div>
-                    <form method="POST" action="/admin/links/<?= (int) $link['id'] ?>/delete" class="admin-links__delete-form">
-                        <input type="hidden" name="_csrf" value="<?= htmlspecialchars(\Hut\Auth::csrfToken()) ?>">
-                        <button type="submit" class="btn btn--ghost" onclick="return confirm('Delete this link?')">Delete</button>
-                    </form>
+                    <div class="admin-links__actions">
+                        <form method="POST" action="/admin/links/<?= (int) $link['id'] ?>/refetch-preview">
+                            <input type="hidden" name="_csrf" value="<?= htmlspecialchars(\Hut\Auth::csrfToken()) ?>">
+                            <button type="submit" class="btn btn--ghost btn--sm" title="Re-fetch preview image">↺</button>
+                        </form>
+                        <form method="POST" action="/admin/links/<?= (int) $link['id'] ?>/delete">
+                            <input type="hidden" name="_csrf" value="<?= htmlspecialchars(\Hut\Auth::csrfToken()) ?>">
+                            <button type="submit" class="btn btn--ghost btn--sm" onclick="return confirm('Delete this link?')">Delete</button>
+                        </form>
+                    </div>
                 </div>
             <?php endforeach; ?>
         </div>

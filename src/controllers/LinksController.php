@@ -17,6 +17,83 @@ class LinksController
         $stmt = $pdo->query('SELECT * FROM links ORDER BY sort_order ASC, id DESC');
         $links = $stmt->fetchAll();
 
+        // Populate preview images for links not yet tried (preview_image_url IS NULL).
+        $update = $pdo->prepare('UPDATE links SET preview_image_url = ? WHERE id = ?');
+        foreach ($links as &$link) {
+            if ($link['preview_image_url'] === null) {
+                $imageUrl = self::fetchOgImage((string) $link['url']);
+                $update->execute([$imageUrl, $link['id']]);
+                $link['preview_image_url'] = $imageUrl;
+            }
+        }
+        unset($link);
+
         require __DIR__ . '/../../templates/info/links.php';
+    }
+
+    /**
+     * Fetch the og:image (or twitter:image) meta tag from a URL.
+     * Returns the image URL on success, or an empty string if none found.
+     */
+    public static function fetchOgImage(string $url): string
+    {
+        // Only allow http/https URLs
+        if (!preg_match('/^https?:\/\//i', $url)) {
+            return '';
+        }
+
+        $context = stream_context_create([
+            'http' => [
+                'timeout'         => 5,
+                'follow_location' => 1,
+                'user_agent'      => 'Mozilla/5.0 (compatible; HutBot/1.0; +https://github.com)',
+                'method'          => 'GET',
+            ],
+            'ssl' => [
+                'verify_peer'      => true,
+                'verify_peer_name' => true,
+            ],
+        ]);
+
+        $handle = @fopen($url, 'r', false, $context);
+        if ($handle === false) {
+            return '';
+        }
+
+        // Read up to 512 KB in chunks. A single fread() can return only a partial HTTP stream.
+        $maxBytes = 524288;
+        $html = '';
+        while (!feof($handle) && strlen($html) < $maxBytes) {
+            $chunk = @fread($handle, 8192);
+            if ($chunk === false || $chunk === '') {
+                break;
+            }
+            $html .= $chunk;
+        }
+        fclose($handle);
+
+        if ($html === false || $html === '') {
+            return '';
+        }
+
+        // Match both attribute orderings: property/name before content, and content before property/name.
+        $patterns = [
+            '/<meta[^>]+property=["\']og:image["\'][^>]+content=["\']([^"\']+)["\'][^>]*>/i',
+            '/<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:image["\'][^>]*>/i',
+            '/<meta[^>]+name=["\']twitter:image["\'][^>]+content=["\']([^"\']+)["\'][^>]*>/i',
+            '/<meta[^>]+content=["\']([^"\']+)["\'][^>]+name=["\']twitter:image["\'][^>]*>/i',
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $html, $m)) {
+                $imageUrl = html_entity_decode(trim($m[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                // Only accept http/https image URLs
+                if (preg_match('/^https?:\/\//i', $imageUrl)) {
+                    return $imageUrl;
+                }
+            }
+        }
+
+        return '';
     }
 }

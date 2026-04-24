@@ -7,6 +7,7 @@ namespace Hut\controllers;
 use Hut\Auth;
 use Hut\Database;
 use Hut\GameImporter;
+use Hut\controllers\LinksController;
 
 class AdminController
 {
@@ -1107,6 +1108,60 @@ class AdminController
             $_SESSION['flash_error'] = 'Failed to delete the link.';
         }
 
+        header('Location: ' . \Hut\Url::to('/admin/links')); exit;
+    }
+
+    public static function refetchLinkPreview(array $params): void
+    {
+        Auth::requireAdmin();
+        Auth::requireCsrf();
+
+        $id = isset($params['id']) ? (int) $params['id'] : 0;
+        if ($id <= 0) {
+            $_SESSION['flash_error'] = 'Invalid link id.';
+            header('Location: ' . \Hut\Url::to('/admin/links')); exit;
+        }
+
+        $pdo = Database::getInstance();
+        $row = $pdo->prepare('SELECT url FROM links WHERE id = ?');
+        $row->execute([$id]);
+        $link = $row->fetch();
+
+        if (!$link) {
+            $_SESSION['flash_error'] = 'Link not found.';
+            header('Location: ' . \Hut\Url::to('/admin/links')); exit;
+        }
+
+        $imageUrl = LinksController::fetchOgImage((string) $link['url']);
+        $pdo->prepare('UPDATE links SET preview_image_url = ? WHERE id = ?')
+            ->execute([$imageUrl, $id]);
+
+        $_SESSION['flash_success'] = $imageUrl !== ''
+            ? 'Preview image updated.'
+            : 'No preview image found for this link.';
+
+        header('Location: ' . \Hut\Url::to('/admin/links')); exit;
+    }
+
+    public static function refetchAllLinkPreviews(array $params): void
+    {
+        Auth::requireAdmin();
+        Auth::requireCsrf();
+
+        $pdo = Database::getInstance();
+        $links = $pdo->query('SELECT id, url FROM links')->fetchAll();
+        $update = $pdo->prepare('UPDATE links SET preview_image_url = ? WHERE id = ?');
+
+        $found = 0;
+        foreach ($links as $link) {
+            $imageUrl = LinksController::fetchOgImage((string) $link['url']);
+            $update->execute([$imageUrl, $link['id']]);
+            if ($imageUrl !== '') {
+                $found++;
+            }
+        }
+
+        $_SESSION['flash_success'] = "Re-fetched previews for " . count($links) . " link(s); found images for {$found}.";
         header('Location: ' . \Hut\Url::to('/admin/links')); exit;
     }
 }

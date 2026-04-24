@@ -153,7 +153,9 @@ $router->post('/admin/users/{id}/disapprove', [AdminController::class, 'disappro
 $router->post('/admin/games/{id}/remove-from-hut', [GameController::class, 'adminRemoveFromHut']);
 $router->get('/admin/links',        [AdminController::class, 'showAdminLinks']);
 $router->post('/admin/links',       [AdminController::class, 'addLink']);
-$router->post('/admin/links/{id}/delete', [AdminController::class, 'deleteLink']);
+$router->post('/admin/links/{id}/delete',          [AdminController::class, 'deleteLink']);
+$router->post('/admin/links/{id}/refetch-preview', [AdminController::class, 'refetchLinkPreview']);
+$router->post('/admin/links/refetch-all-previews', [AdminController::class, 'refetchAllLinkPreviews']);
 
 // ─── Dispatch ────────────────────────────────────────────────────────────────
 $method = $_SERVER['REQUEST_METHOD'];

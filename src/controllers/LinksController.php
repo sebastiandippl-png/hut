@@ -14,7 +14,12 @@ class LinksController
         Auth::requireLogin();
 
         $pdo = Database::getInstance();
-        $stmt = $pdo->query('SELECT * FROM links ORDER BY sort_order ASC, id DESC');
+        $stmt = $pdo->query(
+            'SELECT l.*, c.name AS category_name, c.sort_order AS category_sort_order
+             FROM links l
+             LEFT JOIN link_categories c ON c.id = l.category_id
+             ORDER BY COALESCE(c.sort_order, 2147483647) ASC, c.name ASC, l.sort_order ASC, l.id DESC'
+        );
         $links = $stmt->fetchAll();
 
         // Populate preview images for links not yet tried (preview_image_url IS NULL).
@@ -27,6 +32,19 @@ class LinksController
             }
         }
         unset($link);
+
+        $linksByCategory = [];
+        foreach ($links as $link) {
+            $categoryName = trim((string) ($link['category_name'] ?? ''));
+            if ($categoryName === '') {
+                $categoryName = 'Uncategorized';
+            }
+
+            if (!isset($linksByCategory[$categoryName])) {
+                $linksByCategory[$categoryName] = [];
+            }
+            $linksByCategory[$categoryName][] = $link;
+        }
 
         require __DIR__ . '/../../templates/info/links.php';
     }

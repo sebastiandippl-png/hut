@@ -30,6 +30,14 @@ require __DIR__ . '/../partials/header.php';
         <label class="form__label" for="link_description">Description</label>
         <input class="form__input" type="text" id="link_description" name="description" maxlength="500" placeholder="Short description (optional)">
 
+        <label class="form__label" for="link_category">Category</label>
+        <select class="form__input" id="link_category" name="category_id">
+            <option value="">Uncategorized</option>
+            <?php foreach ($categories as $category): ?>
+                <option value="<?= (int) $category['id'] ?>"><?= htmlspecialchars((string) $category['name']) ?></option>
+            <?php endforeach; ?>
+        </select>
+
         <label class="form__label" for="link_sort_order">Sort order</label>
         <input class="form__input" type="number" id="link_sort_order" name="sort_order" value="0" min="0" max="9999">
         <p class="form__hint">Lower numbers appear first. Ties are broken by newest first.</p>
@@ -62,12 +70,24 @@ require __DIR__ . '/../partials/header.php';
                         <?php if (!empty($link['description'])): ?>
                             <span class="admin-links__desc"><?= htmlspecialchars((string) $link['description']) ?></span>
                         <?php endif; ?>
+                        <span class="tag tag--muted">category: <?= htmlspecialchars((string) ($link['category_name'] ?? 'Uncategorized')) ?></span>
                         <span class="admin-links__url tag tag--muted"><?= htmlspecialchars((string) $link['url']) ?></span>
                         <?php if ($link['preview_image_url'] === null): ?>
                             <span class="tag tag--muted">preview: not fetched</span>
                         <?php elseif ($link['preview_image_url'] === ''): ?>
                             <span class="tag tag--muted">preview: none found</span>
                         <?php endif; ?>
+                        <form class="admin-links__category-form" method="POST" action="/admin/links/<?= (int) $link['id'] ?>/category">
+                            <input type="hidden" name="_csrf" value="<?= htmlspecialchars(\Hut\Auth::csrfToken()) ?>">
+                            <label class="visually-hidden" for="link_item_category_<?= (int) $link['id'] ?>">Category</label>
+                            <select class="form__input form__input--sm" id="link_item_category_<?= (int) $link['id'] ?>" name="category_id">
+                                <option value="">Uncategorized</option>
+                                <?php foreach ($categories as $category): ?>
+                                    <option value="<?= (int) $category['id'] ?>"<?= (int) ($link['category_id'] ?? 0) === (int) $category['id'] ? ' selected' : '' ?>><?= htmlspecialchars((string) $category['name']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <button type="submit" class="btn btn--ghost btn--sm">Set category</button>
+                        </form>
                     </div>
                     <div class="admin-links__actions">
                         <form method="POST" action="/admin/links/<?= (int) $link['id'] ?>/refetch-preview">
@@ -79,6 +99,42 @@ require __DIR__ . '/../partials/header.php';
                             <button type="submit" class="btn btn--ghost btn--sm" onclick="return confirm('Delete this link?')">Delete</button>
                         </form>
                     </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    <?php endif; ?>
+</section>
+
+<section class="card">
+    <h2>Link Categories</h2>
+    <form method="POST" action="/admin/link-categories" class="form admin-categories__create">
+        <input type="hidden" name="_csrf" value="<?= htmlspecialchars(\Hut\Auth::csrfToken()) ?>">
+
+        <label class="form__label" for="category_name">Category name <span aria-hidden="true">*</span></label>
+        <input class="form__input" type="text" id="category_name" name="name" required maxlength="100" placeholder="e.g. Publishers">
+
+        <label class="form__label" for="category_sort_order">Sort order</label>
+        <input class="form__input" type="number" id="category_sort_order" name="sort_order" value="0" min="0" max="9999">
+
+        <button class="btn btn--primary" type="submit">Create category</button>
+    </form>
+
+    <?php if (empty($categories)): ?>
+        <p class="empty-state">No categories yet. Create one above.</p>
+    <?php else: ?>
+        <div class="admin-categories__list">
+            <?php foreach ($categories as $category): ?>
+                <div class="admin-categories__item">
+                    <form method="POST" action="/admin/link-categories/<?= (int) $category['id'] ?>/rename" class="admin-categories__edit-form">
+                        <input type="hidden" name="_csrf" value="<?= htmlspecialchars(\Hut\Auth::csrfToken()) ?>">
+                        <input class="form__input form__input--sm" type="text" name="name" value="<?= htmlspecialchars((string) $category['name']) ?>" maxlength="100" required>
+                        <input class="form__input form__input--sm" type="number" name="sort_order" value="<?= (int) $category['sort_order'] ?>" min="0" max="9999">
+                        <button type="submit" class="btn btn--ghost btn--sm">Save</button>
+                    </form>
+                    <form method="POST" action="/admin/link-categories/<?= (int) $category['id'] ?>/delete" onsubmit="return confirm('Delete this category? Links in this category will become Uncategorized.');">
+                        <input type="hidden" name="_csrf" value="<?= htmlspecialchars(\Hut\Auth::csrfToken()) ?>">
+                        <button type="submit" class="btn btn--ghost btn--sm">Delete</button>
+                    </form>
                 </div>
             <?php endforeach; ?>
         </div>

@@ -1039,8 +1039,14 @@ class AdminController
         Auth::requireAdmin();
 
         $pdo = Database::getInstance();
-        $stmt = $pdo->query('SELECT * FROM links ORDER BY sort_order ASC, id DESC');
+        $stmt = $pdo->query(
+            'SELECT l.*, c.name AS category_name
+             FROM links l
+             LEFT JOIN link_categories c ON c.id = l.category_id
+             ORDER BY COALESCE(c.sort_order, 2147483647) ASC, c.name ASC, l.sort_order ASC, l.id DESC'
+        );
         $links = $stmt->fetchAll();
+        $categories = self::linkCategories($pdo);
 
         require __DIR__ . '/../../templates/admin/links.php';
     }
@@ -1054,9 +1060,16 @@ class AdminController
         $title = trim((string) ($_POST['title'] ?? ''));
         $description = trim((string) ($_POST['description'] ?? ''));
         $sortOrder = max(0, (int) ($_POST['sort_order'] ?? 0));
+        $categoryIdRaw = trim((string) ($_POST['category_id'] ?? ''));
+        $categoryId = $categoryIdRaw === '' ? null : (int) $categoryIdRaw;
 
         if ($url === '' || $title === '') {
             $_SESSION['flash_error'] = 'URL and title are required.';
+            header('Location: ' . \Hut\Url::to('/admin/links')); exit;
+        }
+
+        if ($categoryId !== null && $categoryId <= 0) {
+            $_SESSION['flash_error'] = 'Please select a valid category.';
             header('Location: ' . \Hut\Url::to('/admin/links')); exit;
         }
 
@@ -1068,15 +1081,156 @@ class AdminController
 
         try {
             $pdo = Database::getInstance();
+            if ($categoryId !== null && !self::linkCategoryExists($pdo, $categoryId)) {
+                $_SESSION['flash_error'] = 'Selected category no longer exists.';
+                header('Location: ' . \Hut\Url::to('/admin/links')); exit;
+            }
+
             $stmt = $pdo->prepare(
-                'INSERT INTO links (title, url, description, sort_order)
-                 VALUES (?, ?, ?, ?)'
+                'INSERT INTO links (title, url, description, sort_order, category_id)
+                 VALUES (?, ?, ?, ?, ?)'
             );
-            $stmt->execute([$title, $url, $description, $sortOrder]);
+            $stmt->execute([$title, $url, $description, $sortOrder, $categoryId]);
             $_SESSION['flash_success'] = 'Link added successfully.';
         } catch (\Throwable $e) {
             error_log('Admin add link failed: ' . $e->getMessage());
             $_SESSION['flash_error'] = 'Failed to save the link. Please try again.';
+        }
+
+        header('Location: ' . \Hut\Url::to('/admin/links')); exit;
+    }
+
+    public static function updateLinkCategory(array $params): void
+    {
+        Auth::requireAdmin();
+        Auth::requireCsrf();
+
+        $linkId = isset($params['id']) ? (int) $params['id'] : 0;
+        $categoryIdRaw = trim((string) ($_POST['category_id'] ?? ''));
+        $categoryId = $categoryIdRaw === '' ? null : (int) $categoryIdRaw;
+
+        if ($linkId <= 0) {
+            $_SESSION['flash_error'] = 'Invalid link id.';
+            header('Location: ' . \Hut\Url::to('/admin/links')); exit;
+        }
+
+        if ($categoryId !== null && $categoryId <= 0) {
+            $_SESSION['flash_error'] = 'Please select a valid category.';
+            header('Location: ' . \Hut\Url::to('/admin/links')); exit;
+        }
+
+        try {
+            $pdo = Database::getInstance();
+            if ($categoryId !== null && !self::linkCategoryExists($pdo, $categoryId)) {
+                $_SESSION['flash_error'] = 'Selected category no longer exists.';
+                header('Location: ' . \Hut\Url::to('/admin/links')); exit;
+            }
+
+            $stmt = $pdo->prepare('UPDATE links SET category_id = ? WHERE id = ?');
+            $stmt->execute([$categoryId, $linkId]);
+
+            if ($stmt->rowCount() < 1) {
+                $_SESSION['flash_error'] = 'Link not found or category unchanged.';
+            } else {
+                $_SESSION['flash_success'] = 'Link category updated.';
+            }
+        } catch (\Throwable $e) {
+            error_log('Admin update link category failed: ' . $e->getMessage());
+            $_SESSION['flash_error'] = 'Failed to update link category.';
+        }
+
+        header('Location: ' . \Hut\Url::to('/admin/links')); exit;
+    }
+
+    public static function addLinkCategory(array $params): void
+    {
+        Auth::requireAdmin();
+        Auth::requireCsrf();
+
+        $name = trim((string) ($_POST['name'] ?? ''));
+        $sortOrder = max(0, (int) ($_POST['sort_order'] ?? 0));
+
+        if ($name === '') {
+            $_SESSION['flash_error'] = 'Category name is required.';
+            header('Location: ' . \Hut\Url::to('/admin/links')); exit;
+        }
+
+        try {
+            $pdo = Database::getInstance();
+            $stmt = $pdo->prepare('INSERT INTO link_categories (name, sort_order) VALUES (?, ?)');
+            $stmt->execute([$name, $sortOrder]);
+            $_SESSION['flash_success'] = 'Category created.';
+        } catch (\Throwable $e) {
+            error_log('Admin add link category failed: ' . $e->getMessage());
+            $_SESSION['flash_error'] = 'Failed to create category. The name may already exist.';
+        }
+
+        header('Location: ' . \Hut\Url::to('/admin/links')); exit;
+    }
+
+    public static function renameLinkCategory(array $params): void
+    {
+        Auth::requireAdmin();
+        Auth::requireCsrf();
+
+        $id = isset($params['id']) ? (int) $params['id'] : 0;
+        $name = trim((string) ($_POST['name'] ?? ''));
+        $sortOrder = max(0, (int) ($_POST['sort_order'] ?? 0));
+
+        if ($id <= 0 || $name === '') {
+            $_SESSION['flash_error'] = 'Invalid category data.';
+            header('Location: ' . \Hut\Url::to('/admin/links')); exit;
+        }
+
+        try {
+            $pdo = Database::getInstance();
+            $stmt = $pdo->prepare('UPDATE link_categories SET name = ?, sort_order = ? WHERE id = ?');
+            $stmt->execute([$name, $sortOrder, $id]);
+
+            if ($stmt->rowCount() < 1) {
+                $_SESSION['flash_error'] = 'Category not found or unchanged.';
+            } else {
+                $_SESSION['flash_success'] = 'Category updated.';
+            }
+        } catch (\Throwable $e) {
+            error_log('Admin rename link category failed: ' . $e->getMessage());
+            $_SESSION['flash_error'] = 'Failed to update category. The name may already exist.';
+        }
+
+        header('Location: ' . \Hut\Url::to('/admin/links')); exit;
+    }
+
+    public static function deleteLinkCategory(array $params): void
+    {
+        Auth::requireAdmin();
+        Auth::requireCsrf();
+
+        $id = isset($params['id']) ? (int) $params['id'] : 0;
+        if ($id <= 0) {
+            $_SESSION['flash_error'] = 'Invalid category id.';
+            header('Location: ' . \Hut\Url::to('/admin/links')); exit;
+        }
+
+        try {
+            $pdo = Database::getInstance();
+            $countStmt = $pdo->prepare('SELECT COUNT(*) FROM links WHERE category_id = ?');
+            $countStmt->execute([$id]);
+            $linkedCount = (int) $countStmt->fetchColumn();
+
+            $pdo->prepare('UPDATE links SET category_id = NULL WHERE category_id = ?')->execute([$id]);
+            $stmt = $pdo->prepare('DELETE FROM link_categories WHERE id = ?');
+            $stmt->execute([$id]);
+
+            if ($stmt->rowCount() < 1) {
+                $_SESSION['flash_error'] = 'Category not found.';
+            } elseif ($linkedCount > 0) {
+                $_SESSION['flash_success'] = "Category deleted. {$linkedCount} link(s) moved to Uncategorized.";
+            } else {
+                $_SESSION['flash_success'] = 'Category deleted.';
+            }
+        } catch (\Throwable $e) {
+            error_log('Admin delete link category failed: ' . $e->getMessage());
+            $_SESSION['flash_error'] = 'Failed to delete category.';
         }
 
         header('Location: ' . \Hut\Url::to('/admin/links')); exit;
@@ -1163,6 +1317,19 @@ class AdminController
 
         $_SESSION['flash_success'] = "Re-fetched previews for " . count($links) . " link(s); found images for {$found}.";
         header('Location: ' . \Hut\Url::to('/admin/links')); exit;
+    }
+
+    private static function linkCategories(\PDO $pdo): array
+    {
+        $stmt = $pdo->query('SELECT id, name, sort_order FROM link_categories ORDER BY sort_order ASC, name ASC, id ASC');
+        return $stmt->fetchAll();
+    }
+
+    private static function linkCategoryExists(\PDO $pdo, int $categoryId): bool
+    {
+        $stmt = $pdo->prepare('SELECT 1 FROM link_categories WHERE id = ?');
+        $stmt->execute([$categoryId]);
+        return (bool) $stmt->fetchColumn();
     }
 }
 

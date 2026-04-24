@@ -1,4 +1,5 @@
--- Drop preview_image_url from links if it exists.
--- Uses IF EXISTS so this is safe to run on environments where the column was
--- never added (e.g. production where migration 009 already omits it).
-ALTER TABLE links DROP COLUMN IF EXISTS preview_image_url;
+-- Historical no-op migration.
+-- Some SQLite versions used in local environments do not support
+-- "DROP COLUMN IF EXISTS" syntax, which can block startup migrations.
+-- Migration 011 re-adds preview_image_url, so keeping this migration as a
+-- no-op preserves the final schema without compatibility issues.

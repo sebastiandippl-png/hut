@@ -129,7 +129,24 @@ $collectionOwners = trim((string) ($game['bgg_owned_by'] ?? ''));
                 <span class="heart-summary"><span class="heart-tally"><?= $hearts ?></span> <span class="heart-label">heart<?= $hearts !== 1 ? 's' : '' ?></span></span>
             </div>
 
-            <span class="game-card__selectors" data-hearted-by="<?= $game['id'] ?>">Hearted by: <?= htmlspecialchars($heartedBy) ?></span>
+<?php
+function linkifyDetailResidents(string $names, array $map): string
+{
+    if ($names === '' || $names === 'No hearts yet') {
+        return htmlspecialchars($names);
+    }
+    $parts = explode(', ', $names);
+    $linked = array_map(static function (string $name) use ($map): string {
+        $name = trim($name);
+        if (isset($map[$name])) {
+            return '<a href="/residents/' . $map[$name] . '">' . htmlspecialchars($name) . '</a>';
+        }
+        return htmlspecialchars($name);
+    }, $parts);
+    return implode(', ', $linked);
+}
+?>
+            <span class="game-card__selectors" data-hearted-by="<?= $game['id'] ?>">Hearted by: <?= linkifyDetailResidents($heartedBy, $residentNameMap) ?></span>
             <span class="game-card__selectors">In collections: <?= $collectionOwners !== '' ? htmlspecialchars($collectionOwners) : 'No tracked owners yet' ?></span>
 
             <?php if (!empty($isInMyCollection)): ?>
@@ -253,4 +270,5 @@ $collectionOwners = trim((string) ($game['bgg_owned_by'] ?? ''));
     </div>
 </div>
 
+<script>window.HUT_RESIDENT_MAP = <?= json_encode($residentNameMap, JSON_HEX_TAG | JSON_HEX_AMP) ?>;</script>
 <?php require __DIR__ . '/../partials/footer.php'; ?>

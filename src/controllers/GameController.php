@@ -93,6 +93,7 @@ class GameController
         $hearts     = Game::getHeartCount($game['id']);
         $heartedBy  = \Hut\Vote::heartedBy($game['id']);
         $isInMyCollection = PersonalCollection::has($userId, $gameId);
+        $residentNameMap = \Hut\Resident::firstNameToIdMap();
 
         require __DIR__ . '/../../templates/games/detail.php';
     }

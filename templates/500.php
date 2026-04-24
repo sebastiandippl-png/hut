@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>500 — Hut</title>
-    <link rel="stylesheet" href="<?= htmlspecialchars(\Hut\Url::asset('/assets/style.css')) ?>">
+    <?php $styleVersion = @filemtime(__DIR__ . '/../public/assets/style.css') ?: time(); ?>
+    <link rel="stylesheet" href="/assets/style.css?v=<?= $styleVersion ?>">
 </head>
 <body>
 <main class="container">

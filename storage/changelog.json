@@ -1,7 +1,15 @@
 {
-    "generated_at": "2026-04-24T06:16:20Z",
+    "generated_at": "2026-04-24T06:21:11Z",
     "repo_url": "https://github.com/sebastiandippl-png/hut",
     "entries": [
+        {
+            "hash": "dbedd5396c3b53b814201caf438d282a91830bc1",
+            "short_hash": "dbedd53",
+            "date": "2026-04-24",
+            "author": "Sebastian",
+            "subject": "feat:add cachebusting, so no cached JS is loaded",
+            "url": "https://github.com/sebastiandippl-png/hut/commit/dbedd5396c3b53b814201caf438d282a91830bc1"
+        },
         {
             "hash": "9cedb911a757ba3f371bf9f25c24e2e0fe3f6e95",
             "short_hash": "9cedb91",

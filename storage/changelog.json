@@ -1,7 +1,15 @@
 {
-    "generated_at": "2026-04-21T20:38:25Z",
+    "generated_at": "2026-04-24T06:16:20Z",
     "repo_url": "https://github.com/sebastiandippl-png/hut",
     "entries": [
+        {
+            "hash": "9cedb911a757ba3f371bf9f25c24e2e0fe3f6e95",
+            "short_hash": "9cedb91",
+            "date": "2026-04-24",
+            "author": "Sebastian",
+            "subject": "feat: implement complexity filters for suggest page",
+            "url": "https://github.com/sebastiandippl-png/hut/commit/9cedb911a757ba3f371bf9f25c24e2e0fe3f6e95"
+        },
         {
             "hash": "6a7682c05e2749d5e12d2a9467d270b3550dbd63",
             "short_hash": "6a7682c",

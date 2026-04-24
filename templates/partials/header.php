@@ -6,7 +6,7 @@
     <meta name="csrf-token" content="<?= htmlspecialchars(\Hut\Auth::csrfToken()) ?>">
     <title><?= htmlspecialchars($pageTitle ?? 'Hut') ?> — Hut</title>
     <script>window.HUT_BASE_PATH = <?= json_encode(\Hut\Url::basePath(), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;</script>
-    <link rel="stylesheet" href="/assets/style.css">
+    <link rel="stylesheet" href="<?= htmlspecialchars(\Hut\Url::asset('/assets/style.css')) ?>">
 </head>
 <body>
 <?php require __DIR__ . '/nav.php'; ?>

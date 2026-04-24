@@ -34,6 +34,19 @@ class Url
         return $base . $normalizedPath;
     }
 
+    public static function asset(string $path): string
+    {
+        $normalizedPath = '/' . ltrim($path, '/');
+        $absolutePath = dirname(__DIR__) . '/public' . $normalizedPath;
+        $assetUrl = self::to($normalizedPath);
+
+        if (!is_file($absolutePath)) {
+            return $assetUrl;
+        }
+
+        return $assetUrl . '?v=' . filemtime($absolutePath);
+    }
+
     public static function stripBasePathFromUri(string $uri): string
     {
         $path = parse_url($uri, PHP_URL_PATH);

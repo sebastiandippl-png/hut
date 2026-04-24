@@ -2,6 +2,6 @@
 <footer class="footer">
     <p class="footer__text">Board Game Hut Collection</p>
 </footer>
-<script src="/assets/app.js"></script>
+<script src="<?= htmlspecialchars(\Hut\Url::asset('/assets/app.js')) ?>"></script>
 </body>
 </html>

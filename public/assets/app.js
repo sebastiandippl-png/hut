@@ -101,6 +101,25 @@ document.addEventListener('DOMContentLoaded', () => {
         cb.addEventListener('change', () => cb.closest('form').submit());
     });
 
+    document.querySelector('[data-browse-filters]')?.querySelectorAll('[data-browse-complexity] .filter-seg').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const form = btn.closest('form');
+            const input = form?.querySelector('input[name="complexity"]');
+
+            if (!form || !input) {
+                return;
+            }
+
+            form.querySelectorAll('[data-browse-complexity] .filter-seg').forEach(seg => {
+                seg.classList.remove('filter-seg--active');
+            });
+
+            btn.classList.add('filter-seg--active');
+            input.value = btn.dataset.complexity || '';
+            form.submit();
+        });
+    });
+
     // ── Browse search autocomplete ──────────────────────────────────────────
     document.querySelectorAll('[data-autocomplete]').forEach(root => {
         const input = root.querySelector('[data-autocomplete-input]');
@@ -422,8 +441,25 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        document.querySelectorAll('[data-collection-filter]').forEach(el => {
-            el.addEventListener('change', filterCards);
+        document.querySelectorAll('[data-collection-filter-group]').forEach(group => {
+            group.querySelectorAll('.filter-seg').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const filterName = group.dataset.collectionFilterGroup;
+                    const input = document.querySelector(`[data-collection-filter="${filterName}"]`);
+
+                    if (!filterName || !input) {
+                        return;
+                    }
+
+                    group.querySelectorAll('.filter-seg').forEach(seg => {
+                        seg.classList.remove('filter-seg--active');
+                    });
+
+                    btn.classList.add('filter-seg--active');
+                    input.value = btn.dataset.value || '';
+                    filterCards();
+                });
+            });
         });
 
         document.querySelectorAll('[data-complexity-filters] .filter-seg').forEach(btn => {
@@ -439,6 +475,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.querySelector('[data-collection-filter-reset]')?.addEventListener('click', () => {
             document.querySelectorAll('[data-collection-filter]').forEach(el => { el.value = ''; });
+            document.querySelectorAll('[data-collection-filter-group]').forEach(group => {
+                group.querySelectorAll('.filter-seg').forEach((seg, i) => {
+                    seg.classList.toggle('filter-seg--active', i === 0);
+                });
+            });
             complexityFilter = '';
             document.querySelectorAll('[data-complexity-filters] .filter-seg').forEach((b, i) => {
                 b.classList.toggle('filter-seg--active', i === 0);

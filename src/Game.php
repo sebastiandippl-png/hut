@@ -10,6 +10,16 @@ class Game
 {
     private const RANK_ORDER_SQL = 'CASE WHEN rank IS NULL OR rank <= 0 THEN 1 ELSE 0 END ASC, rank ASC, name ASC';
 
+    private static function complexityWhereClause(string $complexity, string $column = 'bt.averageweight'): ?string
+    {
+        return match ($complexity) {
+            'light' => "{$column} > 0 AND {$column} <= 1.8",
+            'medium' => "{$column} > 1.8 AND {$column} <= 3.0",
+            'complex' => "{$column} > 3.0",
+            default => null,
+        };
+    }
+
     /**
      * @param array<int, string> $selectedUsers
      */
@@ -18,11 +28,19 @@ class Game
         array  $selectedUsers = [],
         int    $page = 1,
         int    $perPage = 24,
-        ?int   $currentUserId = null
+        ?int   $currentUserId = null,
+        string $complexity = ''
     ): array {
         $pdo    = Database::getInstance();
         $where  = ['1=1'];
         $params = [];
+        $joins  = [];
+
+        $complexityWhere = self::complexityWhereClause($complexity);
+        if ($complexityWhere !== null) {
+            $joins[] = 'LEFT JOIN bgg_thing bt ON bt.bgg_id = g.id';
+            $where[] = $complexityWhere;
+        }
 
         if ($search !== '') {
             $where[]          = 'g.name LIKE :search';
@@ -51,9 +69,10 @@ class Game
         }
 
         $whereClause = implode(' AND ', $where);
+        $joinClause  = !empty($joins) ? ' ' . implode(' ', $joins) : '';
         $offset      = ($page - 1) * $perPage;
 
-        $countStmt = $pdo->prepare("SELECT COUNT(DISTINCT g.id) FROM games g WHERE $whereClause");
+        $countStmt = $pdo->prepare("SELECT COUNT(DISTINCT g.id) FROM games g{$joinClause} WHERE $whereClause");
         $countStmt->execute($params);
         $total = (int) $countStmt->fetchColumn();
 
@@ -65,7 +84,7 @@ class Game
             "SELECT DISTINCT g.*,
                     EXISTS(SELECT 1 FROM user_games ug_any WHERE ug_any.game_id = g.id AND ug_any.selected = 1) AS in_hut,
                     {$selectedByMeSql} AS selected_by_me
-                  FROM games g
+                   FROM games g{$joinClause}
              WHERE $whereClause
              ORDER BY " . self::RANK_ORDER_SQL . ' LIMIT :limit OFFSET :offset'
         );
@@ -91,10 +110,11 @@ class Game
         return ['games' => $games, 'total' => $total, 'page' => $page, 'perPage' => $perPage];
     }
 
-    public static function randomCollectionGames(int $limit = 24, ?int $currentUserId = null): array
+    public static function randomCollectionGames(int $limit = 24, ?int $currentUserId = null, string $complexity = ''): array
     {
         $pdo = Database::getInstance();
         $randomOrderExpr = self::randomOrderExpr($pdo);
+        $complexityWhere = self::complexityWhereClause($complexity);
 
         $selectedByMeSql = $currentUserId !== null
             ? 'EXISTS(SELECT 1 FROM user_games ug_self WHERE ug_self.game_id = g.id AND ug_self.user_id = :current_user_id AND ug_self.selected = 1)'
@@ -105,11 +125,13 @@ class Game
                     EXISTS(SELECT 1 FROM user_games ug_any WHERE ug_any.game_id = g.id AND ug_any.selected = 1) AS in_hut,
                     {$selectedByMeSql} AS selected_by_me
              FROM games g
+             LEFT JOIN bgg_thing bt ON bt.bgg_id = g.id
              WHERE (g.is_expansion IS NULL OR g.is_expansion = 0)
                 AND (
                     EXISTS(SELECT 1 FROM user_collection uc WHERE uc.bgg_game_id = g.id)
                     OR EXISTS(SELECT 1 FROM user_personal_collection upc WHERE upc.game_id = g.id)
                 )
+                " . ($complexityWhere !== null ? " AND {$complexityWhere}" : '') . "
                ORDER BY {$randomOrderExpr}
              LIMIT :limit"
         );

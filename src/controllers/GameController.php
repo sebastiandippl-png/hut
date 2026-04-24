@@ -17,10 +17,15 @@ class GameController
         Auth::requireLogin();
 
         $search = trim($_GET['q'] ?? '');
+        $complexity = (string) ($_GET['complexity'] ?? '');
+        if (!in_array($complexity, ['', 'light', 'medium', 'complex'], true)) {
+            $complexity = '';
+        }
         $selectedUsers = isset($_GET['users']) && is_array($_GET['users'])
             ? array_map('strval', array_filter($_GET['users']))
             : [];
         $page = max(1, (int) ($_GET['page'] ?? 1));
+        $browseComplexity = $search === '' ? $complexity : '';
 
         // Offer all known owner labels from BGG imports and manual personal ownership.
         $pdo = \Hut\Database::getInstance();
@@ -41,13 +46,15 @@ class GameController
 
         $isDefaultView = $search === '' && empty($selectedUsers);
         if ($isDefaultView) {
-            $games = Game::randomCollectionGames(24, $userId);
+            $games = Game::randomCollectionGames(24, $userId, $browseComplexity);
             $total = count($games);
             $perPage = 24;
         } else {
-            $result = Game::browse($search, $selectedUsers, $page, 24, $userId);
+            $result = Game::browse($search, $selectedUsers, $page, 24, $userId, $browseComplexity);
             extract($result); // $games, $total, $page, $perPage
         }
+
+        $complexity = $browseComplexity;
 
         BggThingFetcher::ensureForPage(array_column($games, 'id'));
         require __DIR__ . '/../../templates/games/browse.php';

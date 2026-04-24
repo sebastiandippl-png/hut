@@ -27,6 +27,17 @@
         </div>
     <?php endif; ?>
 
+    <div class="filters__users-group">
+        <span class="filters__label">Complexity</span>
+        <input type="hidden" name="complexity" value="<?= htmlspecialchars($complexity) ?>">
+        <div class="filter-segs" data-browse-complexity>
+            <button class="filter-seg <?= $complexity === '' ? 'filter-seg--active' : '' ?>" type="button" data-complexity="">All</button>
+            <button class="filter-seg <?= $complexity === 'light' ? 'filter-seg--active' : '' ?>" type="button" data-complexity="light">Light</button>
+            <button class="filter-seg <?= $complexity === 'medium' ? 'filter-seg--active' : '' ?>" type="button" data-complexity="medium">Medium</button>
+            <button class="filter-seg <?= $complexity === 'complex' ? 'filter-seg--active' : '' ?>" type="button" data-complexity="complex">Complex</button>
+        </div>
+    </div>
+
     <button type="submit" hidden aria-hidden="true"></button>
     <a class="btn btn--ghost" href="/games">Reset</a>
 </form>
@@ -99,6 +110,7 @@
         $base = '/games?' . http_build_query(array_filter([
             'q' => $search,
             'users' => !empty($selectedUsers) ? $selectedUsers : null,
+            'complexity' => $complexity !== '' ? $complexity : null,
         ], static fn ($value) => $value !== null && $value !== ''));
     ?>
         <nav class="pagination">

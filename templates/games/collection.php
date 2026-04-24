@@ -9,30 +9,32 @@
     <p class="empty-state">No games selected yet. <a href="/games">Suggest games</a> and add some!</p>
 <?php else: ?>
 
-    <div class="collection-filters">^
+    <div class="collection-filters">
         <div class="collection-filters__group">
-            <label class="collection-filters__label" for="filterBestPlayers">Best players</label>
-            <select class="collection-filters__select" id="filterBestPlayers" data-collection-filter="bestplayers">
-                <option value="">Any</option>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-                <option value="6">6+</option>
-            </select>
+            <span class="collection-filters__label">Best players</span>
+            <input type="hidden" value="" data-collection-filter="bestplayers">
+            <div class="filter-segs collection-filters__segs" data-collection-filter-group="bestplayers">
+                <button class="filter-seg filter-seg--active" type="button" data-value="">Any</button>
+                <button class="filter-seg" type="button" data-value="1">1</button>
+                <button class="filter-seg" type="button" data-value="2">2</button>
+                <button class="filter-seg" type="button" data-value="3">3</button>
+                <button class="filter-seg" type="button" data-value="4">4</button>
+                <button class="filter-seg" type="button" data-value="5">5</button>
+                <button class="filter-seg" type="button" data-value="6">6+</button>
+            </div>
         </div>
 
         <div class="collection-filters__group">
-            <label class="collection-filters__label" for="filterMaxPlayers">Supports N+ players</label>
-            <select class="collection-filters__select" id="filterMaxPlayers" data-collection-filter="maxplayers">
-                <option value="">Any</option>
-                <option value="2">2+</option>
-                <option value="3">3+</option>
-                <option value="4">4+</option>
-                <option value="5">5+</option>
-                <option value="6">6+</option>
-            </select>
+            <span class="collection-filters__label">Supports N+ players</span>
+            <input type="hidden" value="" data-collection-filter="maxplayers">
+            <div class="filter-segs collection-filters__segs" data-collection-filter-group="maxplayers">
+                <button class="filter-seg filter-seg--active" type="button" data-value="">Any</button>
+                <button class="filter-seg" type="button" data-value="2">2+</button>
+                <button class="filter-seg" type="button" data-value="3">3+</button>
+                <button class="filter-seg" type="button" data-value="4">4+</button>
+                <button class="filter-seg" type="button" data-value="5">5+</button>
+                <button class="filter-seg" type="button" data-value="6">6+</button>
+            </div>
         </div>
 
         <div class="collection-filters__group">
@@ -46,15 +48,16 @@
         </div>
 
         <div class="collection-filters__group">
-            <label class="collection-filters__label" for="filterMaxPlaytime">Max playtime</label>
-            <select class="collection-filters__select" id="filterMaxPlaytime" data-collection-filter="maxplaytime">
-                <option value="">Any</option>
-                <option value="30">≤ 30 min</option>
-                <option value="60">≤ 60 min</option>
-                <option value="90">≤ 90 min</option>
-                <option value="120">≤ 120 min</option>
-                <option value="121+">&gt; 120 min</option>
-            </select>
+            <span class="collection-filters__label">Max playtime</span>
+            <input type="hidden" value="" data-collection-filter="maxplaytime">
+            <div class="filter-segs collection-filters__segs" data-collection-filter-group="maxplaytime">
+                <button class="filter-seg filter-seg--active" type="button" data-value="">Any</button>
+                <button class="filter-seg" type="button" data-value="30">≤ 30 min</button>
+                <button class="filter-seg" type="button" data-value="60">≤ 60 min</button>
+                <button class="filter-seg" type="button" data-value="90">≤ 90 min</button>
+                <button class="filter-seg" type="button" data-value="120">≤ 120 min</button>
+                <button class="filter-seg" type="button" data-value="121+">&gt; 120 min</button>
+            </div>
         </div>
 
         <button class="btn btn--ghost collection-filters__reset" data-collection-filter-reset>Reset</button>
@@ -80,7 +83,7 @@
             if ($complexity !== null) {
                 if ($complexity <= 1.8) {
                     $complexityLabel = 'Light';
-                } elseif ($complexity <= 2.8) {
+                } elseif ($complexity <= 3.0) {
                     $complexityLabel = 'Medium';
                 } else {
                     $complexityLabel = 'Complex';

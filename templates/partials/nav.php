@@ -1,5 +1,6 @@
 <?php
 use Hut\Auth;
+use Hut\Resident;
 
 $user = Auth::user();
 $currentPath = strtok((string) ($_SERVER['REQUEST_URI'] ?? '/'), '?') ?: '/';
@@ -13,6 +14,9 @@ $isNewsLinks = $currentPath === '/links';
 $isNewsWeather = $currentPath === '/news/weather';
 $isNewsGroupActive = $isNewsChangelog || $isNewsLinks || $isNewsWeather;
 
+$isResidentsProfile = str_starts_with($currentPath, '/residents/');
+$isResidentsGroupActive = $currentPath === '/residents' || $isResidentsProfile;
+
 $isAdminUsers = $currentPath === '/admin' || $currentPath === '/admin/users';
 $isAdminImport = $currentPath === '/admin/import';
 $isAdminNotice = $currentPath === '/admin/notice';
@@ -21,7 +25,13 @@ $isAdminGroupActive = str_starts_with($currentPath, '/admin');
 
 $gamesGroupClass = 'nav__group' . ($isGamesGroupActive ? ' nav__group--active' : '');
 $newsGroupClass = 'nav__group' . ($isNewsGroupActive ? ' nav__group--active' : '');
+$residentsGroupClass = 'nav__group' . ($isResidentsGroupActive ? ' nav__group--active' : '');
 $adminGroupClass = 'nav__group' . ($isAdminGroupActive ? ' nav__group--active' : '');
+
+$residentQuicklinks = [];
+if ($user) {
+    $residentQuicklinks = Resident::allApproved();
+}
 ?>
 <nav class="nav" id="mainNav">
     <a class="nav__brand" href="/">🏠 Hut Game Manager</a>
@@ -51,6 +61,27 @@ $adminGroupClass = 'nav__group' . ($isAdminGroupActive ? ' nav__group--active' :
                     <a href="/changelog" class="nav__dropdown-link<?= $isNewsChangelog ? ' nav__dropdown-link--active' : '' ?>">Changelog</a>
                     <a href="/links" class="nav__dropdown-link<?= $isNewsLinks ? ' nav__dropdown-link--active' : '' ?>">Links</a>
                     <a href="/news/weather" class="nav__dropdown-link<?= $isNewsWeather ? ' nav__dropdown-link--active' : '' ?>">Weather</a>
+                </div>
+            </div>
+            <div class="<?= htmlspecialchars($residentsGroupClass) ?>" data-nav-group>
+                <button type="button" class="nav__group-btn" data-nav-group-toggle aria-expanded="false" aria-haspopup="true">
+                    Hut Residents
+                    <span class="nav__arrow" aria-hidden="true">▾</span>
+                </button>
+                <div class="nav__dropdown">
+                    <?php foreach ($residentQuicklinks as $residentQuicklink): ?>
+                        <?php
+                            $residentId = (int) ($residentQuicklink['id'] ?? 0);
+                            if ($residentId <= 0) {
+                                continue;
+                            }
+                            $quicklinkResidentName = trim((string) ($residentQuicklink['name'] ?? 'Resident'));
+                            $isResidentActive = $currentPath === '/residents/' . $residentId;
+                        ?>
+                        <a href="/residents/<?= $residentId ?>" class="nav__dropdown-link nav__dropdown-link--resident<?= $isResidentActive ? ' nav__dropdown-link--active' : '' ?>">
+                            <?= htmlspecialchars($quicklinkResidentName) ?>
+                        </a>
+                    <?php endforeach; ?>
                 </div>
             </div>
             <?php if ($user['is_admin']): ?>

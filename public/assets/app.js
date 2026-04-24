@@ -343,6 +343,30 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // ── Resident name linkifier (used by heart toggle) ───────────────────────
+    function escapeHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    function linkifyHeartedBy(text) {
+        const map = window.HUT_RESIDENT_MAP || {};
+        if (!text || text === 'No hearts yet') {
+            return escapeHtml(text || '');
+        }
+        return text.split(', ').map(name => {
+            const trimmed = name.trim();
+            const id = map[trimmed];
+            if (id) {
+                return `<a href="${basePath}/residents/${id}">${escapeHtml(trimmed)}</a>`;
+            }
+            return escapeHtml(trimmed);
+        }).join(', ');
+    }
+
     // ── Hearts ───────────────────────────────────────────────────────────────
     document.querySelectorAll('[data-heart-button]').forEach(btn => {
         btn.addEventListener('click', async () => {
@@ -371,7 +395,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 document.querySelectorAll(`[data-hearted-by="${gameId}"]`).forEach(node => {
                     if (node.dataset.heartedMode === 'names') {
-                        node.textContent = data.heartedBy;
+                        node.innerHTML = linkifyHeartedBy(data.heartedBy);
                     } else {
                         node.textContent = `Hearted by: ${data.heartedBy}`;
                     }

@@ -142,6 +142,7 @@ class GameController
         Auth::requireLogin();
         $games = Game::collection(Auth::user()['id']);
         BggThingFetcher::ensureForPage(array_column($games, 'id'));
+        $residentNameMap = \Hut\Resident::firstNameToIdMap();
         require __DIR__ . '/../../templates/games/collection.php';
     }
 

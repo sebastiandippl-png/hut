@@ -1,4 +1,27 @@
-<?php $pageTitle = 'Hut Choice'; require __DIR__ . '/../partials/header.php'; ?>
+<?php
+$pageTitle = 'Hut Choice';
+require __DIR__ . '/../partials/header.php';
+
+/**
+ * Convert a comma-separated string of resident first names into HTML with
+ * profile links. Names not found in $residentNameMap are left as plain text.
+ */
+function linkifyResidentNames(string $names, array $map): string
+{
+    if ($names === '' || $names === 'No hearts yet') {
+        return htmlspecialchars($names);
+    }
+    $parts = explode(', ', $names);
+    $linked = array_map(static function (string $name) use ($map): string {
+        $name = trim($name);
+        if (isset($map[$name])) {
+            return '<a href="/residents/' . $map[$name] . '">' . htmlspecialchars($name) . '</a>';
+        }
+        return htmlspecialchars($name);
+    }, $parts);
+    return implode(', ', $linked);
+}
+?>
 
 <div class="page-header">
     <h1>Hut Collection</h1>
@@ -146,7 +169,7 @@
                         </p>
                         <p class="meta-row meta-row--hearts">
                             <span class="meta-row__icon" title="Hearted by">♥</span>
-                            <span class="meta-row__value" data-hearted-by="<?= $game['id'] ?>" data-hearted-mode="names"><?= htmlspecialchars((string) ($game['hearted_by'] ?: 'No hearts yet')) ?></span>
+                            <span class="meta-row__value" data-hearted-by="<?= $game['id'] ?>" data-hearted-mode="names"><?= linkifyResidentNames((string) ($game['hearted_by'] ?: 'No hearts yet'), $residentNameMap) ?></span>
                         </p>
                     </div>
                 </div>
@@ -156,4 +179,5 @@
 
 <?php endif; ?>
 
+<script>window.HUT_RESIDENT_MAP = <?= json_encode($residentNameMap, JSON_HEX_TAG | JSON_HEX_AMP) ?>;</script>
 <?php require __DIR__ . '/../partials/footer.php'; ?>

@@ -16,6 +16,7 @@ use Hut\controllers\AdminController;
 use Hut\controllers\VoteController;
 use Hut\controllers\LinksController;
 use Hut\controllers\WeatherController;
+use Hut\controllers\ResidentController;
 
 $dotenv = Dotenv::createImmutable(__DIR__ . '/..');
 $dotenv->load();
@@ -136,6 +137,8 @@ $router->get('/collection',         [GameController::class, 'collection']);
 $router->get('/changelog',          [GameController::class, 'changelog']);
 $router->get('/links',              [LinksController::class, 'showLinks']);
 $router->get('/news/weather',       [WeatherController::class, 'showWeather']);
+$router->get('/residents',          [ResidentController::class, 'index']);
+$router->get('/residents/{id}',     [ResidentController::class, 'profile']);
 $router->post('/games/{id}/heart',  [VoteController::class, 'heart']);
 
 // ─── Admin routes ────────────────────────────────────────────────────────────

@@ -225,6 +225,11 @@ class Auth
             }
         }
 
+        if (!empty($user['id'])) {
+            Database::getInstance()->prepare('UPDATE users SET last_login_at = CURRENT_TIMESTAMP WHERE id = ?')
+                ->execute([$user['id']]);
+        }
+
         session_regenerate_id(true);
         $_SESSION['user'] = [
             'id'       => $user['id'],

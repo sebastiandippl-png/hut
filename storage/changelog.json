@@ -1,7 +1,15 @@
 {
-    "generated_at": "2026-04-24T09:53:10Z",
+    "generated_at": "2026-04-24T12:08:17Z",
     "repo_url": "https://github.com/sebastiandippl-png/hut",
     "entries": [
+        {
+            "hash": "94cc23e82bb0e185278ef98ac3baabcb77ec072f",
+            "short_hash": "94cc23e",
+            "date": "2026-04-24",
+            "author": "Sebastian",
+            "subject": "feat: add St.Veit Pongau weather",
+            "url": "https://github.com/sebastiandippl-png/hut/commit/94cc23e82bb0e185278ef98ac3baabcb77ec072f"
+        },
         {
             "hash": "ba374f2d80cd9e98b4dcafcff2a912ba8a699b28",
             "short_hash": "ba374f2",
@@ -193,14 +201,6 @@
             "author": "Sebastian",
             "subject": "Enhance rankings feature with complexity filters and update UI for hearted games display",
             "url": "https://github.com/sebastiandippl-png/hut/commit/6aee08ba0acb7865e76db65e69af7c60304738e4"
-        },
-        {
-            "hash": "7f9654cf33bdc1aaf593d54f287756761876b525",
-            "short_hash": "7f9654c",
-            "date": "2026-04-17",
-            "author": "Sebastian",
-            "subject": "Update game card metadata display with icons for owners and hearted by",
-            "url": "https://github.com/sebastiandippl-png/hut/commit/7f9654cf33bdc1aaf593d54f287756761876b525"
         }
     ]
 }

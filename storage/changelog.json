@@ -1,7 +1,15 @@
 {
-    "generated_at": "2026-04-24T12:08:17Z",
+    "generated_at": "2026-04-24T12:19:19Z",
     "repo_url": "https://github.com/sebastiandippl-png/hut",
     "entries": [
+        {
+            "hash": "cb871b149f4060924562d039e5215018ccded9c1",
+            "short_hash": "cb871b1",
+            "date": "2026-04-24",
+            "author": "Sebastian",
+            "subject": "docs: update instructions",
+            "url": "https://github.com/sebastiandippl-png/hut/commit/cb871b149f4060924562d039e5215018ccded9c1"
+        },
         {
             "hash": "94cc23e82bb0e185278ef98ac3baabcb77ec072f",
             "short_hash": "94cc23e",
@@ -193,14 +201,6 @@
             "author": "Sebastian",
             "subject": "Rename \"Hut Choice\" to \"Hut Menu\" in various templates and update SQL query parameter binding for consistency",
             "url": "https://github.com/sebastiandippl-png/hut/commit/c0fa3c76a6655a045ee9fed39f2f7f391d95f18d"
-        },
-        {
-            "hash": "6aee08ba0acb7865e76db65e69af7c60304738e4",
-            "short_hash": "6aee08b",
-            "date": "2026-04-17",
-            "author": "Sebastian",
-            "subject": "Enhance rankings feature with complexity filters and update UI for hearted games display",
-            "url": "https://github.com/sebastiandippl-png/hut/commit/6aee08ba0acb7865e76db65e69af7c60304738e4"
         }
     ]
 }

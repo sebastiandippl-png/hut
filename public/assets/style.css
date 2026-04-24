@@ -1246,12 +1246,41 @@ img { max-width: 100%; display: block; }
     .weather-today__header { flex-wrap: wrap; gap: .75rem; }
     .weather-today__minmax { flex-direction: row; gap: 1rem; }
     .weather-forecast__row {
-        grid-template-columns: 1fr 1fr;
-        gap: .35rem .5rem;
+        grid-template-columns: 4.25rem minmax(0, 1fr);
+        gap: .25rem .65rem;
+        align-items: start;
     }
-    .weather-forecast__date { grid-column: 1 / -1; font-weight: 600; }
-    .weather-forecast__icon { display: none; }
-    .weather-forecast__label { grid-column: 1 / -1; font-size: .85rem; color: var(--color-text-muted); }
+    .weather-forecast__date {
+        grid-column: 2;
+        font-weight: 600;
+    }
+    .weather-forecast__icon {
+        display: block;
+        grid-column: 1;
+        grid-row: 1 / span 4;
+        width: 3.75rem;
+        height: 3.75rem;
+        align-self: start;
+    }
+    .weather-forecast__label {
+        grid-column: 2;
+        font-size: .85rem;
+        color: var(--color-text-muted);
+        white-space: normal;
+        overflow: visible;
+        text-overflow: unset;
+    }
+    .weather-forecast__temps,
+    .weather-forecast__precip,
+    .weather-forecast__wind {
+        grid-column: 2;
+    }
+    .weather-forecast__temps { gap: .75rem; }
+    .weather-forecast__precip,
+    .weather-forecast__wind {
+        white-space: normal;
+        line-height: 1.35;
+    }
 }
 
 /* ── Weather ─────────────────────────────────────────────────────────────── */
@@ -1356,9 +1385,9 @@ img { max-width: 100%; display: block; }
 .weather-forecast__label {
     color: var(--color-text-muted);
     font-size: .85rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
 }
 
 .weather-forecast__temps {

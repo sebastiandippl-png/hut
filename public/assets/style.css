@@ -1241,4 +1241,146 @@ img { max-width: 100%; display: block; }
         align-items: flex-start;
         flex-direction: column;
     }
+
+    /* Weather — mobile */
+    .weather-today__header { flex-wrap: wrap; gap: .75rem; }
+    .weather-today__minmax { flex-direction: row; gap: 1rem; }
+    .weather-forecast__row {
+        grid-template-columns: 1fr 1fr;
+        gap: .35rem .5rem;
+    }
+    .weather-forecast__date { grid-column: 1 / -1; font-weight: 600; }
+    .weather-forecast__icon { display: none; }
+    .weather-forecast__label { grid-column: 1 / -1; font-size: .85rem; color: var(--color-text-muted); }
+}
+
+/* ── Weather ─────────────────────────────────────────────────────────────── */
+
+.weather-today__header {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    margin-bottom: 1.25rem;
+}
+
+.weather-today__icon { flex-shrink: 0; }
+
+.weather-today__main {
+    display: flex;
+    flex-direction: column;
+    gap: .2rem;
+}
+
+.weather-today__temp {
+    font-size: 2.4rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--color-text);
+}
+
+.weather-today__label {
+    font-size: 1rem;
+    color: var(--color-text-muted);
+}
+
+.weather-today__minmax {
+    display: flex;
+    flex-direction: column;
+    gap: .3rem;
+    margin-left: auto;
+    text-align: right;
+    font-size: .95rem;
+}
+
+.weather-today__max { color: var(--color-danger); font-weight: 600; }
+.weather-today__min { color: var(--color-primary); font-weight: 600; }
+
+.weather-today__details {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: .6rem 1.5rem;
+    margin: 0;
+    padding-top: .75rem;
+    border-top: 1px solid var(--color-border);
+}
+
+.weather-detail dt {
+    font-size: .78rem;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--color-text-muted);
+    margin-bottom: .1rem;
+}
+
+.weather-detail dd {
+    font-size: .95rem;
+    margin: 0;
+    font-weight: 500;
+}
+
+.weather-detail__sub {
+    font-weight: 400;
+    color: var(--color-text-muted);
+    font-size: .85rem;
+}
+
+/* 14-day forecast */
+.weather-forecast h2 { margin-bottom: 1rem; }
+
+.weather-forecast__list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.weather-forecast__row {
+    display: grid;
+    grid-template-columns: 9rem 2.25rem 1fr auto auto auto;
+    align-items: center;
+    gap: .4rem .75rem;
+    padding: .55rem 0;
+    border-bottom: 1px solid var(--color-border);
+    font-size: .9rem;
+}
+
+.weather-forecast__row:last-child { border-bottom: none; }
+
+.weather-forecast__date {
+    font-weight: 600;
+    font-size: .88rem;
+    white-space: nowrap;
+}
+
+.weather-forecast__icon { flex-shrink: 0; }
+
+.weather-forecast__label {
+    color: var(--color-text-muted);
+    font-size: .85rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.weather-forecast__temps {
+    display: flex;
+    gap: .5rem;
+    white-space: nowrap;
+}
+
+.weather-forecast__max { color: var(--color-danger); font-weight: 600; }
+.weather-forecast__min { color: var(--color-primary); font-weight: 600; }
+
+.weather-forecast__precip,
+.weather-forecast__wind {
+    white-space: nowrap;
+    color: var(--color-text-muted);
+    font-size: .85rem;
+}
+
+/* Attribution */
+.weather-attribution {
+    margin-top: 1.5rem;
+    font-size: .78rem;
+    color: var(--color-text-muted);
+    text-align: center;
 }

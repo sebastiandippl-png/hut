@@ -10,7 +10,8 @@ $isGamesGroupActive = $isGamesSuggest || $isGamesCollection || str_starts_with($
 
 $isNewsChangelog = $currentPath === '/changelog';
 $isNewsLinks = $currentPath === '/links';
-$isNewsGroupActive = $isNewsChangelog || $isNewsLinks;
+$isNewsWeather = $currentPath === '/news/weather';
+$isNewsGroupActive = $isNewsChangelog || $isNewsLinks || $isNewsWeather;
 
 $isAdminUsers = $currentPath === '/admin' || $currentPath === '/admin/users';
 $isAdminImport = $currentPath === '/admin/import';
@@ -49,6 +50,7 @@ $adminGroupClass = 'nav__group' . ($isAdminGroupActive ? ' nav__group--active' :
                 <div class="nav__dropdown">
                     <a href="/changelog" class="nav__dropdown-link<?= $isNewsChangelog ? ' nav__dropdown-link--active' : '' ?>">Changelog</a>
                     <a href="/links" class="nav__dropdown-link<?= $isNewsLinks ? ' nav__dropdown-link--active' : '' ?>">Links</a>
+                    <a href="/news/weather" class="nav__dropdown-link<?= $isNewsWeather ? ' nav__dropdown-link--active' : '' ?>">Weather</a>
                 </div>
             </div>
             <?php if ($user['is_admin']): ?>

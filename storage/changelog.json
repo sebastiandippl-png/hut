@@ -1,7 +1,15 @@
 {
-    "generated_at": "2026-04-24T06:51:32Z",
+    "generated_at": "2026-04-24T09:53:10Z",
     "repo_url": "https://github.com/sebastiandippl-png/hut",
     "entries": [
+        {
+            "hash": "ba374f2d80cd9e98b4dcafcff2a912ba8a699b28",
+            "short_hash": "ba374f2",
+            "date": "2026-04-24",
+            "author": "Sebastian",
+            "subject": "feat: add categories for links",
+            "url": "https://github.com/sebastiandippl-png/hut/commit/ba374f2d80cd9e98b4dcafcff2a912ba8a699b28"
+        },
         {
             "hash": "158d73b01d393f0d9dc3f6e98e54281cdf04cf4e",
             "short_hash": "158d73b",
@@ -193,14 +201,6 @@
             "author": "Sebastian",
             "subject": "Update game card metadata display with icons for owners and hearted by",
             "url": "https://github.com/sebastiandippl-png/hut/commit/7f9654cf33bdc1aaf593d54f287756761876b525"
-        },
-        {
-            "hash": "00ba8db5151fbe8fabd556c4f151791ef3c25437",
-            "short_hash": "00ba8db",
-            "date": "2026-04-17",
-            "author": "Sebastian",
-            "subject": "Refactor game selection logic and update UI for game suggestions",
-            "url": "https://github.com/sebastiandippl-png/hut/commit/00ba8db5151fbe8fabd556c4f151791ef3c25437"
         }
     ]
 }

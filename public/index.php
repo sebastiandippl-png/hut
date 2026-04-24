@@ -15,6 +15,7 @@ use Hut\controllers\GameController;
 use Hut\controllers\AdminController;
 use Hut\controllers\VoteController;
 use Hut\controllers\LinksController;
+use Hut\controllers\WeatherController;
 
 $dotenv = Dotenv::createImmutable(__DIR__ . '/..');
 $dotenv->load();
@@ -134,6 +135,7 @@ $router->post('/games/{id}/remove-from-collection', [GameController::class, 'rem
 $router->get('/collection',         [GameController::class, 'collection']);
 $router->get('/changelog',          [GameController::class, 'changelog']);
 $router->get('/links',              [LinksController::class, 'showLinks']);
+$router->get('/news/weather',       [WeatherController::class, 'showWeather']);
 $router->post('/games/{id}/heart',  [VoteController::class, 'heart']);
 
 // ─── Admin routes ────────────────────────────────────────────────────────────

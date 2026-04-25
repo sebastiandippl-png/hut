@@ -81,7 +81,8 @@ $statisticsJson = is_string($statisticsJson) ? $statisticsJson : '{}';
             <?php else: ?>
                 <ol class="stats-toplist">
                     <?php foreach ($topCategories as $i => $item): ?>
-                        <li class="stats-toplist__item">
+                        <li class="stats-toplist__item stats-toplist__item--link">
+                            <a class="stats-toplist__item-link" href="/collection?category=<?= urlencode($item['label']) ?>" aria-label="Filter by category: <?= htmlspecialchars($item['label']) ?>"></a>
                             <span class="stats-toplist__rank"><?= $i + 1 ?></span>
                             <span class="stats-toplist__label"><?= htmlspecialchars($item['label']) ?></span>
                             <span class="stats-toplist__count"><?= (int) $item['count'] ?></span>
@@ -98,7 +99,8 @@ $statisticsJson = is_string($statisticsJson) ? $statisticsJson : '{}';
             <?php else: ?>
                 <ol class="stats-toplist">
                     <?php foreach ($topMechanics as $i => $item): ?>
-                        <li class="stats-toplist__item">
+                        <li class="stats-toplist__item stats-toplist__item--link">
+                            <a class="stats-toplist__item-link" href="/collection?mechanic=<?= urlencode($item['label']) ?>" aria-label="Filter by mechanic: <?= htmlspecialchars($item['label']) ?>"></a>
                             <span class="stats-toplist__rank"><?= $i + 1 ?></span>
                             <span class="stats-toplist__label"><?= htmlspecialchars($item['label']) ?></span>
                             <span class="stats-toplist__count"><?= (int) $item['count'] ?></span>
@@ -115,7 +117,8 @@ $statisticsJson = is_string($statisticsJson) ? $statisticsJson : '{}';
             <?php else: ?>
                 <ol class="stats-toplist">
                     <?php foreach ($topDesigners as $i => $item): ?>
-                        <li class="stats-toplist__item">
+                        <li class="stats-toplist__item stats-toplist__item--link">
+                            <a class="stats-toplist__item-link" href="/collection?designer=<?= urlencode($item['label']) ?>" aria-label="Filter by designer: <?= htmlspecialchars($item['label']) ?>"></a>
                             <span class="stats-toplist__rank"><?= $i + 1 ?></span>
                             <span class="stats-toplist__label"><?= htmlspecialchars($item['label']) ?></span>
                             <span class="stats-toplist__count"><?= (int) $item['count'] ?></span>

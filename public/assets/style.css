@@ -1271,6 +1271,25 @@ img { max-width: 100%; display: block; }
     white-space: nowrap;
 }
 
+.stats-pie__slice--link { cursor: pointer; }
+
+.stats-legend__item--link { cursor: pointer; }
+
+.stats-rank-row--link { cursor: pointer; }
+.stats-rank-row--link:hover { opacity: .82; }
+
+.stats-toplist__item--link { position: relative; }
+.stats-toplist__item-link {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    display: block;
+}
+.stats-toplist__item-link:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: -2px;
+}
+
 /* ── Cards ────────────────────────────────────────────────────────────────── */
 .card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius); padding: 1.25rem; box-shadow: var(--shadow); margin-bottom: 1rem; }
 .card h2 { font-size: 1.1rem; margin-bottom: .75rem; }

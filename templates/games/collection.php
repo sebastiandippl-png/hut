@@ -120,7 +120,11 @@ function linkifyResidentNames(string $names, array $map): string
                      data-maxplayers="<?= $maxPlayers > 0 ? $maxPlayers : -1 ?>"
                      data-maxplaytime="<?= $maxPlaytime > 0 ? $maxPlaytime : -1 ?>"
                      data-complexity="<?= $complexity !== null ? number_format($complexity, 5, '.', '') : -1 ?>"
-                     data-hearts="<?= $hearts ?>">
+                     data-hearts="<?= $hearts ?>"
+                     data-rank="<?= isset($game['rank']) && (int) $game['rank'] > 0 ? (int) $game['rank'] : -1 ?>"
+                     data-categories="<?= htmlspecialchars((string) ($game['categories'] ?? ''), ENT_QUOTES, 'UTF-8') ?>"
+                     data-mechanics="<?= htmlspecialchars((string) ($game['mechanics'] ?? ''), ENT_QUOTES, 'UTF-8') ?>"
+                     data-designers="<?= htmlspecialchars((string) ($game['designers'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
 
                 <a href="/games/<?= $game['id'] ?>" tabindex="-1" aria-hidden="true">
                     <?php if ($thumbUrl): ?>

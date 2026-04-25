@@ -133,7 +133,7 @@ class GameController
         $gameId = (int) $params['id'];
         UserGame::clearForAll($gameId);
 
-        $_SESSION['flash_success'] = 'Game removed from hut menu for all users.';
+        $_SESSION['flash_success'] = 'Game removed from hut collection for all users.';
         header('Location: ' . \Hut\Url::to('/games/' . $gameId));
         exit;
     }

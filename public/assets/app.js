@@ -461,7 +461,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 ].join(' ');
             };
 
-            const renderPieChart = (metricKey, data) => {
+            const renderPieChart = (metricKey, data, urlMapper = null) => {
                 const svg    = statisticsRoot.querySelector(`[data-pie-chart="${metricKey}"]`);
                 const legend = statisticsRoot.querySelector(`[data-pie-legend="${metricKey}"]`);
                 if (!svg || !legend || !Array.isArray(data)) {
@@ -502,12 +502,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     // ── Legend entry ──────────────────────────────────────
                     const li = document.createElement('li');
-                    li.className = 'stats-legend__item';
+                    const sliceUrlParam = urlMapper ? urlMapper(slice.label) : null;
+                    li.className = sliceUrlParam ? 'stats-legend__item stats-legend__item--link' : 'stats-legend__item';
                     li.innerHTML = [
                         `<span class="stats-legend__swatch" style="background:${color}"></span>`,
                         `<span class="stats-legend__label">${slice.label}</span>`,
                         `<span class="stats-legend__count">${slice.count} <span class="stats-legend__pct">(${pct}%)</span></span>`,
                     ].join('');
+                    if (sliceUrlParam) {
+                        li.addEventListener('click', () => { window.location.href = withBase(`/collection?${sliceUrlParam}`); });
+                    }
                     legend.append(li);
 
                     if (slice.count <= 0) {
@@ -521,8 +525,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     const path = svgEl('path');
                     path.setAttribute('d', arcPath(110, 110, 98, startAngle, endAngle));
                     path.setAttribute('fill', color);
-                    path.setAttribute('class', 'stats-pie__slice');
+                    path.setAttribute('class', sliceUrlParam ? 'stats-pie__slice stats-pie__slice--link' : 'stats-pie__slice');
                     path.setAttribute('aria-label', `${slice.label}: ${slice.count} (${pct}%)`);
+                    if (sliceUrlParam) {
+                        path.addEventListener('click', () => { window.location.href = withBase(`/collection?${sliceUrlParam}`); });
+                    }
                     svg.append(path);
 
                     // ── Count + % label inside slice ──────────────────────
@@ -588,7 +595,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 svg.append(cLbl);
             };
 
-            const renderRankDistribution = data => {
+            const renderRankDistribution = (data, urlMapper = null) => {
                 const root = statisticsRoot.querySelector('[data-rank-chart]');
                 if (!root || !Array.isArray(data)) {
                     return;
@@ -613,9 +620,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 normalized.forEach((item, index) => {
                     const pct = totalRank > 0 ? Math.round((item.count / totalRank) * 100) : 0;
                     const color = rankColors[index % rankColors.length];
+                    const rowUrlParam = urlMapper ? urlMapper(item.label) : null;
 
                     const row = document.createElement('div');
-                    row.className = 'stats-rank-row';
+                    row.className = rowUrlParam ? 'stats-rank-row stats-rank-row--link' : 'stats-rank-row';
 
                     const label = document.createElement('span');
                     label.className = 'stats-rank-row__label';
@@ -634,16 +642,40 @@ document.addEventListener('DOMContentLoaded', () => {
                     value.className = 'stats-rank-row__value';
                     value.innerHTML = `${item.count} <span class="stats-rank-row__pct">(${pct}%)</span>`;
 
+                    if (rowUrlParam) {
+                        row.addEventListener('click', () => { window.location.href = withBase(`/collection?${rowUrlParam}`); });
+                    }
+
                     row.append(label, barTrack, value);
                     root.append(row);
                 });
             };
 
-            renderPieChart('complexity', stats.complexity || []);
-            renderPieChart('bestWith', stats.bestWith || []);
-            renderPieChart('duration', stats.duration || []);
-            renderPieChart('hearts', stats.hearts || []);
-            renderRankDistribution(stats.rankDistribution || []);
+            const chartUrlMappers = {
+                complexity: label => ({ 'Light': 'complexity=light', 'Medium': 'complexity=medium', 'Complex': 'complexity=complex' })[label] || null,
+                bestWith: label => {
+                    if (label === '6+') { return 'bestplayers=6'; }
+                    if (/^\d$/.test(label)) { return `bestplayers=${label}`; }
+                    return null;
+                },
+                duration: label => ({
+                    '≤ 30 min': 'maxplaytime=0-30', '31-60 min': 'maxplaytime=31-60',
+                    '61-90 min': 'maxplaytime=61-90', '91-120 min': 'maxplaytime=91-120', '> 120 min': 'maxplaytime=121%2B',
+                })[label] || null,
+                hearts: label => ({
+                    '0 hearts': 'hearts=0', '1-2 hearts': 'hearts=1-2', '3-5 hearts': 'hearts=3-5', '6+ hearts': 'hearts=6%2B',
+                })[label] || null,
+            };
+
+            const rankUrlMapper = label => ({
+                'Top 100': 'rank=top100', '101-500': 'rank=101-500', '501-2000': 'rank=501-2000', '2001+': 'rank=2001%2B', 'Unranked': 'rank=unranked',
+            })[label] || null;
+
+            renderPieChart('complexity', stats.complexity || [], chartUrlMappers.complexity);
+            renderPieChart('bestWith', stats.bestWith || [], chartUrlMappers.bestWith);
+            renderPieChart('duration', stats.duration || [], chartUrlMappers.duration);
+            renderPieChart('hearts', stats.hearts || [], chartUrlMappers.hearts);
+            renderRankDistribution(stats.rankDistribution || [], rankUrlMapper);
         }
     }
 
@@ -652,6 +684,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (collectionGrid) {
         const countEl = document.querySelector('[data-collection-count]');
         let complexityFilter = '';
+        let rankFilter = '';
+        let categoryFilter = '';
+        let mechanicFilter = '';
+        let designerFilter = '';
+        let heartsFilter = '';
 
         const filterCards = () => {
             const bpSel  = document.querySelector('[data-collection-filter="bestplayers"]')?.value  || '';
@@ -664,6 +701,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const mp  = Number(card.dataset.maxplayers);
                 const mpt = Number(card.dataset.maxplaytime);
                 const cx  = Number(card.dataset.complexity);
+                const rank = Number(card.dataset.rank);
+                const cats = String(card.dataset.categories || '');
+                const mechs = String(card.dataset.mechanics || '');
+                const designers = String(card.dataset.designers || '');
+                const hearts = Number(card.dataset.hearts);
 
                 let show = true;
 
@@ -685,6 +727,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (complexityFilter === 'light')   { show = show && (cx > 0 && cx <= 1.8); }
                 if (complexityFilter === 'medium')  { show = show && (cx > 1.8 && cx <= 3.0); }
                 if (complexityFilter === 'complex') { show = show && (cx > 3.0); }
+
+                if (rankFilter === 'top100')   { show = show && (rank > 0 && rank <= 100); }
+                if (rankFilter === '101-500')  { show = show && (rank > 100 && rank <= 500); }
+                if (rankFilter === '501-2000') { show = show && (rank > 500 && rank <= 2000); }
+                if (rankFilter === '2001+')    { show = show && (rank > 2000); }
+                if (rankFilter === 'unranked') { show = show && (rank <= 0); }
+
+                if (categoryFilter !== '') {
+                    show = show && cats.split(',').map(s => s.trim()).includes(categoryFilter);
+                }
+                if (mechanicFilter !== '') {
+                    show = show && mechs.split(',').map(s => s.trim()).includes(mechanicFilter);
+                }
+                if (designerFilter !== '') {
+                    show = show && designers.split(',').map(s => s.trim()).includes(designerFilter);
+                }
+                if (heartsFilter === '0')   { show = show && (hearts <= 0); }
+                if (heartsFilter === '1-2') { show = show && (hearts >= 1 && hearts <= 2); }
+                if (heartsFilter === '3-5') { show = show && (hearts >= 3 && hearts <= 5); }
+                if (heartsFilter === '6+')  { show = show && (hearts >= 6); }
 
                 card.hidden = !show;
                 if (show) visible++;
@@ -735,11 +797,55 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             });
             complexityFilter = '';
+            rankFilter = '';
+            categoryFilter = '';
+            mechanicFilter = '';
+            designerFilter = '';
+            heartsFilter = '';
             document.querySelectorAll('[data-complexity-filters] .filter-seg').forEach((b, i) => {
                 b.classList.toggle('filter-seg--active', i === 0);
             });
             filterCards();
         });
+
+        // ── Apply URL params on page load ─────────────────────────────────
+        const collectionParams = new URLSearchParams(window.location.search);
+
+        const urlComplexity = collectionParams.get('complexity') || '';
+        if (['light', 'medium', 'complex'].includes(urlComplexity)) {
+            complexityFilter = urlComplexity;
+            document.querySelectorAll('[data-complexity-filters] .filter-seg').forEach(b => {
+                b.classList.toggle('filter-seg--active', (b.dataset.complexity || '') === urlComplexity);
+            });
+        }
+
+        const urlBestPlayers = collectionParams.get('bestplayers') || '';
+        if (urlBestPlayers !== '') {
+            const bpInput = document.querySelector('[data-collection-filter="bestplayers"]');
+            if (bpInput) {
+                bpInput.value = urlBestPlayers;
+                document.querySelector('[data-collection-filter-group="bestplayers"]')?.querySelectorAll('.filter-seg').forEach(seg => {
+                    seg.classList.toggle('filter-seg--active', (seg.dataset.value || '') === urlBestPlayers);
+                });
+            }
+        }
+
+        const urlMaxPlaytime = collectionParams.get('maxplaytime') || '';
+        if (urlMaxPlaytime !== '') {
+            const mptInput = document.querySelector('[data-collection-filter="maxplaytime"]');
+            if (mptInput) {
+                mptInput.value = urlMaxPlaytime;
+                document.querySelector('[data-collection-filter-group="maxplaytime"]')?.querySelectorAll('.filter-seg').forEach(seg => {
+                    seg.classList.toggle('filter-seg--active', (seg.dataset.value || '') === urlMaxPlaytime);
+                });
+            }
+        }
+
+        rankFilter     = collectionParams.get('rank')     || '';
+        categoryFilter = collectionParams.get('category') || '';
+        mechanicFilter = collectionParams.get('mechanic') || '';
+        designerFilter = collectionParams.get('designer') || '';
+        heartsFilter   = collectionParams.get('hearts')   || '';
 
         filterCards();
     }

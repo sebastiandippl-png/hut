@@ -7,7 +7,8 @@ $currentPath = strtok((string) ($_SERVER['REQUEST_URI'] ?? '/'), '?') ?: '/';
 
 $isGamesSuggest = $currentPath === '/games';
 $isGamesCollection = $currentPath === '/' || $currentPath === '/collection';
-$isGamesGroupActive = $isGamesSuggest || $isGamesCollection || str_starts_with($currentPath, '/games/');
+$isGamesStatistics = $currentPath === '/games/statistics';
+$isGamesGroupActive = $isGamesSuggest || $isGamesCollection || $isGamesStatistics || str_starts_with($currentPath, '/games/');
 
 $isNewsChangelog = $currentPath === '/changelog';
 $isNewsLinks = $currentPath === '/links';
@@ -49,6 +50,7 @@ if ($user) {
                 </button>
                 <div class="nav__dropdown">
                     <a href="/collection" class="nav__dropdown-link<?= $isGamesCollection ? ' nav__dropdown-link--active' : '' ?>">Hut Collection</a>
+                    <a href="/games/statistics" class="nav__dropdown-link<?= $isGamesStatistics ? ' nav__dropdown-link--active' : '' ?>">Statistics</a>
                     <a href="/games" class="nav__dropdown-link<?= $isGamesSuggest ? ' nav__dropdown-link--active' : '' ?>">Suggest</a>
                 </div>
             </div>

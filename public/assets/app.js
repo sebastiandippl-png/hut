@@ -418,6 +418,235 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // ── Collection statistics charts ───────────────────────────────────────
+    const statisticsRoot = document.querySelector('[data-statistics-page]');
+    if (statisticsRoot) {
+        const rawStats = statisticsRoot.getAttribute('data-stats') || '{}';
+        let stats = null;
+
+        try {
+            stats = JSON.parse(rawStats);
+        } catch (error) {
+            console.error('Could not parse statistics data', error);
+        }
+
+        if (stats && typeof stats === 'object') {
+            const palettes = {
+                complexity: ['#6ab187', '#e3b04b', '#d36a46', '#a0a9be'],
+                bestWith:   ['#5470c6', '#6fa8dc', '#4caf99', '#8bc34a', '#f9a825', '#ef6c00', '#9c6ec7'],
+                duration:   ['#5fa8d3', '#3d90b6', '#4f7ebd', '#6a55bf', '#b8507a', '#8c93a8'],
+                hearts:     ['#bfc8d8', '#f0a45a', '#e05c5c', '#c7254e'],
+            };
+
+            const rankColors = ['#7b9ed9', '#5b8fcf', '#4c7bbf', '#3d6aae', '#a0a9be'];
+
+            const ns = 'http://www.w3.org/2000/svg';
+            const svgEl = tag => document.createElementNS(ns, tag);
+            const toNumber = value => Number.isFinite(Number(value)) ? Number(value) : 0;
+
+            const polarToCartesian = (cx, cy, r, rad) => ({
+                x: cx + Math.cos(rad) * r,
+                y: cy + Math.sin(rad) * r,
+            });
+
+            const arcPath = (cx, cy, r, startAngle, endAngle) => {
+                const s = polarToCartesian(cx, cy, r, startAngle);
+                const e = polarToCartesian(cx, cy, r, endAngle);
+                const large = endAngle - startAngle > Math.PI ? 1 : 0;
+                return [
+                    `M ${cx} ${cy}`,
+                    `L ${s.x} ${s.y}`,
+                    `A ${r} ${r} 0 ${large} 1 ${e.x} ${e.y}`,
+                    'Z',
+                ].join(' ');
+            };
+
+            const renderPieChart = (metricKey, data) => {
+                const svg    = statisticsRoot.querySelector(`[data-pie-chart="${metricKey}"]`);
+                const legend = statisticsRoot.querySelector(`[data-pie-legend="${metricKey}"]`);
+                if (!svg || !legend || !Array.isArray(data)) {
+                    return;
+                }
+
+                svg.innerHTML = '';
+                legend.innerHTML = '';
+
+                const normalized = data.map(item => ({
+                    label: String(item.label || ''),
+                    count: toNumber(item.count),
+                }));
+                const total = normalized.reduce((sum, item) => sum + item.count, 0);
+
+                if (total <= 0) {
+                    const empty = svgEl('text');
+                    empty.setAttribute('x', '110');
+                    empty.setAttribute('y', '114');
+                    empty.setAttribute('text-anchor', 'middle');
+                    empty.setAttribute('class', 'stats-pie__empty');
+                    empty.textContent = 'No data';
+                    svg.append(empty);
+
+                    const emptyLegend = document.createElement('li');
+                    emptyLegend.className = 'stats-legend__item stats-legend__item--empty';
+                    emptyLegend.textContent = 'No data available';
+                    legend.append(emptyLegend);
+                    return;
+                }
+
+                const colors = palettes[metricKey] || palettes.complexity;
+                let startAngle = -Math.PI / 2;
+
+                normalized.forEach((slice, index) => {
+                    const color = colors[index % colors.length];
+                    const pct   = total > 0 ? Math.round((slice.count / total) * 100) : 0;
+
+                    // ── Legend entry ──────────────────────────────────────
+                    const li = document.createElement('li');
+                    li.className = 'stats-legend__item';
+                    li.innerHTML = [
+                        `<span class="stats-legend__swatch" style="background:${color}"></span>`,
+                        `<span class="stats-legend__label">${slice.label}</span>`,
+                        `<span class="stats-legend__count">${slice.count} <span class="stats-legend__pct">(${pct}%)</span></span>`,
+                    ].join('');
+                    legend.append(li);
+
+                    if (slice.count <= 0) {
+                        return;
+                    }
+
+                    const angle    = (slice.count / total) * Math.PI * 2;
+                    const endAngle = startAngle + angle;
+
+                    // ── Arc slice ─────────────────────────────────────────
+                    const path = svgEl('path');
+                    path.setAttribute('d', arcPath(110, 110, 98, startAngle, endAngle));
+                    path.setAttribute('fill', color);
+                    path.setAttribute('class', 'stats-pie__slice');
+                    path.setAttribute('aria-label', `${slice.label}: ${slice.count} (${pct}%)`);
+                    svg.append(path);
+
+                    // ── Count + % label inside slice ──────────────────────
+                    const midAngle  = startAngle + angle / 2;
+                    const labelR    = 73; // midpoint of ring (hole r=52, outer r=98)
+                    const lp        = polarToCartesian(110, 110, labelR, midAngle);
+                    const showPct   = angle >= 0.42; // ≥ ~24° — enough room for two lines
+                    const showLabel = angle >= 0.22; // ≥ ~13° — show at least count
+
+                    if (showLabel) {
+                        const g = svgEl('g');
+                        g.setAttribute('class', 'stats-pie__label-group');
+                        g.setAttribute('text-anchor', 'middle');
+
+                        const tCount = svgEl('text');
+                        tCount.setAttribute('x', String(lp.x));
+                        tCount.setAttribute('y', showPct ? String(lp.y - 7) : String(lp.y));
+                        tCount.setAttribute('dominant-baseline', 'middle');
+                        tCount.setAttribute('class', 'stats-pie__count');
+                        tCount.textContent = String(slice.count);
+                        g.append(tCount);
+
+                        if (showPct) {
+                            const tPct = svgEl('text');
+                            tPct.setAttribute('x', String(lp.x));
+                            tPct.setAttribute('y', String(lp.y + 8));
+                            tPct.setAttribute('dominant-baseline', 'middle');
+                            tPct.setAttribute('class', 'stats-pie__pct');
+                            tPct.textContent = `${pct}%`;
+                            g.append(tPct);
+                        }
+
+                        svg.append(g);
+                    }
+
+                    startAngle = endAngle;
+                });
+
+                // ── Donut hole with centre total ──────────────────────────
+                const hole = svgEl('circle');
+                hole.setAttribute('cx', '110');
+                hole.setAttribute('cy', '110');
+                hole.setAttribute('r', '52');
+                hole.setAttribute('class', 'stats-donut-hole');
+                svg.append(hole);
+
+                const cVal = svgEl('text');
+                cVal.setAttribute('x', '110');
+                cVal.setAttribute('y', '106');
+                cVal.setAttribute('text-anchor', 'middle');
+                cVal.setAttribute('dominant-baseline', 'middle');
+                cVal.setAttribute('class', 'stats-donut__center-value');
+                cVal.textContent = String(total);
+                svg.append(cVal);
+
+                const cLbl = svgEl('text');
+                cLbl.setAttribute('x', '110');
+                cLbl.setAttribute('y', '122');
+                cLbl.setAttribute('text-anchor', 'middle');
+                cLbl.setAttribute('dominant-baseline', 'middle');
+                cLbl.setAttribute('class', 'stats-donut__center-label');
+                cLbl.textContent = 'games';
+                svg.append(cLbl);
+            };
+
+            const renderRankDistribution = data => {
+                const root = statisticsRoot.querySelector('[data-rank-chart]');
+                if (!root || !Array.isArray(data)) {
+                    return;
+                }
+
+                root.innerHTML = '';
+                const normalized = data.map(item => ({
+                    label: String(item.label || ''),
+                    count: toNumber(item.count),
+                }));
+                const maxCount = normalized.reduce((max, item) => Math.max(max, item.count), 0);
+                const totalRank = normalized.reduce((sum, item) => sum + item.count, 0);
+
+                if (maxCount <= 0) {
+                    const empty = document.createElement('p');
+                    empty.className = 'empty-state';
+                    empty.textContent = 'No rank data available yet.';
+                    root.append(empty);
+                    return;
+                }
+
+                normalized.forEach((item, index) => {
+                    const pct = totalRank > 0 ? Math.round((item.count / totalRank) * 100) : 0;
+                    const color = rankColors[index % rankColors.length];
+
+                    const row = document.createElement('div');
+                    row.className = 'stats-rank-row';
+
+                    const label = document.createElement('span');
+                    label.className = 'stats-rank-row__label';
+                    label.textContent = item.label;
+
+                    const barTrack = document.createElement('div');
+                    barTrack.className = 'stats-rank-row__track';
+
+                    const barFill = document.createElement('span');
+                    barFill.className = 'stats-rank-row__fill';
+                    barFill.style.setProperty('--bar-target', `${Math.max(4, (item.count / maxCount) * 100)}%`);
+                    barFill.style.background = `linear-gradient(90deg, ${color}cc, ${color})`;
+                    barTrack.append(barFill);
+
+                    const value = document.createElement('span');
+                    value.className = 'stats-rank-row__value';
+                    value.innerHTML = `${item.count} <span class="stats-rank-row__pct">(${pct}%)</span>`;
+
+                    row.append(label, barTrack, value);
+                    root.append(row);
+                });
+            };
+
+            renderPieChart('complexity', stats.complexity || []);
+            renderPieChart('bestWith', stats.bestWith || []);
+            renderPieChart('duration', stats.duration || []);
+            renderPieChart('hearts', stats.hearts || []);
+            renderRankDistribution(stats.rankDistribution || []);
+        }
+    }
+
     // ── Collection filters ─────────────────────────────────────────────────
     const collectionGrid = document.querySelector('[data-collection-grid]');
     if (collectionGrid) {

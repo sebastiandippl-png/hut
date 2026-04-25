@@ -116,7 +116,7 @@ $collectionOwners = trim((string) ($game['bgg_owned_by'] ?? ''));
             <?php if (!empty(\Hut\Auth::user()['is_admin']) && $isInHut): ?>
                 <form method="POST" action="/admin/games/<?= (int) $game['id'] ?>/remove-from-hut">
                     <input type="hidden" name="_csrf" value="<?= htmlspecialchars(\Hut\Auth::csrfToken()) ?>">
-                    <button class="btn btn--danger" type="submit">Remove From Hut Menu (All Users)</button>
+                    <button class="btn btn--danger" type="submit">Remove From Hut Collection (All Users)</button>
                 </form>
             <?php endif; ?>
 

@@ -75,10 +75,10 @@ function linkifyResidentNames(string $names, array $map): string
             <input type="hidden" value="" data-collection-filter="maxplaytime">
             <div class="filter-segs collection-filters__segs" data-collection-filter-group="maxplaytime">
                 <button class="filter-seg filter-seg--active" type="button" data-value="">Any</button>
-                <button class="filter-seg" type="button" data-value="30">≤ 30 min</button>
-                <button class="filter-seg" type="button" data-value="60">≤ 60 min</button>
-                <button class="filter-seg" type="button" data-value="90">≤ 90 min</button>
-                <button class="filter-seg" type="button" data-value="120">≤ 120 min</button>
+                <button class="filter-seg" type="button" data-value="0-30">0–30 min</button>
+                <button class="filter-seg" type="button" data-value="31-60">31–60 min</button>
+                <button class="filter-seg" type="button" data-value="61-90">61–90 min</button>
+                <button class="filter-seg" type="button" data-value="91-120">91–120 min</button>
                 <button class="filter-seg" type="button" data-value="121+">&gt; 120 min</button>
             </div>
         </div>

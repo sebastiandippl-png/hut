@@ -678,7 +678,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (mptSel === '121+') {
                         show = show && (mpt > 120);
                     } else {
-                        show = show && (mpt > 0 && mpt <= Number(mptSel));
+                        const [mptMin, mptMax] = mptSel.split('-').map(Number);
+                        show = show && (mpt >= mptMin && mpt <= mptMax);
                     }
                 }
                 if (complexityFilter === 'light')   { show = show && (cx > 0 && cx <= 1.8); }

@@ -679,6 +679,121 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // ── Landing page: complexity donut ─────────────────────────────────────
+    const landingRoot = document.querySelector('[data-landing-page]');
+    if (landingRoot) {
+        const complexityCard = landingRoot.querySelector('[data-landing-complexity]');
+        if (complexityCard) {
+            let complexityData = null;
+            try {
+                complexityData = JSON.parse(complexityCard.getAttribute('data-landing-complexity') || '[]');
+            } catch (e) {
+                console.error('Could not parse landing complexity data', e);
+            }
+
+            if (Array.isArray(complexityData) && complexityData.length > 0) {
+                const ns      = 'http://www.w3.org/2000/svg';
+                const svgEl   = tag => document.createElementNS(ns, tag);
+                const toNum   = v => Number.isFinite(Number(v)) ? Number(v) : 0;
+                const colors  = ['#6ab187', '#e3b04b', '#d36a46', '#a0a9be'];
+
+                const polarToCartesian = (cx, cy, r, rad) => ({
+                    x: cx + Math.cos(rad) * r,
+                    y: cy + Math.sin(rad) * r,
+                });
+
+                const arcPath = (cx, cy, r, startAngle, endAngle) => {
+                    const s = polarToCartesian(cx, cy, r, startAngle);
+                    const e = polarToCartesian(cx, cy, r, endAngle);
+                    const large = endAngle - startAngle > Math.PI ? 1 : 0;
+                    return [`M ${cx} ${cy}`, `L ${s.x} ${s.y}`, `A ${r} ${r} 0 ${large} 1 ${e.x} ${e.y}`, 'Z'].join(' ');
+                };
+
+                const svg    = complexityCard.querySelector('[data-landing-pie-chart="complexity"]');
+                const legend = complexityCard.querySelector('[data-landing-pie-legend="complexity"]');
+                if (svg && legend) {
+                    const normalized = complexityData.map(item => ({ label: String(item.label || ''), count: toNum(item.count) }));
+                    const total = normalized.reduce((sum, item) => sum + item.count, 0);
+                    let startAngle = -Math.PI / 2;
+
+                    normalized.forEach((slice, index) => {
+                        const color = colors[index % colors.length];
+                        const pct   = total > 0 ? Math.round((slice.count / total) * 100) : 0;
+
+                        const li = document.createElement('li');
+                        li.className = 'stats-legend__item';
+                        li.innerHTML = [
+                            `<span class="stats-legend__swatch" style="background:${color}"></span>`,
+                            `<span class="stats-legend__label">${slice.label}</span>`,
+                            `<span class="stats-legend__count">${slice.count} <span class="stats-legend__pct">(${pct}%)</span></span>`,
+                        ].join('');
+                        legend.append(li);
+
+                        if (slice.count <= 0) return;
+
+                        const angle    = (slice.count / total) * Math.PI * 2;
+                        const endAngle = startAngle + angle;
+
+                        const path = svgEl('path');
+                        path.setAttribute('d', arcPath(110, 110, 98, startAngle, endAngle));
+                        path.setAttribute('fill', color);
+                        path.setAttribute('class', 'stats-pie__slice');
+                        path.setAttribute('aria-label', `${slice.label}: ${slice.count} (${pct}%)`);
+                        svg.append(path);
+
+                        const midAngle = startAngle + angle / 2;
+                        const lp = polarToCartesian(110, 110, 73, midAngle);
+                        const showLabel = angle >= 0.22;
+                        const showPct   = angle >= 0.42;
+                        if (showLabel) {
+                            const g = svgEl('g');
+                            g.setAttribute('class', 'stats-pie__label-group');
+                            g.setAttribute('text-anchor', 'middle');
+                            const tCount = svgEl('text');
+                            tCount.setAttribute('x', String(lp.x));
+                            tCount.setAttribute('y', showPct ? String(lp.y - 7) : String(lp.y));
+                            tCount.setAttribute('dominant-baseline', 'middle');
+                            tCount.setAttribute('class', 'stats-pie__count');
+                            tCount.textContent = String(slice.count);
+                            g.append(tCount);
+                            if (showPct) {
+                                const tPct = svgEl('text');
+                                tPct.setAttribute('x', String(lp.x));
+                                tPct.setAttribute('y', String(lp.y + 8));
+                                tPct.setAttribute('dominant-baseline', 'middle');
+                                tPct.setAttribute('class', 'stats-pie__pct');
+                                tPct.textContent = `${pct}%`;
+                                g.append(tPct);
+                            }
+                            svg.append(g);
+                        }
+                        startAngle = endAngle;
+                    });
+
+                    // Donut hole
+                    const hole = svgEl('circle');
+                    hole.setAttribute('cx', '110'); hole.setAttribute('cy', '110'); hole.setAttribute('r', '52');
+                    hole.setAttribute('class', 'stats-donut-hole');
+                    svg.append(hole);
+
+                    const cVal = svgEl('text');
+                    cVal.setAttribute('x', '110'); cVal.setAttribute('y', '106');
+                    cVal.setAttribute('text-anchor', 'middle'); cVal.setAttribute('dominant-baseline', 'middle');
+                    cVal.setAttribute('class', 'stats-donut__center-value');
+                    cVal.textContent = String(total);
+                    svg.append(cVal);
+
+                    const cLbl = svgEl('text');
+                    cLbl.setAttribute('x', '110'); cLbl.setAttribute('y', '122');
+                    cLbl.setAttribute('text-anchor', 'middle'); cLbl.setAttribute('dominant-baseline', 'middle');
+                    cLbl.setAttribute('class', 'stats-donut__center-label');
+                    cLbl.textContent = 'games';
+                    svg.append(cLbl);
+                }
+            }
+        }
+    }
+
     // ── Collection filters ─────────────────────────────────────────────────
     const collectionGrid = document.querySelector('[data-collection-grid]');
     if (collectionGrid) {

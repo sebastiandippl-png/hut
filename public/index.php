@@ -126,7 +126,7 @@ $router->get('/auth/google',        [AuthController::class, 'googleRedirect']);
 $router->get('/auth/google/callback', [AuthController::class, 'googleCallback']);
 
 // ─── Game routes (require login) ────────────────────────────────────────────
-$router->get('/',                   [GameController::class, 'collection']);
+$router->get('/',                   [GameController::class, 'landing']);
 $router->get('/games',              [GameController::class, 'browse']);
 $router->get('/games/statistics',   [GameController::class, 'statistics']);
 $router->get('/games/suggestions',  [GameController::class, 'suggestions']);

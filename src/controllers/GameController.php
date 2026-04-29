@@ -138,6 +138,94 @@ class GameController
         exit;
     }
 
+    public static function landing(array $params): void
+    {
+        Auth::requireLogin();
+
+        $pdo = \Hut\Database::getInstance();
+
+        // Selected games count + complexity buckets (reuse same query as statistics)
+        $stmt = $pdo->query(
+            'SELECT g.id, bt.averageweight
+             FROM games g
+             LEFT JOIN bgg_thing bt ON bt.bgg_id = g.id
+             WHERE EXISTS (
+                 SELECT 1 FROM user_games ug
+                 WHERE ug.game_id = g.id AND ug.selected = 1
+             )'
+        );
+        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $totalGames = count($rows);
+
+        $complexityBuckets = self::labelsToBuckets(['Light', 'Medium', 'Complex', 'Unknown']);
+        foreach ($rows as $row) {
+            $complexity = isset($row['averageweight']) && $row['averageweight'] !== null
+                ? (float) $row['averageweight']
+                : null;
+            if ($complexity === null || $complexity <= 0.0) {
+                $complexityBuckets['Unknown']++;
+            } elseif ($complexity <= 1.8) {
+                $complexityBuckets['Light']++;
+            } elseif ($complexity <= 3.0) {
+                $complexityBuckets['Medium']++;
+            } else {
+                $complexityBuckets['Complex']++;
+            }
+        }
+        $complexityData = self::toChartData($complexityBuckets);
+
+        // Latest global activity (approved users only)
+        $latestAdded   = \Hut\Resident::latestAddedGameGlobally();
+        $latestHearted = \Hut\Resident::latestHeartedGameGlobally();
+
+        // Most hearted game overall
+        $mostHeartedStmt = $pdo->query(
+            'SELECT g.id, g.name, COUNT(DISTINCT v.user_id) AS hearts
+             FROM votes v
+             JOIN games g ON g.id = v.game_id
+             JOIN users u ON u.id = v.user_id
+             WHERE u.is_approved = 1
+             GROUP BY g.id, g.name
+             ORDER BY hearts DESC, g.name ASC
+             LIMIT 1'
+        );
+        $mostHearted = $mostHeartedStmt->fetch(\PDO::FETCH_ASSOC) ?: null;
+        if ($mostHearted !== null) {
+            $mostHearted['hearted_by'] = \Hut\Vote::heartedBy((int) $mostHearted['id']);
+        }
+
+        // Preload thumbnails for activity cards
+        $thumbIds = array_filter([
+            $latestAdded   !== null ? (int) $latestAdded['id']   : 0,
+            $latestHearted !== null ? (int) $latestHearted['id'] : 0,
+            $mostHearted   !== null ? (int) $mostHearted['id']   : 0,
+        ]);
+        if (!empty($thumbIds)) {
+            BggThingFetcher::ensureForPage(array_values($thumbIds));
+        }
+
+        // Weather – current conditions only
+        $weatherToday = null;
+        $weatherRaw   = \Hut\WeatherForecast::get();
+        if ($weatherRaw !== null) {
+            $current = $weatherRaw['current'] ?? [];
+            $daily   = $weatherRaw['daily']   ?? [];
+            $isDay   = (bool) ($current['is_day'] ?? 1);
+            $wmoCode = (int)  ($current['weather_code'] ?? 0);
+            $wmoInfo = \Hut\WeatherForecast::wmoInfo($wmoCode, $isDay);
+            $weatherToday = [
+                'temp'      => $current['temperature_2m']      ?? null,
+                'feels_like'=> $current['apparent_temperature'] ?? null,
+                'temp_max'  => $daily['temperature_2m_max'][0] ?? null,
+                'temp_min'  => $daily['temperature_2m_min'][0] ?? null,
+                'label'     => $wmoInfo['label'],
+                'icon'      => $wmoInfo['icon'],
+            ];
+        }
+
+        require __DIR__ . '/../../templates/home/landing.php';
+    }
+
     public static function collection(array $params): void
     {
         Auth::requireLogin();

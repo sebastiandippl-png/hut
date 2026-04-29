@@ -113,4 +113,44 @@ class Resident
 
         return $stmt->fetchAll();
     }
+
+    /**
+     * Returns the most recently added game to the hut collection across all approved users.
+     */
+    public static function latestAddedGameGlobally(): ?array
+    {
+        $pdo = Database::getInstance();
+        $stmt = $pdo->query(
+            'SELECT g.id, g.name, u.name AS added_by, ug.created_at AS added_at
+             FROM user_games ug
+             JOIN games g ON g.id = ug.game_id
+             JOIN users u ON u.id = ug.user_id
+             WHERE ug.selected = 1 AND u.is_approved = 1
+             ORDER BY ug.created_at DESC, ug.id DESC
+             LIMIT 1'
+        );
+
+        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+        return $row ?: null;
+    }
+
+    /**
+     * Returns the most recently hearted game across all approved users.
+     */
+    public static function latestHeartedGameGlobally(): ?array
+    {
+        $pdo = Database::getInstance();
+        $stmt = $pdo->query(
+            'SELECT g.id, g.name, u.name AS hearted_by, v.created_at AS hearted_at
+             FROM votes v
+             JOIN games g ON g.id = v.game_id
+             JOIN users u ON u.id = v.user_id
+             WHERE u.is_approved = 1
+             ORDER BY v.created_at DESC, v.id DESC
+             LIMIT 1'
+        );
+
+        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+        return $row ?: null;
+    }
 }

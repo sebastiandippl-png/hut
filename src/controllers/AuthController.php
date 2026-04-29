@@ -12,7 +12,7 @@ class AuthController
     public static function showLogin(array $params): void
     {
         if (Auth::user()) {
-            header('Location: ' . \Hut\Url::to('/games')); exit;
+            header('Location: ' . \Hut\Url::to('/')); exit;
         }
         require __DIR__ . '/../../templates/login.php';
     }
@@ -36,13 +36,13 @@ class AuthController
         }
 
         Auth::login($user);
-        header('Location: ' . \Hut\Url::to('/games')); exit;
+        header('Location: ' . \Hut\Url::to('/')); exit;
     }
 
     public static function showRegister(array $params): void
     {
         if (Auth::user()) {
-            header('Location: ' . \Hut\Url::to('/games')); exit;
+            header('Location: ' . \Hut\Url::to('/')); exit;
         }
         require __DIR__ . '/../../templates/register.php';
     }
@@ -80,7 +80,7 @@ class AuthController
                 header('Location: ' . \Hut\Url::to('/login')); exit;
             }
             Auth::login($user);
-            header('Location: ' . \Hut\Url::to('/games')); exit;
+            header('Location: ' . \Hut\Url::to('/')); exit;
         } catch (\RuntimeException $e) {
             $_SESSION['flash_error'] = $e->getMessage();
             header('Location: ' . \Hut\Url::to('/register')); exit;
@@ -141,7 +141,7 @@ class AuthController
                 header('Location: ' . \Hut\Url::to('/login')); exit;
             }
             Auth::login($user);
-            header('Location: ' . \Hut\Url::to('/games')); exit;
+            header('Location: ' . \Hut\Url::to('/')); exit;
         } catch (\Exception $e) {
             error_log('Google OAuth callback failed: ' . $e->getMessage());
             $_SESSION['flash_error'] = 'Google login failed.';

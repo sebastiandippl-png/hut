@@ -6,7 +6,7 @@ $user = Auth::user();
 $currentPath = strtok((string) ($_SERVER['REQUEST_URI'] ?? '/'), '?') ?: '/';
 
 $isGamesSuggest = $currentPath === '/games';
-$isGamesCollection = $currentPath === '/' || $currentPath === '/collection';
+$isGamesCollection = $currentPath === '/collection';
 $isGamesStatistics = $currentPath === '/games/statistics';
 $isGamesGroupActive = $isGamesSuggest || $isGamesCollection || $isGamesStatistics || str_starts_with($currentPath, '/games/');
 

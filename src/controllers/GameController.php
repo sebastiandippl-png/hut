@@ -204,6 +204,15 @@ class GameController
             BggThingFetcher::ensureForPage(array_values($thumbIds));
         }
 
+        // Random link from the links page
+        $randomLinkStmt = $pdo->query(
+            'SELECT id, title, url, description, preview_image_url
+             FROM links
+             ORDER BY RANDOM()
+             LIMIT 1'
+        );
+        $randomLink = $randomLinkStmt->fetch(\PDO::FETCH_ASSOC) ?: null;
+
         // Weather – current conditions only
         $weatherToday = null;
         $weatherRaw   = \Hut\WeatherForecast::get();

@@ -184,6 +184,30 @@ $complexityJson = is_string($complexityJson) ? $complexityJson : '[]';
         <?php endif; ?>
     </a>
 
+    <?php /* ── Card 6: Random link ─────────────────────────────────────── */ ?>
+    <?php if ($randomLink !== null): ?>
+    <a href="<?= htmlspecialchars((string) $randomLink['url']) ?>" class="landing-card landing-card--link landing-card--randomlink"
+       target="_blank" rel="noopener noreferrer"
+       aria-label="Open link: <?= htmlspecialchars((string) $randomLink['title']) ?>">
+        <h2 class="landing-card__heading">🔗 Discover <span class="landing-card__arrow" aria-hidden="true">↗</span></h2>
+        <div class="landing-activity">
+            <?php if (!empty($randomLink['preview_image_url'])): ?>
+                <img class="landing-activity__thumb landing-activity__thumb--link"
+                     src="<?= htmlspecialchars((string) $randomLink['preview_image_url']) ?>"
+                     alt=""
+                     loading="lazy">
+            <?php endif; ?>
+            <div class="landing-activity__info">
+                <span class="landing-activity__name"><?= htmlspecialchars((string) $randomLink['title']) ?></span>
+                <?php if (!empty(trim((string) $randomLink['description']))): ?>
+                    <p class="landing-activity__meta"><?= htmlspecialchars((string) $randomLink['description']) ?></p>
+                <?php endif; ?>
+                <p class="landing-activity__date landing-link__domain"><?= htmlspecialchars((string) (parse_url((string) $randomLink['url'], PHP_URL_HOST) ?: '')) ?></p>
+            </div>
+        </div>
+    </a>
+    <?php endif; ?>
+
     <?php /* ── Card 5: Complexity Donut ─────────────────────────────────── */ ?>
     <a href="/games/statistics" class="landing-card landing-card--donut landing-card--link" aria-label="View full collection statistics"
        data-landing-complexity='<?= htmlspecialchars($complexityJson, ENT_QUOTES, 'UTF-8') ?>'>

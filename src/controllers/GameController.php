@@ -205,10 +205,12 @@ class GameController
         }
 
         // Random link from the links page
+        $driver = (string) $pdo->getAttribute(\PDO::ATTR_DRIVER_NAME);
+        $randomFunc = $driver === 'mysql' ? 'RAND()' : 'RANDOM()';
         $randomLinkStmt = $pdo->query(
             'SELECT id, title, url, description, preview_image_url
              FROM links
-             ORDER BY RANDOM()
+             ORDER BY ' . $randomFunc . '
              LIMIT 1'
         );
         $randomLink = $randomLinkStmt->fetch(\PDO::FETCH_ASSOC) ?: null;

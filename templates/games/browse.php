@@ -2,7 +2,7 @@
 
 <div class="page-header">
     <h1>Suggest Games</h1>
-    <p class="page-header__sub">Get inspired by a random choice of games that are owned by a fellow hut lover. Or search across BoardGameGeek to find a game for the menu…</p>
+    <p class="page-header__sub">Get inspired by a random choice of games that are owned by a fellow hut lover. Or search across BoardGameGeek to find a game for the hut collection…</p>
 </div>
 
 <form class="filters" method="GET" action="/games" data-browse-filters>

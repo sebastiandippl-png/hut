@@ -35,7 +35,7 @@ class UserGame
     }
 
     /**
-     * Remove a game from the hut menu for all users.
+     * Remove a game from the hut collection for all users.
      */
     public static function clearForAll(int $gameId): void
     {

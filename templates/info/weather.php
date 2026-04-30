@@ -185,9 +185,14 @@ if (!is_string($tripWeather2021Json)) {
                         <span class="weather-trip-compare__card-label">Total rain (mm)</span>
                         <span class="weather-trip-compare__card-value"><?= isset($tripStats[$year]['rain']) ? number_format($tripStats[$year]['rain'], 1) : '—' ?></span>
                     </div>
-                    <div class="weather-trip-compare__card-row<?= $summary['sun'] == $year ? ' weather-trip-compare__winner' : '' ?>">
-                        <span class="weather-trip-compare__card-label">Total precip hours</span>
-                        <span class="weather-trip-compare__card-value"><?= isset($tripStats[$year]['sun']) ? number_format($tripStats[$year]['sun'], 1) : '—' ?></span>
+                    <div class="weather-trip-compare__card-row<?= (isset($mostSunYear) && $mostSunYear == $year) ? ' weather-trip-compare__winner' : '' ?>">
+                        <span class="weather-trip-compare__card-label">Sunshine hours</span>
+                        <span class="weather-trip-compare__card-value">
+                            <?= isset($tripStats[$year]['sun']) ? number_format($tripStats[$year]['sun'], 1) . ' h' : '—' ?>
+                            <?php if (isset($mostSunYear) && $mostSunYear == $year): ?>
+                                <span title="Most sunshine hours" style="color:#e6b800; font-size:1.1em; margin-left:0.3em;">★</span>
+                            <?php endif; ?>
+                        </span>
                     </div>
                 </div>
             <?php endforeach; ?>
@@ -232,6 +237,7 @@ if (!is_string($tripWeather2021Json)) {
                 <span class="weather-trip__legend-item"><span class="weather-trip__swatch weather-trip__swatch--max"></span> Max temperature</span>
                 <span class="weather-trip__legend-item"><span class="weather-trip__swatch weather-trip__swatch--min"></span> Min temperature</span>
                 <span class="weather-trip__legend-item"><span class="weather-trip__swatch weather-trip__swatch--precip"></span> Precipitation (mm)</span>
+                <span class="weather-trip__legend-item"><span class="weather-trip__swatch weather-trip__swatch--sun"></span> Sunshine (h)</span>
                 <span class="weather-trip__legend-item"><span class="weather-trip__swatch weather-trip__swatch--icon"></span> Meteocon per day</span>
             </div>
         <?php endif; ?>
@@ -261,6 +267,7 @@ if (!is_string($tripWeather2021Json)) {
                 <span class="weather-trip__legend-item"><span class="weather-trip__swatch weather-trip__swatch--max"></span> Max temperature</span>
                 <span class="weather-trip__legend-item"><span class="weather-trip__swatch weather-trip__swatch--min"></span> Min temperature</span>
                 <span class="weather-trip__legend-item"><span class="weather-trip__swatch weather-trip__swatch--precip"></span> Precipitation (mm)</span>
+                <span class="weather-trip__legend-item"><span class="weather-trip__swatch weather-trip__swatch--sun"></span> Sunshine (h)</span>
                 <span class="weather-trip__legend-item"><span class="weather-trip__swatch weather-trip__swatch--icon"></span> Meteocon per day</span>
             </div>
         <?php endif; ?>
@@ -290,6 +297,7 @@ if (!is_string($tripWeather2021Json)) {
                 <span class="weather-trip__legend-item"><span class="weather-trip__swatch weather-trip__swatch--max"></span> Max temperature</span>
                 <span class="weather-trip__legend-item"><span class="weather-trip__swatch weather-trip__swatch--min"></span> Min temperature</span>
                 <span class="weather-trip__legend-item"><span class="weather-trip__swatch weather-trip__swatch--precip"></span> Precipitation (mm)</span>
+                <span class="weather-trip__legend-item"><span class="weather-trip__swatch weather-trip__swatch--sun"></span> Sunshine (h)</span>
                 <span class="weather-trip__legend-item"><span class="weather-trip__swatch weather-trip__swatch--icon"></span> Meteocon per day</span>
             </div>
         <?php endif; ?>
@@ -319,6 +327,7 @@ if (!is_string($tripWeather2021Json)) {
                 <span class="weather-trip__legend-item"><span class="weather-trip__swatch weather-trip__swatch--max"></span> Max temperature</span>
                 <span class="weather-trip__legend-item"><span class="weather-trip__swatch weather-trip__swatch--min"></span> Min temperature</span>
                 <span class="weather-trip__legend-item"><span class="weather-trip__swatch weather-trip__swatch--precip"></span> Precipitation (mm)</span>
+                <span class="weather-trip__legend-item"><span class="weather-trip__swatch weather-trip__swatch--sun"></span> Sunshine (h)</span>
                 <span class="weather-trip__legend-item"><span class="weather-trip__swatch weather-trip__swatch--icon"></span> Meteocon per day</span>
             </div>
         <?php endif; ?>
@@ -348,6 +357,7 @@ if (!is_string($tripWeather2021Json)) {
                 <span class="weather-trip__legend-item"><span class="weather-trip__swatch weather-trip__swatch--max"></span> Max temperature</span>
                 <span class="weather-trip__legend-item"><span class="weather-trip__swatch weather-trip__swatch--min"></span> Min temperature</span>
                 <span class="weather-trip__legend-item"><span class="weather-trip__swatch weather-trip__swatch--precip"></span> Precipitation (mm)</span>
+                <span class="weather-trip__legend-item"><span class="weather-trip__swatch weather-trip__swatch--sun"></span> Sunshine (h)</span>
                 <span class="weather-trip__legend-item"><span class="weather-trip__swatch weather-trip__swatch--icon"></span> Meteocon per day</span>
             </div>
         <?php endif; ?>

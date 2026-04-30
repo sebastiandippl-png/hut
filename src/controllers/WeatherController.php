@@ -111,9 +111,10 @@ class WeatherController
                     'icon_url'     => WeatherForecast::iconUrl($info['icon']),
                     'temp_max'     => $daily['temperature_2m_max'][$i] ?? null,
                     'temp_min'     => $daily['temperature_2m_min'][$i] ?? null,
-                    'precip_sum'   => $daily['precipitation_sum'][$i] ?? null,
-                    'precip_hours' => $daily['precipitation_hours'][$i] ?? null,
-                    'wind_max'     => $daily['wind_speed_10m_max'][$i] ?? null,
+                    'precip_sum'      => $daily['precipitation_sum'][$i] ?? null,
+                    'precip_hours'    => $daily['precipitation_hours'][$i] ?? null,
+                    'sunshine_hours'  => isset($daily['sunshine_duration'][$i]) ? (float)$daily['sunshine_duration'][$i] / 3600.0 : null,
+                    'wind_max'        => $daily['wind_speed_10m_max'][$i] ?? null,
                 ];
             }
 
@@ -139,9 +140,10 @@ class WeatherController
                     'icon_url'     => WeatherForecast::iconUrl($info['icon']),
                     'temp_max'     => $daily['temperature_2m_max'][$i] ?? null,
                     'temp_min'     => $daily['temperature_2m_min'][$i] ?? null,
-                    'precip_sum'   => $daily['precipitation_sum'][$i] ?? null,
-                    'precip_hours' => $daily['precipitation_hours'][$i] ?? null,
-                    'wind_max'     => $daily['wind_speed_10m_max'][$i] ?? null,
+                    'precip_sum'      => $daily['precipitation_sum'][$i] ?? null,
+                    'precip_hours'    => $daily['precipitation_hours'][$i] ?? null,
+                    'sunshine_hours'  => isset($daily['sunshine_duration'][$i]) ? (float)$daily['sunshine_duration'][$i] / 3600.0 : null,
+                    'wind_max'        => $daily['wind_speed_10m_max'][$i] ?? null,
                 ];
             }
 
@@ -167,9 +169,10 @@ class WeatherController
                     'icon_url'     => WeatherForecast::iconUrl($info['icon']),
                     'temp_max'     => $daily['temperature_2m_max'][$i] ?? null,
                     'temp_min'     => $daily['temperature_2m_min'][$i] ?? null,
-                    'precip_sum'   => $daily['precipitation_sum'][$i] ?? null,
-                    'precip_hours' => $daily['precipitation_hours'][$i] ?? null,
-                    'wind_max'     => $daily['wind_speed_10m_max'][$i] ?? null,
+                    'precip_sum'      => $daily['precipitation_sum'][$i] ?? null,
+                    'precip_hours'    => $daily['precipitation_hours'][$i] ?? null,
+                    'sunshine_hours'  => isset($daily['sunshine_duration'][$i]) ? (float)$daily['sunshine_duration'][$i] / 3600.0 : null,
+                    'wind_max'        => $daily['wind_speed_10m_max'][$i] ?? null,
                 ];
             }
 
@@ -195,9 +198,10 @@ class WeatherController
                     'icon_url'     => WeatherForecast::iconUrl($info['icon']),
                     'temp_max'     => $daily['temperature_2m_max'][$i] ?? null,
                     'temp_min'     => $daily['temperature_2m_min'][$i] ?? null,
-                    'precip_sum'   => $daily['precipitation_sum'][$i] ?? null,
-                    'precip_hours' => $daily['precipitation_hours'][$i] ?? null,
-                    'wind_max'     => $daily['wind_speed_10m_max'][$i] ?? null,
+                    'precip_sum'      => $daily['precipitation_sum'][$i] ?? null,
+                    'precip_hours'    => $daily['precipitation_hours'][$i] ?? null,
+                    'sunshine_hours'  => isset($daily['sunshine_duration'][$i]) ? (float)$daily['sunshine_duration'][$i] / 3600.0 : null,
+                    'wind_max'        => $daily['wind_speed_10m_max'][$i] ?? null,
                 ];
             }
 
@@ -223,9 +227,10 @@ class WeatherController
                     'icon_url'     => WeatherForecast::iconUrl($info['icon']),
                     'temp_max'     => $daily['temperature_2m_max'][$i] ?? null,
                     'temp_min'     => $daily['temperature_2m_min'][$i] ?? null,
-                    'precip_sum'   => $daily['precipitation_sum'][$i] ?? null,
-                    'precip_hours' => $daily['precipitation_hours'][$i] ?? null,
-                    'wind_max'     => $daily['wind_speed_10m_max'][$i] ?? null,
+                    'precip_sum'      => $daily['precipitation_sum'][$i] ?? null,
+                    'precip_hours'    => $daily['precipitation_hours'][$i] ?? null,
+                    'sunshine_hours'  => isset($daily['sunshine_duration'][$i]) ? (float)$daily['sunshine_duration'][$i] / 3600.0 : null,
+                    'wind_max'        => $daily['wind_speed_10m_max'][$i] ?? null,
                 ];
             }
 
@@ -244,6 +249,7 @@ class WeatherController
         ];
         $tripStats = [];
         $overlayData = [];
+        $sunHoursByYear = [];
         foreach ($tripYears as $year => $rows) {
             $coldest = null;
             $warmest = null;
@@ -265,8 +271,8 @@ class WeatherController
                 if (isset($row['precip_sum'])) {
                     $rain += (float)$row['precip_sum'];
                 }
-                if (isset($row['precip_hours'])) {
-                    $sun += (float)$row['precip_hours'];
+                if (isset($row['sunshine_hours'])) {
+                    $sun += (float)$row['sunshine_hours'];
                 }
                 if ($wind !== null) {
                     $avgWinds[] = $wind;
@@ -279,6 +285,7 @@ class WeatherController
                     $avgTemps[] = null;
                 }
             }
+            // ...existing code for $tripStats[$year] and $overlayData[$year]...
             $avgTemp = null;
             $avgValid = array_filter($avgTemps, static fn($v) => $v !== null);
             if (count($avgValid) > 0) {
@@ -301,6 +308,14 @@ class WeatherController
             ];
             $overlayData[$year] = $avgTemps;
         }
+        // Find year with most sunshine hours
+        $mostSunYear = null;
+        foreach ($tripStats as $year => $s) {
+            if ($mostSunYear === null || $s['sun'] > $tripStats[$mostSunYear]['sun']) {
+                $mostSunYear = $year;
+            }
+        }
+
         // Find winners (coldest/warmest = lowest/highest avg temp, windiest = highest avg wind)
         $summary = [
             'coldest' => null,

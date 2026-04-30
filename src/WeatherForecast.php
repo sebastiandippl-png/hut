@@ -518,6 +518,7 @@ class WeatherForecast
                 'temperature_2m_min',
                 'precipitation_sum',
                 'precipitation_hours',
+                'sunshine_duration',
                 'wind_speed_10m_max',
             ]),
         ]);

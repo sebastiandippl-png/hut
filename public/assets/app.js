@@ -991,6 +991,112 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // ── Trip comparison metric bars (5-year) ─────────────────────────────
+    document.querySelectorAll('[data-trip-compare-metrics]').forEach(compareRoot => {
+        const rawData = compareRoot.getAttribute('data-trip-compare-metrics') || '{}';
+        const barsRoot = compareRoot.querySelector('[data-trip-compare-bars]');
+        const metaRoot = compareRoot.querySelector('[data-trip-compare-metric-meta]');
+        const buttons = Array.from(compareRoot.querySelectorAll('[data-trip-compare-metric-btn]'));
+        let metrics = {};
+
+        try {
+            const parsed = JSON.parse(rawData);
+            if (parsed && typeof parsed === 'object') {
+                metrics = parsed;
+            }
+        } catch (error) {
+            console.error('Could not parse trip comparison metric data', error);
+        }
+
+        if (!barsRoot || !metaRoot || buttons.length === 0 || Object.keys(metrics).length === 0) {
+            return;
+        }
+
+        const formatValue = (value, unit, decimals) => {
+            if (!Number.isFinite(Number(value))) {
+                return '—';
+            }
+            return `${Number(value).toFixed(decimals)} ${unit}`;
+        };
+
+        const renderMetric = metricKey => {
+            const metric = metrics[metricKey];
+            if (!metric || !Array.isArray(metric.rows)) {
+                return;
+            }
+
+            const validValues = metric.rows
+                .map(row => Number(row.value))
+                .filter(value => Number.isFinite(value));
+            const maxValue = validValues.length > 0 ? Math.max(...validValues) : 1;
+
+            const sortedRows = [...metric.rows].sort((a, b) => {
+                const aVal = Number(a.value);
+                const bVal = Number(b.value);
+                const aOk = Number.isFinite(aVal);
+                const bOk = Number.isFinite(bVal);
+                if (!aOk && !bOk) return 0;
+                if (!aOk) return 1;
+                if (!bOk) return -1;
+                return metric.higherIsBetter ? (bVal - aVal) : (aVal - bVal);
+            });
+
+            barsRoot.innerHTML = '';
+            sortedRows.forEach(row => {
+                const value = Number(row.value);
+                const hasValue = Number.isFinite(value);
+                const width = hasValue && maxValue > 0 ? Math.max(4, Math.round((value / maxValue) * 100)) : 0;
+                const isWinner = String(row.year) === String(metric.winner);
+
+                const rowEl = document.createElement('div');
+                rowEl.className = `weather-trip-compare__bar-row${isWinner ? ' is-winner' : ''}`;
+
+                const yearEl = document.createElement('span');
+                yearEl.className = 'weather-trip-compare__bar-year';
+                yearEl.textContent = String(row.year);
+
+                const trackEl = document.createElement('div');
+                trackEl.className = 'weather-trip-compare__bar-track';
+
+                const fillEl = document.createElement('span');
+                fillEl.className = 'weather-trip-compare__bar-fill';
+                fillEl.style.width = `${width}%`;
+                trackEl.append(fillEl);
+
+                const valueEl = document.createElement('span');
+                valueEl.className = 'weather-trip-compare__bar-value';
+                valueEl.textContent = formatValue(value, metric.unit, Number(metric.decimals ?? 1));
+
+                rowEl.append(yearEl, trackEl, valueEl);
+                barsRoot.append(rowEl);
+            });
+
+            const winnerText = metric.winner ? `Winner: ${metric.winner}` : 'Winner: —';
+            const directionText = metric.higherIsBetter ? 'higher is better' : 'lower is better';
+            metaRoot.textContent = `${metric.label} (${directionText}) · ${winnerText}`;
+
+            buttons.forEach(button => {
+                const active = button.getAttribute('data-trip-compare-metric-btn') === metricKey;
+                button.classList.toggle('is-active', active);
+                button.setAttribute('aria-pressed', active ? 'true' : 'false');
+            });
+        };
+
+        const initialButton = buttons.find(button => button.classList.contains('is-active')) || buttons[0];
+        const initialMetric = initialButton.getAttribute('data-trip-compare-metric-btn') || 'avgTemp';
+        renderMetric(initialMetric);
+
+        buttons.forEach(button => {
+            button.addEventListener('click', () => {
+                const metricKey = button.getAttribute('data-trip-compare-metric-btn');
+                if (!metricKey) {
+                    return;
+                }
+                renderMetric(metricKey);
+            });
+        });
+    });
+
     // ── Trip overlay chart (5-year comparison) ───────────────────────────
     (function renderTripOverlayChart() {
         const chartSvg = document.querySelector('[data-trip-overlay-chart]');

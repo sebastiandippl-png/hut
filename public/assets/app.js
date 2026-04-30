@@ -997,18 +997,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const overlayData = window.tripOverlayData || {};
         if (!chartSvg || !overlayData || Object.keys(overlayData).length === 0) return;
 
-        // Responsive width/height
-        const width = chartSvg.clientWidth || 860;
-        const height = chartSvg.clientHeight || 360;
-        chartSvg.setAttribute('viewBox', `0 0 860 360`);
+        const width = 860;
+        const height = 360;
+        chartSvg.setAttribute('viewBox', `0 0 ${width} ${height}`);
         const ns = 'http://www.w3.org/2000/svg';
         const svgEl = tag => document.createElementNS(ns, tag);
         const toNumber = v => Number.isFinite(Number(v)) ? Number(v) : null;
-        // Reduce padding for a more compact chart
-        const padding = { top: 18, right: 12, bottom: 32, left: 38 };
-        const plotWidth = 860 - padding.left - padding.right;
-        const plotHeight = 360 - padding.top - padding.bottom;
-        const bottomY = 360 - padding.bottom;
+
+        // Same padding as individual trip charts
+        const padding = { top: 34, right: 26, bottom: 62, left: 54 };
+        const plotWidth = width - padding.left - padding.right;
+        const plotHeight = height - padding.top - padding.bottom;
+        const bottomY = height - padding.bottom;
+
         const yearColors = {
             '2025': '#e74c3c',
             '2024': '#f39c12',
@@ -1016,6 +1017,7 @@ document.addEventListener('DOMContentLoaded', () => {
             '2022': '#2980b9',
             '2021': '#8e44ad',
         };
+
         // Find global min/max for y axis
         let allTemps = [];
         Object.values(overlayData).forEach(arr => {
@@ -1025,23 +1027,25 @@ document.addEventListener('DOMContentLoaded', () => {
         const minTemp = Math.floor(Math.min(...allTemps) - 1);
         const maxTemp = Math.ceil(Math.max(...allTemps) + 1);
         const tempSpan = Math.max(1, maxTemp - minTemp);
-        // Find max days (x axis)
+
         const maxDays = Math.max(...Object.values(overlayData).map(arr => arr.length));
         const xStep = maxDays > 1 ? plotWidth / (maxDays - 1) : 0;
         const xPos = i => padding.left + (xStep * i);
         const yTemp = v => padding.top + ((maxTemp - v) / tempSpan) * plotHeight;
 
         chartSvg.innerHTML = '';
+
         // Grid lines and y axis labels
         for (let i = 0; i <= 4; i++) {
             const y = padding.top + ((plotHeight / 4) * i);
             const line = svgEl('line');
             line.setAttribute('x1', String(padding.left));
-            line.setAttribute('x2', String(860 - padding.right));
+            line.setAttribute('x2', String(width - padding.right));
             line.setAttribute('y1', String(y));
             line.setAttribute('y2', String(y));
             line.setAttribute('class', 'weather-trip__grid-line');
             chartSvg.append(line);
+
             const tempTickValue = maxTemp - ((tempSpan / 4) * i);
             const tick = svgEl('text');
             tick.setAttribute('x', String(padding.left - 8));
@@ -1051,9 +1055,20 @@ document.addEventListener('DOMContentLoaded', () => {
             tick.textContent = `${Math.round(tempTickValue)}°`;
             chartSvg.append(tick);
         }
-        // Draw each year with points and always-visible year label
-        const yearOrder = ['2025','2024','2023','2022','2021'];
-        Object.entries(overlayData).forEach(([year, arr], idx) => {
+
+        // X axis day labels
+        for (let i = 0; i < maxDays; i++) {
+            const label = svgEl('text');
+            label.setAttribute('x', String(xPos(i)));
+            label.setAttribute('y', String(height - 24));
+            label.setAttribute('text-anchor', 'middle');
+            label.setAttribute('class', 'weather-trip__date-label');
+            label.textContent = `Day ${i + 1}`;
+            chartSvg.append(label);
+        }
+
+        // Draw each year's temperature line with points
+        Object.entries(overlayData).forEach(([year, arr]) => {
             const color = yearColors[year] || '#888';
             let d = '';
             const points = [];
@@ -1062,32 +1077,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 const x = xPos(i);
                 const y = yTemp(v);
                 d += d === '' ? `M ${x} ${y}` : ` L ${x} ${y}`;
-                points.push({x, y});
+                points.push({ x, y });
             });
-            if (d) {
-                const path = svgEl('path');
-                path.setAttribute('d', d);
-                path.setAttribute('stroke', color);
-                path.setAttribute('fill', 'none');
-                path.setAttribute('stroke-width', '3.5');
-                path.setAttribute('class', 'weather-trip-compare__line');
-                path.setAttribute('data-year', year);
-                chartSvg.append(path);
-                // Draw points
-                points.forEach(pt => {
-                    const circle = svgEl('circle');
-                    circle.setAttribute('cx', String(pt.x));
-                    circle.setAttribute('cy', String(pt.y));
-                    circle.setAttribute('r', '3.6');
-                    circle.setAttribute('fill', color);
-                    circle.setAttribute('stroke', '#fff');
-                    circle.setAttribute('stroke-width', '1.2');
-                    circle.setAttribute('class', 'weather-trip__point');
-                    chartSvg.append(circle);
-                });
-                // Show year label at the end of the line
-                // Year labels removed as requested
-            }
+            if (!d) return;
+
+            const path = svgEl('path');
+            path.setAttribute('d', d);
+            path.setAttribute('stroke', color);
+            path.setAttribute('fill', 'none');
+            path.setAttribute('stroke-width', '2.5');
+            path.setAttribute('stroke-linejoin', 'round');
+            path.setAttribute('stroke-linecap', 'round');
+            path.setAttribute('class', 'weather-trip__line');
+            path.setAttribute('data-year', year);
+            chartSvg.append(path);
+
+            points.forEach(pt => {
+                const circle = svgEl('circle');
+                circle.setAttribute('cx', String(pt.x));
+                circle.setAttribute('cy', String(pt.y));
+                circle.setAttribute('r', '3.6');
+                circle.setAttribute('fill', color);
+                circle.setAttribute('stroke', '#fff');
+                circle.setAttribute('stroke-width', '1.5');
+                circle.setAttribute('class', 'weather-trip__point');
+                chartSvg.append(circle);
+            });
         });
     })();
 

@@ -202,15 +202,15 @@ if (!is_string($tripWeather2021Json)) {
         </div>
         </div>
 
-        <div class="weather-forecast__chart-wrap">
-            <svg class="weather-forecast__chart" data-trip-overlay-chart viewBox="0 0 920 360" aria-label="5-year average temperature overlay chart"></svg>
+        <div class="weather-trip__chart-wrap">
+            <svg class="weather-trip__chart" data-trip-overlay-chart viewBox="0 0 860 360" aria-label="5-year average temperature overlay chart"></svg>
         </div>
-        <div class="weather-forecast__legend" aria-hidden="true">
-            <span class="weather-forecast__legend-item"><span class="weather-forecast__swatch" style="background: #e74c3c"></span>2025</span>
-            <span class="weather-forecast__legend-item"><span class="weather-forecast__swatch" style="background: #f39c12"></span>2024</span>
-            <span class="weather-forecast__legend-item"><span class="weather-forecast__swatch" style="background: #27ae60"></span>2023</span>
-            <span class="weather-forecast__legend-item"><span class="weather-forecast__swatch" style="background: #2980b9"></span>2022</span>
-            <span class="weather-forecast__legend-item"><span class="weather-forecast__swatch" style="background: #8e44ad"></span>2021</span>
+        <div class="weather-trip__legend" aria-hidden="true">
+            <span class="weather-trip__legend-item"><span class="weather-trip__swatch" style="background: #e74c3c"></span>2025</span>
+            <span class="weather-trip__legend-item"><span class="weather-trip__swatch" style="background: #f39c12"></span>2024</span>
+            <span class="weather-trip__legend-item"><span class="weather-trip__swatch" style="background: #27ae60"></span>2023</span>
+            <span class="weather-trip__legend-item"><span class="weather-trip__swatch" style="background: #2980b9"></span>2022</span>
+            <span class="weather-trip__legend-item"><span class="weather-trip__swatch" style="background: #8e44ad"></span>2021</span>
         </div>
         <script>
         window.tripOverlayData = <?= json_encode($overlayData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;

@@ -173,14 +173,14 @@ if (!is_string($tripWeather2021Json)) {
                 <tbody>
                 <?php foreach ([2025,2024,2023,2022,2021] as $year): ?>
                     <tr>
-                        <td><?= $year ?></td>
-                        <td<?= ($tripStats[$year]['coldest'] === min(array_column($tripStats, 'coldest'))) ? ' class="weather-trip-compare__winner"' : '' ?>><?= isset($tripStats[$year]['coldest']) ? number_format($tripStats[$year]['coldest'], 1) . ' °C' : '—' ?></td>
-                        <td<?= $summary['warmest'] == $year ? ' class="weather-trip-compare__winner"' : '' ?>><?= isset($tripStats[$year]['warmest']) ? number_format($tripStats[$year]['warmest'], 1) . ' °C' : '—' ?></td>
-                        <td<?= $summary['avgTemp'] == $year ? ' class="weather-trip-compare__winner"' : '' ?>><?= isset($tripStats[$year]['avgTemp']) ? number_format($tripStats[$year]['avgTemp'], 1) . ' °C' : '—' ?></td>
-                        <td<?= $summary['windiest'] == $year ? ' class="weather-trip-compare__winner"' : '' ?>><?= isset($tripStats[$year]['avgWind']) ? number_format($tripStats[$year]['avgWind'], 1) . ' km/h' : '—' ?></td>
-                        <td<?= ($tripStats[$year]['maxWind'] === max(array_column($tripStats, 'maxWind'))) ? ' class="weather-trip-compare__winner"' : '' ?>><?= isset($tripStats[$year]['maxWind']) ? number_format($tripStats[$year]['maxWind'], 1) . ' km/h' : '—' ?></td>
-                        <td<?= $summary['rain'] == $year ? ' class="weather-trip-compare__winner"' : '' ?>><?= isset($tripStats[$year]['rain']) ? number_format($tripStats[$year]['rain'], 1) : '—' ?></td>
-                        <td<?= $summary['sun'] == $year ? ' class="weather-trip-compare__winner"' : '' ?>><?= isset($tripStats[$year]['sun']) ? number_format($tripStats[$year]['sun'], 1) : '—' ?></td>
+                        <td data-label="Year"><?= $year ?></td>
+                        <td data-label="Coldest min"<?= ($tripStats[$year]['coldest'] === min(array_column($tripStats, 'coldest'))) ? ' class="weather-trip-compare__winner"' : '' ?>><?= isset($tripStats[$year]['coldest']) ? number_format($tripStats[$year]['coldest'], 1) . ' °C' : '—' ?></td>
+                        <td data-label="Warmest max"<?= $summary['warmest'] == $year ? ' class="weather-trip-compare__winner"' : '' ?>><?= isset($tripStats[$year]['warmest']) ? number_format($tripStats[$year]['warmest'], 1) . ' °C' : '—' ?></td>
+                        <td data-label="Avg temp"<?= $summary['avgTemp'] == $year ? ' class="weather-trip-compare__winner"' : '' ?>><?= isset($tripStats[$year]['avgTemp']) ? number_format($tripStats[$year]['avgTemp'], 1) . ' °C' : '—' ?></td>
+                        <td data-label="Avg wind"<?= $summary['windiest'] == $year ? ' class="weather-trip-compare__winner"' : '' ?>><?= isset($tripStats[$year]['avgWind']) ? number_format($tripStats[$year]['avgWind'], 1) . ' km/h' : '—' ?></td>
+                        <td data-label="Max wind"<?= ($tripStats[$year]['maxWind'] === max(array_column($tripStats, 'maxWind'))) ? ' class="weather-trip-compare__winner"' : '' ?>><?= isset($tripStats[$year]['maxWind']) ? number_format($tripStats[$year]['maxWind'], 1) . ' km/h' : '—' ?></td>
+                        <td data-label="Total rain (mm)"<?= $summary['rain'] == $year ? ' class="weather-trip-compare__winner"' : '' ?>><?= isset($tripStats[$year]['rain']) ? number_format($tripStats[$year]['rain'], 1) : '—' ?></td>
+                        <td data-label="Total precip hours"<?= $summary['sun'] == $year ? ' class="weather-trip-compare__winner"' : '' ?>><?= isset($tripStats[$year]['sun']) ? number_format($tripStats[$year]['sun'], 1) : '—' ?></td>
                     </tr>
                 <?php endforeach; ?>
                 </tbody>
@@ -188,15 +188,15 @@ if (!is_string($tripWeather2021Json)) {
 
         </div>
 
-        <div class="weather-trip-compare__chart-wrap">
-            <svg class="weather-trip-compare__chart" data-trip-overlay-chart viewBox="0 0 860 360" aria-label="Average temperature overlay chart"></svg>
+        <div class="weather-forecast__chart-wrap">
+            <svg class="weather-forecast__chart" data-trip-overlay-chart viewBox="0 0 920 360" aria-label="5-year average temperature overlay chart"></svg>
         </div>
-        <div class="weather-trip-compare__legend" aria-hidden="true">
-            <span class="weather-trip-compare__legend-item" style="--color: #e74c3c">2025</span>
-            <span class="weather-trip-compare__legend-item" style="--color: #f39c12">2024</span>
-            <span class="weather-trip-compare__legend-item" style="--color: #27ae60">2023</span>
-            <span class="weather-trip-compare__legend-item" style="--color: #2980b9">2022</span>
-            <span class="weather-trip-compare__legend-item" style="--color: #8e44ad">2021</span>
+        <div class="weather-forecast__legend" aria-hidden="true">
+            <span class="weather-forecast__legend-item"><span class="weather-forecast__swatch" style="background: #e74c3c"></span>2025</span>
+            <span class="weather-forecast__legend-item"><span class="weather-forecast__swatch" style="background: #f39c12"></span>2024</span>
+            <span class="weather-forecast__legend-item"><span class="weather-forecast__swatch" style="background: #27ae60"></span>2023</span>
+            <span class="weather-forecast__legend-item"><span class="weather-forecast__swatch" style="background: #2980b9"></span>2022</span>
+            <span class="weather-forecast__legend-item"><span class="weather-forecast__swatch" style="background: #8e44ad"></span>2021</span>
         </div>
         <script>
         window.tripOverlayData = <?= json_encode($overlayData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;

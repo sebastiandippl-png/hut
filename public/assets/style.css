@@ -1,3 +1,91 @@
+.weather-trip-compare__year-label {
+    font-size: 1.05rem;
+    font-weight: bold;
+    paint-order: stroke;
+    stroke: #fff;
+    stroke-width: 5px;
+    stroke-linejoin: round;
+    fill: var(--color-primary);
+    opacity: .97;
+    pointer-events: none;
+    text-anchor: middle;
+    dominant-baseline: middle;
+}
+.weather-trip-compare__chart-wrap {
+    margin: 0.7rem 0 0 0;
+    padding: 0.5rem 0.5rem 0.7rem 0.5rem;
+}
+/* Responsive 5-year comparison table */
+.weather-trip-compare__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+    table-layout: auto;
+}
+.weather-trip-compare__table th,
+.weather-trip-compare__table td {
+    padding: 0.5em 0.4em;
+    text-align: center;
+    min-width: 80px;
+}
+.weather-trip-compare__table th {
+    background: var(--color-bg-alt, #f7f7fa);
+    font-weight: 600;
+    font-size: 0.98em;
+}
+.weather-trip-compare__table tr {
+    border-bottom: 1px solid #ececf0;
+}
+.weather-trip-compare__table td.weather-trip-compare__winner {
+    background: linear-gradient(90deg, #f9e7b1 0%, #f7f3d7 100%);
+    font-weight: 600;
+    border-radius: 0.3em;
+}
+@media (max-width: 700px) {
+    .weather-trip-compare__table,
+    .weather-trip-compare__table thead,
+    .weather-trip-compare__table tbody,
+    .weather-trip-compare__table tr {
+        display: block;
+        width: 100%;
+    }
+    .weather-trip-compare__table thead {
+        display: none;
+    }
+    .weather-trip-compare__table tr {
+        margin-bottom: 1.1em;
+        border: 1px solid #ececf0;
+        border-radius: 0.5em;
+        background: #fff;
+        box-shadow: 0 1px 4px 0 rgba(0,0,0,0.03);
+        padding: 0.5em 0.2em;
+    }
+    .weather-trip-compare__table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.45em 0.7em;
+        border: none;
+        font-size: 1em;
+        min-width: 0;
+        width: 100%;
+        background: none;
+        position: relative;
+    }
+    .weather-trip-compare__table td:before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #888;
+        flex: 0 0 54%;
+        text-align: left;
+        font-size: 0.97em;
+        padding-right: 0.7em;
+    }
+    .weather-trip-compare__table td.weather-trip-compare__winner {
+        background: linear-gradient(90deg, #f9e7b1 0%, #f7f3d7 100%);
+    }
+}
 .weather-trip-compare__point {
     stroke: #fff;
     stroke-width: 1.2;

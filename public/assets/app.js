@@ -794,6 +794,459 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // ── 14-day forecast chart ─────────────────────────────────────────────
+    document.querySelectorAll('[data-forecast-chart-data]').forEach(forecastRoot => {
+        const chartSvg = forecastRoot.querySelector('[data-forecast-weather-chart]');
+        const rawData = forecastRoot.getAttribute('data-forecast-chart-data') || '[]';
+        let forecastData = [];
+
+        try {
+            const parsed = JSON.parse(rawData);
+            if (Array.isArray(parsed)) {
+                forecastData = parsed;
+            }
+        } catch (error) {
+            console.error('Could not parse forecast chart data', error);
+        }
+
+        if (!(chartSvg && forecastData.length > 0)) {
+            return;
+        }
+
+        const normalized = forecastData.filter(day => (
+            typeof day === 'object' &&
+            day !== null &&
+            typeof day.date === 'string'
+        ));
+
+        if (normalized.length === 0) {
+            return;
+        }
+
+        const ns = 'http://www.w3.org/2000/svg';
+        const svgEl = tag => document.createElementNS(ns, tag);
+        const toNumber = value => Number.isFinite(Number(value)) ? Number(value) : null;
+        const isMobile = window.matchMedia('(max-width: 640px)').matches;
+        const iconSize = isMobile ? 16 : 20;
+
+        const width = 920;
+        const height = 360;
+        const padding = { top: 34, right: 26, bottom: 62, left: 54 };
+        const plotWidth = width - padding.left - padding.right;
+        const plotHeight = height - padding.top - padding.bottom;
+        const bottomY = height - padding.bottom;
+
+        const temps = normalized.flatMap(day => [toNumber(day.temp_min), toNumber(day.temp_max)]).filter(value => value !== null);
+        const precipValues = normalized.map(day => toNumber(day.precip_sum)).filter(value => value !== null);
+        if (temps.length === 0) {
+            return;
+        }
+
+        const minTemp = Math.floor(Math.min(...temps) - 1);
+        const maxTemp = Math.ceil(Math.max(...temps) + 1);
+        const tempSpan = Math.max(1, maxTemp - minTemp);
+        const maxPrecip = Math.max(1, ...precipValues, 0);
+        const barWidth = Math.max(6, Math.min(18, plotWidth / (normalized.length * 1.9)));
+        const xStep = normalized.length > 1 ? plotWidth / (normalized.length - 1) : 0;
+        const xPos = index => padding.left + (xStep * index);
+        const yTemp = value => padding.top + ((maxTemp - value) / tempSpan) * plotHeight;
+        const yPrecip = value => bottomY - ((value / maxPrecip) * (plotHeight * 0.3));
+
+        chartSvg.innerHTML = '';
+
+        for (let i = 0; i <= 4; i++) {
+            const y = padding.top + ((plotHeight / 4) * i);
+
+            const line = svgEl('line');
+            line.setAttribute('x1', String(padding.left));
+            line.setAttribute('x2', String(width - padding.right));
+            line.setAttribute('y1', String(y));
+            line.setAttribute('y2', String(y));
+            line.setAttribute('class', 'weather-forecast__grid-line');
+            chartSvg.append(line);
+
+            const tempTickValue = maxTemp - ((tempSpan / 4) * i);
+            const tick = svgEl('text');
+            tick.setAttribute('x', String(padding.left - 8));
+            tick.setAttribute('y', String(y + 4));
+            tick.setAttribute('text-anchor', 'end');
+            tick.setAttribute('class', 'weather-forecast__axis-label');
+            tick.textContent = `${Math.round(tempTickValue)}°`;
+            chartSvg.append(tick);
+        }
+
+        normalized.forEach((day, index) => {
+            const precip = toNumber(day.precip_sum) ?? 0;
+            const x = xPos(index);
+            const y = yPrecip(precip);
+
+            const bar = svgEl('rect');
+            bar.setAttribute('x', String(x - (barWidth / 2)));
+            bar.setAttribute('y', String(y));
+            bar.setAttribute('width', String(barWidth));
+            bar.setAttribute('height', String(Math.max(0, bottomY - y)));
+            bar.setAttribute('rx', '3');
+            bar.setAttribute('class', 'weather-forecast__precip-bar');
+            chartSvg.append(bar);
+        });
+
+        const linePath = key => {
+            let d = '';
+            normalized.forEach((day, index) => {
+                const value = toNumber(day[key]);
+                if (value === null) {
+                    return;
+                }
+                const x = xPos(index);
+                const y = yTemp(value);
+                d += d === '' ? `M ${x} ${y}` : ` L ${x} ${y}`;
+            });
+            return d;
+        };
+
+        const maxLine = svgEl('path');
+        maxLine.setAttribute('d', linePath('temp_max'));
+        maxLine.setAttribute('class', 'weather-forecast__line weather-forecast__line--max');
+        chartSvg.append(maxLine);
+
+        const minLine = svgEl('path');
+        minLine.setAttribute('d', linePath('temp_min'));
+        minLine.setAttribute('class', 'weather-forecast__line weather-forecast__line--min');
+        chartSvg.append(minLine);
+
+        normalized.forEach((day, index) => {
+            const x = xPos(index);
+            const maxTempValue = toNumber(day.temp_max);
+            const minTempValue = toNumber(day.temp_min);
+
+            if (maxTempValue !== null) {
+                const point = svgEl('circle');
+                point.setAttribute('cx', String(x));
+                point.setAttribute('cy', String(yTemp(maxTempValue)));
+                point.setAttribute('r', '3.2');
+                point.setAttribute('class', 'weather-forecast__point weather-forecast__point--max');
+                chartSvg.append(point);
+            }
+
+            if (minTempValue !== null) {
+                const point = svgEl('circle');
+                point.setAttribute('cx', String(x));
+                point.setAttribute('cy', String(yTemp(minTempValue)));
+                point.setAttribute('r', '3.2');
+                point.setAttribute('class', 'weather-forecast__point weather-forecast__point--min');
+                chartSvg.append(point);
+            }
+
+            const showIcon = !isMobile || index % 2 === 0;
+            if (showIcon && typeof day.icon_url === 'string' && day.icon_url !== '') {
+                const icon = svgEl('image');
+                const iconYBase = maxTempValue !== null ? yTemp(maxTempValue) - iconSize - 8 : padding.top;
+                icon.setAttribute('x', String(x - (iconSize / 2)));
+                icon.setAttribute('y', String(Math.max(2, iconYBase)));
+                icon.setAttribute('width', String(iconSize));
+                icon.setAttribute('height', String(iconSize));
+                icon.setAttribute('href', day.icon_url);
+                icon.setAttribute('class', 'weather-forecast__icon-mark');
+                icon.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+                chartSvg.append(icon);
+            }
+
+            const label = svgEl('text');
+            label.setAttribute('x', String(x));
+            label.setAttribute('y', String(height - 24));
+            label.setAttribute('text-anchor', 'middle');
+            label.setAttribute('class', 'weather-forecast__date-label');
+            label.textContent = day.date.slice(8, 10) + '.' + day.date.slice(5, 7) + '.';
+            chartSvg.append(label);
+        });
+    });
+
+    // ── Trip overlay chart (5-year comparison) ───────────────────────────
+    (function renderTripOverlayChart() {
+        const chartSvg = document.querySelector('[data-trip-overlay-chart]');
+        const overlayData = window.tripOverlayData || {};
+        if (!chartSvg || !overlayData || Object.keys(overlayData).length === 0) return;
+
+        const ns = 'http://www.w3.org/2000/svg';
+        const svgEl = tag => document.createElementNS(ns, tag);
+        const toNumber = v => Number.isFinite(Number(v)) ? Number(v) : null;
+        const width = 860;
+        const height = 360;
+        const padding = { top: 34, right: 26, bottom: 62, left: 54 };
+        const plotWidth = width - padding.left - padding.right;
+        const plotHeight = height - padding.top - padding.bottom;
+        const bottomY = height - padding.bottom;
+        const yearColors = {
+            '2025': '#e74c3c',
+            '2024': '#f39c12',
+            '2023': '#27ae60',
+            '2022': '#2980b9',
+            '2021': '#8e44ad',
+        };
+        // Find global min/max for y axis
+        let allTemps = [];
+        Object.values(overlayData).forEach(arr => {
+            arr.forEach(v => { if (v !== null) allTemps.push(Number(v)); });
+        });
+        if (allTemps.length === 0) return;
+        const minTemp = Math.floor(Math.min(...allTemps) - 1);
+        const maxTemp = Math.ceil(Math.max(...allTemps) + 1);
+        const tempSpan = Math.max(1, maxTemp - minTemp);
+        // Find max days (x axis)
+        const maxDays = Math.max(...Object.values(overlayData).map(arr => arr.length));
+        const xStep = maxDays > 1 ? plotWidth / (maxDays - 1) : 0;
+        const xPos = i => padding.left + (xStep * i);
+        const yTemp = v => padding.top + ((maxTemp - v) / tempSpan) * plotHeight;
+
+        chartSvg.innerHTML = '';
+        // Grid lines and y axis labels
+        for (let i = 0; i <= 4; i++) {
+            const y = padding.top + ((plotHeight / 4) * i);
+            const line = svgEl('line');
+            line.setAttribute('x1', String(padding.left));
+            line.setAttribute('x2', String(width - padding.right));
+            line.setAttribute('y1', String(y));
+            line.setAttribute('y2', String(y));
+            line.setAttribute('class', 'weather-trip__grid-line');
+            chartSvg.append(line);
+            const tempTickValue = maxTemp - ((tempSpan / 4) * i);
+            const tick = svgEl('text');
+            tick.setAttribute('x', String(padding.left - 8));
+            tick.setAttribute('y', String(y + 4));
+            tick.setAttribute('text-anchor', 'end');
+            tick.setAttribute('class', 'weather-trip__axis-label');
+            tick.textContent = `${Math.round(tempTickValue)}°`;
+            chartSvg.append(tick);
+        }
+        // Draw each year with points and hover label
+        const yearOrder = ['2025','2024','2023','2022','2021'];
+        let hoverLabel = null;
+        Object.entries(overlayData).forEach(([year, arr], idx) => {
+            const color = yearColors[year] || '#888';
+            let d = '';
+            const points = [];
+            arr.forEach((v, i) => {
+                if (v === null) return;
+                const x = xPos(i);
+                const y = yTemp(v);
+                d += d === '' ? `M ${x} ${y}` : ` L ${x} ${y}`;
+                points.push({x, y});
+            });
+            if (d) {
+                const path = svgEl('path');
+                path.setAttribute('d', d);
+                path.setAttribute('stroke', color);
+                path.setAttribute('fill', 'none');
+                path.setAttribute('stroke-width', '3.5');
+                path.setAttribute('class', 'weather-trip-compare__line');
+                path.setAttribute('data-year', year);
+                path.style.cursor = 'pointer';
+                // Hover effect
+                path.addEventListener('mouseenter', () => {
+                    path.style.filter = 'drop-shadow(0 0 8px ' + color + ')';
+                    if (!hoverLabel) {
+                        hoverLabel = svgEl('text');
+                        hoverLabel.setAttribute('class', 'weather-trip-compare__hover-label');
+                        chartSvg.append(hoverLabel);
+                    }
+                    hoverLabel.textContent = year;
+                    hoverLabel.setAttribute('x', String(points[Math.floor(points.length/2)].x));
+                    hoverLabel.setAttribute('y', String(padding.top + 18 + (idx*18)));
+                    hoverLabel.setAttribute('fill', color);
+                    hoverLabel.style.fontWeight = 'bold';
+                    hoverLabel.style.fontSize = '1.15rem';
+                    hoverLabel.style.paintOrder = 'stroke';
+                    hoverLabel.style.stroke = '#fff';
+                    hoverLabel.style.strokeWidth = '6px';
+                    hoverLabel.style.strokeLinejoin = 'round';
+                });
+                path.addEventListener('mouseleave', () => {
+                    path.style.filter = '';
+                    if (hoverLabel) hoverLabel.remove(); hoverLabel = null;
+                });
+                chartSvg.append(path);
+                // Draw points
+                points.forEach(pt => {
+                    const circle = svgEl('circle');
+                    circle.setAttribute('cx', String(pt.x));
+                    circle.setAttribute('cy', String(pt.y));
+                    circle.setAttribute('r', '3.2');
+                    circle.setAttribute('fill', color);
+                    circle.setAttribute('stroke', '#fff');
+                    circle.setAttribute('stroke-width', '1.2');
+                    circle.setAttribute('class', 'weather-trip-compare__point');
+                    chartSvg.append(circle);
+                });
+            }
+        });
+    })();
+
+    // ── Trip weather chart (historical) ───────────────────────────────────
+    document.querySelectorAll('[data-trip-weather-chart-data]').forEach(tripWeatherRoot => {
+        const chartSvg = tripWeatherRoot.querySelector('[data-trip-weather-chart]');
+        const rawData = tripWeatherRoot.getAttribute('data-trip-weather-chart-data') || '[]';
+        let tripData = [];
+
+        try {
+            const parsed = JSON.parse(rawData);
+            if (Array.isArray(parsed)) {
+                tripData = parsed;
+            }
+        } catch (error) {
+            console.error('Could not parse trip weather chart data', error);
+        }
+
+        if (!(chartSvg && tripData.length > 0)) {
+            return;
+        }
+
+        const normalized = tripData.filter(day => (
+            typeof day === 'object' &&
+            day !== null &&
+            typeof day.date === 'string'
+        ));
+
+        if (normalized.length === 0) {
+            return;
+        }
+
+        const ns = 'http://www.w3.org/2000/svg';
+        const svgEl = tag => document.createElementNS(ns, tag);
+        const toNumber = value => Number.isFinite(Number(value)) ? Number(value) : null;
+        const iconSize = window.matchMedia('(max-width: 640px)').matches ? 18 : 24;
+
+        const width = 860;
+        const height = 360;
+        const padding = { top: 34, right: 26, bottom: 62, left: 54 };
+        const plotWidth = width - padding.left - padding.right;
+        const plotHeight = height - padding.top - padding.bottom;
+        const bottomY = height - padding.bottom;
+
+        const temps = normalized.flatMap(day => [toNumber(day.temp_min), toNumber(day.temp_max)]).filter(value => value !== null);
+        const precipValues = normalized.map(day => toNumber(day.precip_sum)).filter(value => value !== null);
+
+        if (temps.length === 0) {
+            return;
+        }
+
+        const minTemp = Math.floor(Math.min(...temps) - 1);
+        const maxTemp = Math.ceil(Math.max(...temps) + 1);
+        const tempSpan = Math.max(1, maxTemp - minTemp);
+        const maxPrecip = Math.max(1, ...precipValues, 0);
+        const barWidth = Math.max(8, Math.min(28, plotWidth / (normalized.length * 1.8)));
+        const xStep = normalized.length > 1 ? plotWidth / (normalized.length - 1) : 0;
+        const xPos = index => padding.left + (xStep * index);
+        const yTemp = value => padding.top + ((maxTemp - value) / tempSpan) * plotHeight;
+        const yPrecip = value => bottomY - ((value / maxPrecip) * (plotHeight * 0.34));
+
+        chartSvg.innerHTML = '';
+
+        for (let i = 0; i <= 4; i++) {
+            const y = padding.top + ((plotHeight / 4) * i);
+
+            const line = svgEl('line');
+            line.setAttribute('x1', String(padding.left));
+            line.setAttribute('x2', String(width - padding.right));
+            line.setAttribute('y1', String(y));
+            line.setAttribute('y2', String(y));
+            line.setAttribute('class', 'weather-trip__grid-line');
+            chartSvg.append(line);
+
+            const tempTickValue = maxTemp - ((tempSpan / 4) * i);
+            const tick = svgEl('text');
+            tick.setAttribute('x', String(padding.left - 8));
+            tick.setAttribute('y', String(y + 4));
+            tick.setAttribute('text-anchor', 'end');
+            tick.setAttribute('class', 'weather-trip__axis-label');
+            tick.textContent = `${Math.round(tempTickValue)}°`;
+            chartSvg.append(tick);
+        }
+
+        normalized.forEach((day, index) => {
+            const precip = toNumber(day.precip_sum) ?? 0;
+            const x = xPos(index);
+            const y = yPrecip(precip);
+
+            const bar = svgEl('rect');
+            bar.setAttribute('x', String(x - (barWidth / 2)));
+            bar.setAttribute('y', String(y));
+            bar.setAttribute('width', String(barWidth));
+            bar.setAttribute('height', String(Math.max(0, bottomY - y)));
+            bar.setAttribute('rx', '3');
+            bar.setAttribute('class', 'weather-trip__precip-bar');
+            chartSvg.append(bar);
+        });
+
+        const linePath = key => {
+            let d = '';
+            normalized.forEach((day, index) => {
+                const value = toNumber(day[key]);
+                if (value === null) {
+                    return;
+                }
+                const x = xPos(index);
+                const y = yTemp(value);
+                d += d === '' ? `M ${x} ${y}` : ` L ${x} ${y}`;
+            });
+            return d;
+        };
+
+        const maxLine = svgEl('path');
+        maxLine.setAttribute('d', linePath('temp_max'));
+        maxLine.setAttribute('class', 'weather-trip__line weather-trip__line--max');
+        chartSvg.append(maxLine);
+
+        const minLine = svgEl('path');
+        minLine.setAttribute('d', linePath('temp_min'));
+        minLine.setAttribute('class', 'weather-trip__line weather-trip__line--min');
+        chartSvg.append(minLine);
+
+        normalized.forEach((day, index) => {
+            const x = xPos(index);
+            const maxTempValue = toNumber(day.temp_max);
+            const minTempValue = toNumber(day.temp_min);
+
+            if (maxTempValue !== null) {
+                const point = svgEl('circle');
+                point.setAttribute('cx', String(x));
+                point.setAttribute('cy', String(yTemp(maxTempValue)));
+                point.setAttribute('r', '3.6');
+                point.setAttribute('class', 'weather-trip__point weather-trip__point--max');
+                chartSvg.append(point);
+            }
+
+            if (minTempValue !== null) {
+                const point = svgEl('circle');
+                point.setAttribute('cx', String(x));
+                point.setAttribute('cy', String(yTemp(minTempValue)));
+                point.setAttribute('r', '3.6');
+                point.setAttribute('class', 'weather-trip__point weather-trip__point--min');
+                chartSvg.append(point);
+            }
+
+            if (typeof day.icon_url === 'string' && day.icon_url !== '') {
+                const icon = svgEl('image');
+                const iconYBase = maxTempValue !== null ? yTemp(maxTempValue) - iconSize - 8 : padding.top;
+                icon.setAttribute('x', String(x - (iconSize / 2)));
+                icon.setAttribute('y', String(Math.max(2, iconYBase)));
+                icon.setAttribute('width', String(iconSize));
+                icon.setAttribute('height', String(iconSize));
+                icon.setAttribute('href', day.icon_url);
+                icon.setAttribute('class', 'weather-trip__icon-mark');
+                icon.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+                chartSvg.append(icon);
+            }
+
+            const label = svgEl('text');
+            label.setAttribute('x', String(x));
+            label.setAttribute('y', String(height - 24));
+            label.setAttribute('text-anchor', 'middle');
+            label.setAttribute('class', 'weather-trip__date-label');
+            label.textContent = day.date.slice(8, 10) + '.' + day.date.slice(5, 7) + '.';
+            chartSvg.append(label);
+        });
+    });
+
     // ── Collection filters ─────────────────────────────────────────────────
     const collectionGrid = document.querySelector('[data-collection-grid]');
     if (collectionGrid) {

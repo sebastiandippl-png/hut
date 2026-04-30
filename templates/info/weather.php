@@ -157,35 +157,42 @@ if (!is_string($tripWeather2021Json)) {
         </div>
 
         <div class="weather-trip-compare__summary">
-            <table class="weather-trip-compare__table">
-                <thead>
-                    <tr>
-                        <th>Year</th>
-                        <th>Coldest min</th>
-                        <th>Warmest max</th>
-                        <th>Avg temp</th>
-                        <th>Avg wind</th>
-                        <th>Max wind</th>
-                        <th>Total rain (mm)</th>
-                        <th>Total precip hours</th>
-                    </tr>
-                </thead>
-                <tbody>
-                <?php foreach ([2025,2024,2023,2022,2021] as $year): ?>
-                    <tr>
-                        <td data-label="Year"><?= $year ?></td>
-                        <td data-label="Coldest min"<?= ($tripStats[$year]['coldest'] === min(array_column($tripStats, 'coldest'))) ? ' class="weather-trip-compare__winner"' : '' ?>><?= isset($tripStats[$year]['coldest']) ? number_format($tripStats[$year]['coldest'], 1) . ' °C' : '—' ?></td>
-                        <td data-label="Warmest max"<?= $summary['warmest'] == $year ? ' class="weather-trip-compare__winner"' : '' ?>><?= isset($tripStats[$year]['warmest']) ? number_format($tripStats[$year]['warmest'], 1) . ' °C' : '—' ?></td>
-                        <td data-label="Avg temp"<?= $summary['avgTemp'] == $year ? ' class="weather-trip-compare__winner"' : '' ?>><?= isset($tripStats[$year]['avgTemp']) ? number_format($tripStats[$year]['avgTemp'], 1) . ' °C' : '—' ?></td>
-                        <td data-label="Avg wind"<?= $summary['windiest'] == $year ? ' class="weather-trip-compare__winner"' : '' ?>><?= isset($tripStats[$year]['avgWind']) ? number_format($tripStats[$year]['avgWind'], 1) . ' km/h' : '—' ?></td>
-                        <td data-label="Max wind"<?= ($tripStats[$year]['maxWind'] === max(array_column($tripStats, 'maxWind'))) ? ' class="weather-trip-compare__winner"' : '' ?>><?= isset($tripStats[$year]['maxWind']) ? number_format($tripStats[$year]['maxWind'], 1) . ' km/h' : '—' ?></td>
-                        <td data-label="Total rain (mm)"<?= $summary['rain'] == $year ? ' class="weather-trip-compare__winner"' : '' ?>><?= isset($tripStats[$year]['rain']) ? number_format($tripStats[$year]['rain'], 1) : '—' ?></td>
-                        <td data-label="Total precip hours"<?= $summary['sun'] == $year ? ' class="weather-trip-compare__winner"' : '' ?>><?= isset($tripStats[$year]['sun']) ? number_format($tripStats[$year]['sun'], 1) : '—' ?></td>
-                    </tr>
-                <?php endforeach; ?>
-                </tbody>
-            </table>
-
+            <div class="weather-trip-compare__cards">
+            <?php foreach ([2025,2024,2023,2022,2021] as $year): ?>
+                <div class="weather-trip-compare__card">
+                    <div class="weather-trip-compare__card-year">Year: <strong><?= $year ?></strong></div>
+                    <div class="weather-trip-compare__card-row<?= ($tripStats[$year]['coldest'] === min(array_column($tripStats, 'coldest'))) ? ' weather-trip-compare__winner' : '' ?>">
+                        <span class="weather-trip-compare__card-label">Coldest min</span>
+                        <span class="weather-trip-compare__card-value"><?= isset($tripStats[$year]['coldest']) ? number_format($tripStats[$year]['coldest'], 1) . ' °C' : '—' ?></span>
+                    </div>
+                    <div class="weather-trip-compare__card-row<?= $summary['warmest'] == $year ? ' weather-trip-compare__winner' : '' ?>">
+                        <span class="weather-trip-compare__card-label">Warmest max</span>
+                        <span class="weather-trip-compare__card-value"><?= isset($tripStats[$year]['warmest']) ? number_format($tripStats[$year]['warmest'], 1) . ' °C' : '—' ?></span>
+                    </div>
+                    <div class="weather-trip-compare__card-row<?= $summary['avgTemp'] == $year ? ' weather-trip-compare__winner' : '' ?>">
+                        <span class="weather-trip-compare__card-label">Avg temp</span>
+                        <span class="weather-trip-compare__card-value"><?= isset($tripStats[$year]['avgTemp']) ? number_format($tripStats[$year]['avgTemp'], 1) . ' °C' : '—' ?></span>
+                    </div>
+                    <div class="weather-trip-compare__card-row<?= $summary['windiest'] == $year ? ' weather-trip-compare__winner' : '' ?>">
+                        <span class="weather-trip-compare__card-label">Avg wind</span>
+                        <span class="weather-trip-compare__card-value"><?= isset($tripStats[$year]['avgWind']) ? number_format($tripStats[$year]['avgWind'], 1) . ' km/h' : '—' ?></span>
+                    </div>
+                    <div class="weather-trip-compare__card-row<?= ($tripStats[$year]['maxWind'] === max(array_column($tripStats, 'maxWind'))) ? ' weather-trip-compare__winner' : '' ?>">
+                        <span class="weather-trip-compare__card-label">Max wind</span>
+                        <span class="weather-trip-compare__card-value"><?= isset($tripStats[$year]['maxWind']) ? number_format($tripStats[$year]['maxWind'], 1) . ' km/h' : '—' ?></span>
+                    </div>
+                    <div class="weather-trip-compare__card-row<?= $summary['rain'] == $year ? ' weather-trip-compare__winner' : '' ?>">
+                        <span class="weather-trip-compare__card-label">Total rain (mm)</span>
+                        <span class="weather-trip-compare__card-value"><?= isset($tripStats[$year]['rain']) ? number_format($tripStats[$year]['rain'], 1) : '—' ?></span>
+                    </div>
+                    <div class="weather-trip-compare__card-row<?= $summary['sun'] == $year ? ' weather-trip-compare__winner' : '' ?>">
+                        <span class="weather-trip-compare__card-label">Total precip hours</span>
+                        <span class="weather-trip-compare__card-value"><?= isset($tripStats[$year]['sun']) ? number_format($tripStats[$year]['sun'], 1) : '—' ?></span>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+            </div>
+        </div>
         </div>
 
         <div class="weather-forecast__chart-wrap">

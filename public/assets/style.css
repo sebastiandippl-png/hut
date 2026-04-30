@@ -1,3 +1,63 @@
+/* Responsive card layout for comparison summary */
+.weather-trip-compare__cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.2rem;
+    justify-content: space-between;
+}
+.weather-trip-compare__card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(155,142,199,.07);
+    padding: 1.1rem 1.2rem 1.2rem 1.2rem;
+    min-width: 0;
+    flex: 1 1 220px;
+    max-width: 320px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+.weather-trip-compare__card-year {
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: 0.3rem;
+    font-size: 1.08em;
+}
+.weather-trip-compare__card-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.18em 0;
+    font-size: 1em;
+}
+.weather-trip-compare__card-label {
+    color: #888;
+    font-weight: 500;
+    font-size: 0.98em;
+}
+.weather-trip-compare__card-value {
+    font-weight: 600;
+    font-size: 1.01em;
+}
+@media (max-width: 700px) {
+    .weather-trip-compare__cards {
+        flex-direction: column;
+        gap: 1.1rem;
+    }
+    .weather-trip-compare__card {
+        max-width: 100%;
+        width: 100%;
+        min-width: 0;
+        padding: 1rem 0.7rem 1.1rem 0.7rem;
+    }
+}
+/* Ensure table stays within card and is scrollable on small screens */
+.weather-trip-compare__table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    box-sizing: border-box;
+}
 .weather-trip-compare__year-label {
     font-size: 1.05rem;
     font-weight: bold;

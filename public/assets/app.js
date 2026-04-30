@@ -838,6 +838,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const temps = normalized.flatMap(day => [toNumber(day.temp_min), toNumber(day.temp_max)]).filter(value => value !== null);
         const precipValues = normalized.map(day => toNumber(day.precip_sum)).filter(value => value !== null);
+        const sunValues = normalized.map(day => toNumber(day.sunshine_hours)).filter(value => value !== null);
         if (temps.length === 0) {
             return;
         }
@@ -846,11 +847,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const maxTemp = Math.ceil(Math.max(...temps) + 1);
         const tempSpan = Math.max(1, maxTemp - minTemp);
         const maxPrecip = Math.max(1, ...precipValues, 0);
-        const barWidth = Math.max(6, Math.min(18, plotWidth / (normalized.length * 1.9)));
+        const maxSun = Math.max(1, ...sunValues, 0);
+        const barGroupWidth = Math.max(10, Math.min(28, plotWidth / (normalized.length * 1.5)));
+        const barWidth = Math.floor(barGroupWidth / 2) - 1;
         const xStep = normalized.length > 1 ? plotWidth / (normalized.length - 1) : 0;
         const xPos = index => padding.left + (xStep * index);
         const yTemp = value => padding.top + ((maxTemp - value) / tempSpan) * plotHeight;
         const yPrecip = value => bottomY - ((value / maxPrecip) * (plotHeight * 0.3));
+        const ySun = value => bottomY - ((value / maxSun) * (plotHeight * 0.3));
 
         chartSvg.innerHTML = '';
 
@@ -875,19 +879,45 @@ document.addEventListener('DOMContentLoaded', () => {
             chartSvg.append(tick);
         }
 
+        // Right-side axis for sun hours
+        for (let i = 0; i <= 2; i++) {
+            const sunTickVal = Math.round((maxSun / 2) * i);
+            const yTick = ySun(sunTickVal);
+            const rtick = svgEl('text');
+            rtick.setAttribute('x', String(width - padding.right + 6));
+            rtick.setAttribute('y', String(yTick + 4));
+            rtick.setAttribute('text-anchor', 'start');
+            rtick.setAttribute('class', 'weather-forecast__axis-label weather-forecast__axis-label--sun');
+            rtick.textContent = `${sunTickVal}h`;
+            chartSvg.append(rtick);
+        }
+
         normalized.forEach((day, index) => {
             const precip = toNumber(day.precip_sum) ?? 0;
+            const sun = toNumber(day.sunshine_hours) ?? 0;
             const x = xPos(index);
-            const y = yPrecip(precip);
 
-            const bar = svgEl('rect');
-            bar.setAttribute('x', String(x - (barWidth / 2)));
-            bar.setAttribute('y', String(y));
-            bar.setAttribute('width', String(barWidth));
-            bar.setAttribute('height', String(Math.max(0, bottomY - y)));
-            bar.setAttribute('rx', '3');
-            bar.setAttribute('class', 'weather-forecast__precip-bar');
-            chartSvg.append(bar);
+            // Precipitation bar (left of center)
+            const py = yPrecip(precip);
+            const precipBar = svgEl('rect');
+            precipBar.setAttribute('x', String(x - barWidth - 1));
+            precipBar.setAttribute('y', String(py));
+            precipBar.setAttribute('width', String(barWidth));
+            precipBar.setAttribute('height', String(Math.max(0, bottomY - py)));
+            precipBar.setAttribute('rx', '2');
+            precipBar.setAttribute('class', 'weather-forecast__precip-bar');
+            chartSvg.append(precipBar);
+
+            // Sunshine bar (right of center)
+            const sy = ySun(sun);
+            const sunBar = svgEl('rect');
+            sunBar.setAttribute('x', String(x + 1));
+            sunBar.setAttribute('y', String(sy));
+            sunBar.setAttribute('width', String(barWidth));
+            sunBar.setAttribute('height', String(Math.max(0, bottomY - sy)));
+            sunBar.setAttribute('rx', '2');
+            sunBar.setAttribute('class', 'weather-forecast__sun-bar');
+            chartSvg.append(sunBar);
         });
 
         const linePath = key => {

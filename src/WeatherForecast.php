@@ -447,6 +447,7 @@ class WeatherForecast
                 'temperature_2m_min',
                 'precipitation_probability_max',
                 'precipitation_sum',
+                'sunshine_duration',
                 'wind_speed_10m_max',
                 'wind_gusts_10m_max',
                 'sunrise',

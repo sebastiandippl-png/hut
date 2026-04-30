@@ -29,11 +29,12 @@ if (!is_string($tripWeatherJson)) {
 
 $forecastChart = array_map(static function (array $day): array {
     return [
-        'date'      => $day['date'] ?? null,
-        'temp_max'  => $day['temp_max'] ?? null,
-        'temp_min'  => $day['temp_min'] ?? null,
-        'precip_sum'=> $day['precip_sum'] ?? null,
-        'icon_url'  => WeatherForecast::iconUrl((string) ($day['icon'] ?? 'not-available')),
+        'date'           => $day['date'] ?? null,
+        'temp_max'       => $day['temp_max'] ?? null,
+        'temp_min'       => $day['temp_min'] ?? null,
+        'precip_sum'     => $day['precip_sum'] ?? null,
+        'sunshine_hours' => $day['sunshine_hours'] ?? null,
+        'icon_url'       => WeatherForecast::iconUrl((string) ($day['icon'] ?? 'not-available')),
     ];
 }, $forecast ?? []);
 
@@ -142,6 +143,7 @@ if (!is_string($tripWeather2021Json)) {
             <span class="weather-forecast__legend-item"><span class="weather-forecast__swatch weather-forecast__swatch--max"></span> Max temperature</span>
             <span class="weather-forecast__legend-item"><span class="weather-forecast__swatch weather-forecast__swatch--min"></span> Min temperature</span>
             <span class="weather-forecast__legend-item"><span class="weather-forecast__swatch weather-forecast__swatch--precip"></span> Precipitation (mm)</span>
+            <span class="weather-forecast__legend-item"><span class="weather-forecast__swatch weather-forecast__swatch--sun"></span> Sunshine (h)</span>
             <span class="weather-forecast__legend-item"><span class="weather-forecast__swatch weather-forecast__swatch--icon"></span> Meteocon per day</span>
         </div>
     </section>

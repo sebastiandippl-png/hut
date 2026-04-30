@@ -78,18 +78,19 @@ class WeatherController
                 $ssRaw   = $daily['sunset'][$i]  ?? null;
 
                 $forecast[] = [
-                    'date'        => $date,
-                    'weather_code' => $code,
-                    'label'       => $info['label'],
-                    'icon'        => $info['icon'],
-                    'temp_max'    => $daily['temperature_2m_max'][$i]          ?? null,
-                    'temp_min'    => $daily['temperature_2m_min'][$i]          ?? null,
-                    'precip_prob' => $daily['precipitation_probability_max'][$i] ?? null,
-                    'precip_sum'  => $daily['precipitation_sum'][$i]           ?? null,
-                    'wind_max'    => $daily['wind_speed_10m_max'][$i]          ?? null,
-                    'gusts_max'   => $daily['wind_gusts_10m_max'][$i]          ?? null,
-                    'sunrise'     => $srRaw !== null ? (new DateTime($srRaw))->format('H:i') : null,
-                    'sunset'      => $ssRaw !== null ? (new DateTime($ssRaw))->format('H:i')  : null,
+                    'date'           => $date,
+                    'weather_code'   => $code,
+                    'label'          => $info['label'],
+                    'icon'           => $info['icon'],
+                    'temp_max'       => $daily['temperature_2m_max'][$i]          ?? null,
+                    'temp_min'       => $daily['temperature_2m_min'][$i]          ?? null,
+                    'precip_prob'    => $daily['precipitation_probability_max'][$i] ?? null,
+                    'precip_sum'     => $daily['precipitation_sum'][$i]           ?? null,
+                    'sunshine_hours' => isset($daily['sunshine_duration'][$i]) ? (float)$daily['sunshine_duration'][$i] / 3600.0 : null,
+                    'wind_max'       => $daily['wind_speed_10m_max'][$i]          ?? null,
+                    'gusts_max'      => $daily['wind_gusts_10m_max'][$i]          ?? null,
+                    'sunrise'        => $srRaw !== null ? (new DateTime($srRaw))->format('H:i') : null,
+                    'sunset'         => $ssRaw !== null ? (new DateTime($ssRaw))->format('H:i')  : null,
                 ];
             }
         }

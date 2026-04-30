@@ -2180,6 +2180,16 @@ img { max-width: 100%; display: block; }
     opacity: .72;
 }
 
+.weather-forecast__sun-bar {
+    fill: #f5c518;
+    opacity: .78;
+}
+
+.weather-forecast__axis-label--sun {
+    fill: #b89000;
+    font-size: .75rem;
+}
+
 .weather-forecast__line {
     fill: none;
     stroke-width: 2.2;
@@ -2228,6 +2238,7 @@ img { max-width: 100%; display: block; }
 .weather-forecast__swatch--max { background: #d36a46; }
 .weather-forecast__swatch--min { background: #4e88cc; }
 .weather-forecast__swatch--precip { background: color-mix(in srgb, var(--color-primary) 62%, #ffffff 38%); }
+.weather-forecast__swatch--sun { background: #f5c518; }
 .weather-forecast__swatch--icon { background: linear-gradient(135deg, #ffd167, #ff8f66); }
 
 .weather-forecast__list {

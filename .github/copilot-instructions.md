@@ -40,7 +40,7 @@
 
 ## Weather Integration
 - Weather forecast logic lives in `src/WeatherForecast.php`, the HTTP endpoint in `src/controllers/WeatherController.php`, and the UI in `templates/info/weather.php`.
-- The weather page uses Open-Meteo `https://api.open-meteo.com/v1/forecast` for fixed St. Veit im Pongau coordinates `47.33056, 13.15556` with timezone `Europe/Vienna`, `forecast_days=14`, metric units, a `current` block, and a `daily` block.
+- The weather page uses Open-Meteo `https://api.open-meteo.com/v1/forecast` for fixed St. Veit im Pongau coordinates `47.34011279241758, 13.136896307009817` with timezone `Europe/Vienna`, `forecast_days=14`, metric units, a `current` block, and a `daily` block.
 - Cache weather API responses in `storage/weather_cache/st_veit_pongau.json` with a short TTL; keep graceful fallback behavior when the API is unavailable.
 - Keep weather fetches HTTPS-only, use a stream context timeout, and retain retry/backoff only for transient failures like `429` and `503`.
 - WMO weather-code to label/icon mapping is centralized in `WeatherForecast::wmoInfo()`; update mappings there instead of duplicating them in templates or controllers.

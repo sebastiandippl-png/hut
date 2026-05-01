@@ -7,7 +7,7 @@ namespace Hut;
 /**
  * Fetches and caches weather forecast data from Open-Meteo for St. Veit im Pongau.
  *
- * Coordinates: 47.33056 N, 13.15556 E
+ * Coordinates: 47.34011279241758 N, 13.136896307009817 E
  * Timezone: Europe/Vienna
  * Forecast: 14 days, metric units (°C, km/h, mm)
  *
@@ -17,8 +17,8 @@ class WeatherForecast
 {
     private const API_URL       = 'https://api.open-meteo.com/v1/forecast';
     private const HISTORICAL_API_URL = 'https://archive-api.open-meteo.com/v1/archive';
-    private const LAT           = 47.33056;
-    private const LON           = 13.15556;
+    private const LAT           = 47.34011279241758;
+    private const LON           = 13.136896307009817;
     private const TIMEZONE      = 'Europe/Vienna';
     private const FORECAST_DAYS = 14;
     private const CACHE_TTL     = 1800; // 30 minutes
@@ -235,6 +235,10 @@ class WeatherForecast
             return null;
         }
 
+        if (!self::isCacheForCurrentCoordinates($data)) {
+            return null;
+        }
+
         if (time() - (int) $data['cached_at'] > self::CACHE_TTL) {
             return null;
         }
@@ -266,6 +270,10 @@ class WeatherForecast
 
         $data = json_decode($raw, true);
         if (!is_array($data) || empty($data['cached_at'])) {
+            return null;
+        }
+
+        if (!self::isCacheForCurrentCoordinates($data)) {
             return null;
         }
 
@@ -303,6 +311,10 @@ class WeatherForecast
             return null;
         }
 
+        if (!self::isCacheForCurrentCoordinates($data)) {
+            return null;
+        }
+
         if (time() - (int) $data['cached_at'] > self::HISTORICAL_CACHE_TTL) {
             return null;
         }
@@ -334,6 +346,10 @@ class WeatherForecast
 
         $data = json_decode($raw, true);
         if (!is_array($data) || empty($data['cached_at'])) {
+            return null;
+        }
+
+        if (!self::isCacheForCurrentCoordinates($data)) {
             return null;
         }
 
@@ -371,6 +387,10 @@ class WeatherForecast
             return null;
         }
 
+        if (!self::isCacheForCurrentCoordinates($data)) {
+            return null;
+        }
+
         if (time() - (int) $data['cached_at'] > self::HISTORICAL_CACHE_TTL) {
             return null;
         }
@@ -405,11 +425,25 @@ class WeatherForecast
             return null;
         }
 
+        if (!self::isCacheForCurrentCoordinates($data)) {
+            return null;
+        }
+
         if (time() - (int) $data['cached_at'] > self::HISTORICAL_CACHE_TTL) {
             return null;
         }
 
         return $data;
+    }
+
+    private static function isCacheForCurrentCoordinates(array $data): bool
+    {
+        if (!isset($data['latitude'], $data['longitude'])) {
+            return false;
+        }
+
+        return abs((float) $data['latitude'] - self::LAT) < 0.000001
+            && abs((float) $data['longitude'] - self::LON) < 0.000001;
     }
 
     private static function writeTrip2024Cache(array $data): void

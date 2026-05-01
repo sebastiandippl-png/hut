@@ -36,6 +36,7 @@ class AuthController
         }
 
         Auth::login($user);
+        self::notifyAdminAboutPendingApprovals($user);
         header('Location: ' . \Hut\Url::to('/')); exit;
     }
 
@@ -141,6 +142,7 @@ class AuthController
                 header('Location: ' . \Hut\Url::to('/login')); exit;
             }
             Auth::login($user);
+            self::notifyAdminAboutPendingApprovals($user);
             header('Location: ' . \Hut\Url::to('/')); exit;
         } catch (\Exception $e) {
             error_log('Google OAuth callback failed: ' . $e->getMessage());
@@ -158,5 +160,23 @@ class AuthController
         $client->addScope('email');
         $client->addScope('profile');
         return $client;
+    }
+
+    private static function notifyAdminAboutPendingApprovals(array $user): void
+    {
+        if (((int) ($user['is_admin'] ?? 0)) !== 1) {
+            return;
+        }
+
+        $pendingApprovals = Auth::pendingApprovalCount();
+        if ($pendingApprovals <= 0) {
+            return;
+        }
+
+        $message = $pendingApprovals === 1
+            ? '1 user is waiting for approval.'
+            : $pendingApprovals . ' users are waiting for approval.';
+
+        $_SESSION['flash_success'] = $message . ' Review them in Admin > Users.';
     }
 }

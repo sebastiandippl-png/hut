@@ -7,3 +7,4 @@ bgg_dump/.DS_Store
 bgg_dump/boardgames_ranks.csv
 public/cache/
 storage/changelog.json
+storage/weather_cache/*

@@ -130,6 +130,16 @@ class Auth
     }
 
     /**
+     * Return the number of users that are currently pending approval.
+     */
+    public static function pendingApprovalCount(): int
+    {
+        $pdo = Database::getInstance();
+        $stmt = $pdo->query('SELECT COUNT(*) FROM users WHERE is_approved = 0');
+        return (int) $stmt->fetchColumn();
+    }
+
+    /**
      * Register a new local user. Returns user array on success.
      * Throws \RuntimeException if email already taken.
      */

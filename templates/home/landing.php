@@ -187,7 +187,7 @@ $complexityJson = is_string($complexityJson) ? $complexityJson : '[]';
 
     <?php /* ── Card 4c: Random suggested dish ───────────────────────────── */ ?>
     <a href="/news/food" class="landing-card landing-card--activity landing-card--link" aria-labelledby="landing-random-dish-title">
-        <h2 id="landing-random-dish-title" class="landing-card__heading">🍲 Random dish <span class="landing-card__arrow" aria-hidden="true">→</span></h2>
+        <h2 id="landing-random-dish-title" class="landing-card__heading">🍲 Random suggested dish <span class="landing-card__arrow" aria-hidden="true">→</span></h2>
         <?php if ($randomDish !== null): ?>
             <div class="landing-activity">
                 <?php if (!empty($randomDish['image_url'])): ?>

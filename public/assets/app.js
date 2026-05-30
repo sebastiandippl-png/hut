@@ -8,6 +8,133 @@ document.addEventListener('DOMContentLoaded', () => {
         return `${basePath}${normalizedPath}`;
     };
 
+    // ── Admin sortable lists (links/categories) ───────────────────────────
+    document.querySelectorAll('[data-sortable-list]').forEach(list => {
+        const endpoint = String(list.dataset.sortEndpoint || '').trim();
+        if (!endpoint) {
+            return;
+        }
+
+        let draggingItem = null;
+        let isSaving = false;
+
+        const getSortableItems = () => Array.from(list.querySelectorAll('[data-sortable-item]'));
+
+        const itemAfterPointer = y => {
+            const candidates = getSortableItems().filter(item => item !== draggingItem);
+            let closest = null;
+            let closestOffset = Number.NEGATIVE_INFINITY;
+
+            candidates.forEach(item => {
+                const box = item.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                if (offset < 0 && offset > closestOffset) {
+                    closestOffset = offset;
+                    closest = item;
+                }
+            });
+
+            return closest;
+        };
+
+        const markSaveState = state => {
+            list.classList.remove('is-saving', 'is-error', 'is-saved');
+            if (state) {
+                list.classList.add(state);
+            }
+
+            if (state === 'is-saved') {
+                window.setTimeout(() => {
+                    list.classList.remove('is-saved');
+                }, 900);
+            }
+        };
+
+        const persistOrder = async () => {
+            if (isSaving) {
+                return;
+            }
+
+            const ids = getSortableItems().map(item => Number(item.dataset.sortId || 0)).filter(id => id > 0);
+            if (ids.length < 2) {
+                return;
+            }
+
+            isSaving = true;
+            markSaveState('is-saving');
+
+            const payload = new URLSearchParams();
+            payload.set('order', ids.join(','));
+
+            if (Object.prototype.hasOwnProperty.call(list.dataset, 'categoryId')) {
+                payload.set('category_id', String(list.dataset.categoryId || ''));
+            }
+
+            try {
+                const response = await fetch(withBase(endpoint), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-Token': csrfToken,
+                    },
+                    body: payload.toString(),
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Sort save failed (${response.status})`);
+                }
+
+                markSaveState('is-saved');
+            } catch (error) {
+                console.error('Could not persist sort order', error);
+                markSaveState('is-error');
+            } finally {
+                isSaving = false;
+            }
+        };
+
+        getSortableItems().forEach(item => {
+            item.addEventListener('dragstart', event => {
+                draggingItem = item;
+                item.classList.add('is-dragging');
+                if (event.dataTransfer) {
+                    event.dataTransfer.effectAllowed = 'move';
+                    event.dataTransfer.setData('text/plain', item.dataset.sortId || '');
+                }
+            });
+
+            item.addEventListener('dragend', () => {
+                item.classList.remove('is-dragging');
+                draggingItem = null;
+            });
+        });
+
+        list.addEventListener('dragover', event => {
+            event.preventDefault();
+            if (!draggingItem) {
+                return;
+            }
+
+            const afterElement = itemAfterPointer(event.clientY);
+            if (afterElement === null) {
+                list.appendChild(draggingItem);
+                return;
+            }
+
+            list.insertBefore(draggingItem, afterElement);
+        });
+
+        list.addEventListener('drop', async event => {
+            event.preventDefault();
+            if (!draggingItem) {
+                return;
+            }
+
+            await persistOrder();
+        });
+    });
+
     // ── Two-level nav interactions ───────────────────────────────────────────
     const navBurger = document.querySelector('[data-nav-burger]');
     const mainNav   = document.getElementById('mainNav');

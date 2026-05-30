@@ -1047,6 +1047,36 @@ class AdminController
         );
         $links = $stmt->fetchAll();
         $categories = self::linkCategories($pdo);
+        $linksByCategory = [];
+
+        foreach ($links as $link) {
+            $categoryKey = isset($link['category_id']) && $link['category_id'] !== null
+                ? (string) ((int) $link['category_id'])
+                : 'uncategorized';
+            $categoryName = trim((string) ($link['category_name'] ?? ''));
+
+            if ($categoryName === '') {
+                $categoryName = 'Uncategorized';
+            }
+
+            if (!isset($linksByCategory[$categoryKey])) {
+                $linksByCategory[$categoryKey] = [
+                    'id' => $categoryKey === 'uncategorized' ? null : (int) $link['category_id'],
+                    'name' => $categoryName,
+                    'items' => [],
+                ];
+            }
+
+            $linksByCategory[$categoryKey]['items'][] = $link;
+        }
+
+        if (!isset($linksByCategory['uncategorized'])) {
+            $linksByCategory['uncategorized'] = [
+                'id' => null,
+                'name' => 'Uncategorized',
+                'items' => [],
+            ];
+        }
 
         require __DIR__ . '/../../templates/admin/links.php';
     }
@@ -1059,7 +1089,6 @@ class AdminController
         $url = trim((string) ($_POST['url'] ?? ''));
         $title = trim((string) ($_POST['title'] ?? ''));
         $description = trim((string) ($_POST['description'] ?? ''));
-        $sortOrder = max(0, (int) ($_POST['sort_order'] ?? 0));
         $categoryIdRaw = trim((string) ($_POST['category_id'] ?? ''));
         $categoryId = $categoryIdRaw === '' ? null : (int) $categoryIdRaw;
 
@@ -1085,6 +1114,8 @@ class AdminController
                 $_SESSION['flash_error'] = 'Selected category no longer exists.';
                 header('Location: ' . \Hut\Url::to('/admin/links')); exit;
             }
+
+            $sortOrder = self::nextLinkSortOrder($pdo, $categoryId);
 
             $stmt = $pdo->prepare(
                 'INSERT INTO links (title, url, description, sort_order, category_id)
@@ -1148,7 +1179,6 @@ class AdminController
         Auth::requireCsrf();
 
         $name = trim((string) ($_POST['name'] ?? ''));
-        $sortOrder = max(0, (int) ($_POST['sort_order'] ?? 0));
 
         if ($name === '') {
             $_SESSION['flash_error'] = 'Category name is required.';
@@ -1157,6 +1187,7 @@ class AdminController
 
         try {
             $pdo = Database::getInstance();
+            $sortOrder = self::nextCategorySortOrder($pdo);
             $stmt = $pdo->prepare('INSERT INTO link_categories (name, sort_order) VALUES (?, ?)');
             $stmt->execute([$name, $sortOrder]);
             $_SESSION['flash_success'] = 'Category created.';
@@ -1175,7 +1206,6 @@ class AdminController
 
         $id = isset($params['id']) ? (int) $params['id'] : 0;
         $name = trim((string) ($_POST['name'] ?? ''));
-        $sortOrder = max(0, (int) ($_POST['sort_order'] ?? 0));
 
         if ($id <= 0 || $name === '') {
             $_SESSION['flash_error'] = 'Invalid category data.';
@@ -1184,8 +1214,8 @@ class AdminController
 
         try {
             $pdo = Database::getInstance();
-            $stmt = $pdo->prepare('UPDATE link_categories SET name = ?, sort_order = ? WHERE id = ?');
-            $stmt->execute([$name, $sortOrder, $id]);
+            $stmt = $pdo->prepare('UPDATE link_categories SET name = ? WHERE id = ?');
+            $stmt->execute([$name, $id]);
 
             if ($stmt->rowCount() < 1) {
                 $_SESSION['flash_error'] = 'Category not found or unchanged.';
@@ -1198,6 +1228,92 @@ class AdminController
         }
 
         header('Location: ' . \Hut\Url::to('/admin/links')); exit;
+    }
+
+    public static function reorderLinks(array $params): void
+    {
+        Auth::requireAdmin();
+        Auth::requireCsrf(true);
+
+        $orderRaw = trim((string) ($_POST['order'] ?? ''));
+        $categoryIdRaw = trim((string) ($_POST['category_id'] ?? ''));
+        $categoryId = $categoryIdRaw === '' ? null : (int) $categoryIdRaw;
+        $orderedIds = self::parseOrderedIds($orderRaw);
+
+        if (!self::isValidOrderedList($orderedIds)) {
+            self::jsonResponse(['error' => 'Invalid reorder payload.'], 400);
+        }
+
+        if ($categoryId !== null && $categoryId <= 0) {
+            self::jsonResponse(['error' => 'Invalid category id.'], 400);
+        }
+
+        try {
+            $pdo = Database::getInstance();
+
+            if ($categoryId !== null && !self::linkCategoryExists($pdo, $categoryId)) {
+                self::jsonResponse(['error' => 'Category not found.'], 404);
+            }
+
+            $existingIds = self::linkIdsByCategory($pdo, $categoryId);
+            if (!self::sameIdSet($orderedIds, $existingIds)) {
+                self::jsonResponse(['error' => 'Reorder payload does not match current links. Please reload.'], 409);
+            }
+
+            $pdo->beginTransaction();
+            $stmt = $pdo->prepare('UPDATE links SET sort_order = ? WHERE id = ?');
+
+            foreach ($orderedIds as $index => $linkId) {
+                $stmt->execute([$index, $linkId]);
+            }
+
+            $pdo->commit();
+            self::jsonResponse(['ok' => true]);
+        } catch (\Throwable $e) {
+            if (isset($pdo) && $pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            error_log('Admin reorder links failed: ' . $e->getMessage());
+            self::jsonResponse(['error' => 'Failed to reorder links.'], 500);
+        }
+    }
+
+    public static function reorderLinkCategories(array $params): void
+    {
+        Auth::requireAdmin();
+        Auth::requireCsrf(true);
+
+        $orderRaw = trim((string) ($_POST['order'] ?? ''));
+        $orderedIds = self::parseOrderedIds($orderRaw);
+
+        if (!self::isValidOrderedList($orderedIds)) {
+            self::jsonResponse(['error' => 'Invalid reorder payload.'], 400);
+        }
+
+        try {
+            $pdo = Database::getInstance();
+            $existingIds = self::allLinkCategoryIds($pdo);
+
+            if (!self::sameIdSet($orderedIds, $existingIds)) {
+                self::jsonResponse(['error' => 'Reorder payload does not match current categories. Please reload.'], 409);
+            }
+
+            $pdo->beginTransaction();
+            $stmt = $pdo->prepare('UPDATE link_categories SET sort_order = ? WHERE id = ?');
+
+            foreach ($orderedIds as $index => $categoryId) {
+                $stmt->execute([$index, $categoryId]);
+            }
+
+            $pdo->commit();
+            self::jsonResponse(['ok' => true]);
+        } catch (\Throwable $e) {
+            if (isset($pdo) && $pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            error_log('Admin reorder link categories failed: ' . $e->getMessage());
+            self::jsonResponse(['error' => 'Failed to reorder categories.'], 500);
+        }
     }
 
     public static function deleteLinkCategory(array $params): void
@@ -1323,6 +1439,74 @@ class AdminController
     {
         $stmt = $pdo->query('SELECT id, name, sort_order FROM link_categories ORDER BY sort_order ASC, name ASC, id ASC');
         return $stmt->fetchAll();
+    }
+
+    private static function nextLinkSortOrder(\PDO $pdo, ?int $categoryId): int
+    {
+        if ($categoryId === null) {
+            $stmt = $pdo->query('SELECT COALESCE(MAX(sort_order), -1) FROM links WHERE category_id IS NULL');
+            return ((int) $stmt->fetchColumn()) + 1;
+        }
+
+        $stmt = $pdo->prepare('SELECT COALESCE(MAX(sort_order), -1) FROM links WHERE category_id = ?');
+        $stmt->execute([$categoryId]);
+        return ((int) $stmt->fetchColumn()) + 1;
+    }
+
+    private static function nextCategorySortOrder(\PDO $pdo): int
+    {
+        $stmt = $pdo->query('SELECT COALESCE(MAX(sort_order), -1) FROM link_categories');
+        return ((int) $stmt->fetchColumn()) + 1;
+    }
+
+    private static function linkIdsByCategory(\PDO $pdo, ?int $categoryId): array
+    {
+        if ($categoryId === null) {
+            $stmt = $pdo->query('SELECT id FROM links WHERE category_id IS NULL ORDER BY sort_order ASC, id ASC');
+            return array_map(static fn (array $row): int => (int) $row['id'], $stmt->fetchAll());
+        }
+
+        $stmt = $pdo->prepare('SELECT id FROM links WHERE category_id = ? ORDER BY sort_order ASC, id ASC');
+        $stmt->execute([$categoryId]);
+        return array_map(static fn (array $row): int => (int) $row['id'], $stmt->fetchAll());
+    }
+
+    private static function allLinkCategoryIds(\PDO $pdo): array
+    {
+        $stmt = $pdo->query('SELECT id FROM link_categories ORDER BY sort_order ASC, id ASC');
+        return array_map(static fn (array $row): int => (int) $row['id'], $stmt->fetchAll());
+    }
+
+    private static function parseOrderedIds(string $orderRaw): array
+    {
+        $parts = array_filter(array_map('trim', explode(',', $orderRaw)), static fn (string $value): bool => $value !== '');
+        return array_map(static fn (string $value): int => (int) $value, $parts);
+    }
+
+    private static function isValidOrderedList(array $orderedIds): bool
+    {
+        if ($orderedIds === []) {
+            return false;
+        }
+
+        foreach ($orderedIds as $id) {
+            if (!is_int($id) || $id <= 0) {
+                return false;
+            }
+        }
+
+        return count($orderedIds) === count(array_unique($orderedIds));
+    }
+
+    private static function sameIdSet(array $left, array $right): bool
+    {
+        if (count($left) !== count($right)) {
+            return false;
+        }
+
+        sort($left);
+        sort($right);
+        return $left === $right;
     }
 
     private static function linkCategoryExists(\PDO $pdo, int $categoryId): bool

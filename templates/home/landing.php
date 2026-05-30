@@ -12,6 +12,7 @@ use Hut\WeatherForecast;
  *   $complexityData— list<array{label:string,count:int}>
  *   $latestAdded   — array{id,name,added_by,added_at}|null
  *   $latestHearted — array{id,name,hearted_by,hearted_at}|null
+ *   $randomDish    — array{id,title,image_url,suggested_by,hearts}|null
  *   $weatherToday  — array{temp,feels_like,temp_max,temp_min,label,icon}|null
  */
 
@@ -181,6 +182,30 @@ $complexityJson = is_string($complexityJson) ? $complexityJson : '[]';
             </div>
         <?php else: ?>
             <p class="empty-state">No hearted games yet.</p>
+        <?php endif; ?>
+    </a>
+
+    <?php /* ── Card 4c: Random suggested dish ───────────────────────────── */ ?>
+    <a href="/news/food" class="landing-card landing-card--activity landing-card--link" aria-labelledby="landing-random-dish-title">
+        <h2 id="landing-random-dish-title" class="landing-card__heading">🍲 Random dish <span class="landing-card__arrow" aria-hidden="true">→</span></h2>
+        <?php if ($randomDish !== null): ?>
+            <div class="landing-activity">
+                <?php if (!empty($randomDish['image_url'])): ?>
+                    <img class="landing-activity__thumb landing-activity__thumb--link"
+                         src="<?= htmlspecialchars((string) $randomDish['image_url']) ?>"
+                         alt="<?= htmlspecialchars((string) $randomDish['title']) ?>"
+                         loading="lazy">
+                <?php else: ?>
+                    <span class="landing-activity__thumb landing-activity__thumb--placeholder">🍽️</span>
+                <?php endif; ?>
+                <div class="landing-activity__info">
+                    <span class="landing-activity__name"><?= htmlspecialchars((string) $randomDish['title']) ?></span>
+                    <p class="landing-activity__meta">Suggested by <?= htmlspecialchars(\Hut\Auth::firstName((string) $randomDish['suggested_by'])) ?></p>
+                    <p class="landing-activity__date">♥ <?= (int) ($randomDish['hearts'] ?? 0) ?> heart<?= (int) ($randomDish['hearts'] ?? 0) !== 1 ? 's' : '' ?></p>
+                </div>
+            </div>
+        <?php else: ?>
+            <p class="empty-state">No dish suggestions yet.</p>
         <?php endif; ?>
     </a>
 

@@ -215,6 +215,25 @@ class GameController
         );
         $randomLink = $randomLinkStmt->fetch(\PDO::FETCH_ASSOC) ?: null;
 
+        // Random suggested dish from the food page
+        $randomDishStmt = $pdo->query(
+            'SELECT fs.id,
+                    fs.title,
+                    fs.image_url,
+                    u.name AS suggested_by,
+                    COALESCE(v.hearts, 0) AS hearts
+             FROM food_suggestions fs
+             JOIN users u ON u.id = fs.user_id
+             LEFT JOIN (
+                SELECT food_suggestion_id, COUNT(DISTINCT user_id) AS hearts
+                FROM food_votes
+                GROUP BY food_suggestion_id
+             ) v ON v.food_suggestion_id = fs.id
+             ORDER BY ' . $randomFunc . '
+             LIMIT 1'
+        );
+        $randomDish = $randomDishStmt->fetch(\PDO::FETCH_ASSOC) ?: null;
+
         // Weather – current conditions only
         $weatherToday = null;
         $weatherRaw   = \Hut\WeatherForecast::get();

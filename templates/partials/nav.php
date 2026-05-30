@@ -12,8 +12,9 @@ $isGamesGroupActive = $isGamesSuggest || $isGamesCollection || $isGamesStatistic
 
 $isNewsChangelog = $currentPath === '/changelog';
 $isNewsLinks = $currentPath === '/links';
+$isNewsFood = $currentPath === '/news/food';
 $isNewsWeather = $currentPath === '/news/weather';
-$isNewsGroupActive = $isNewsChangelog || $isNewsLinks || $isNewsWeather;
+$isNewsGroupActive = $isNewsChangelog || $isNewsLinks || $isNewsFood || $isNewsWeather;
 
 $isResidentsProfile = str_starts_with($currentPath, '/residents/');
 $isResidentsGroupActive = $currentPath === '/residents' || $isResidentsProfile;
@@ -62,6 +63,7 @@ if ($user) {
                 <div class="nav__dropdown">
                     <a href="/changelog" class="nav__dropdown-link<?= $isNewsChangelog ? ' nav__dropdown-link--active' : '' ?>">Changelog</a>
                     <a href="/links" class="nav__dropdown-link<?= $isNewsLinks ? ' nav__dropdown-link--active' : '' ?>">Links</a>
+                    <a href="/news/food" class="nav__dropdown-link<?= $isNewsFood ? ' nav__dropdown-link--active' : '' ?>">Food</a>
                     <a href="/news/weather" class="nav__dropdown-link<?= $isNewsWeather ? ' nav__dropdown-link--active' : '' ?>">Weather</a>
                 </div>
             </div>

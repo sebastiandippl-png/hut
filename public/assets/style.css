@@ -1010,6 +1010,194 @@ img { max-width: 100%; display: block; }
 .heart-tally { font-weight: 700; font-size: 1.05rem; color: var(--color-heart); }
 .heart-label { color: var(--color-heart); }
 
+/* ── Food suggestions ─────────────────────────────────────────────────── */
+.food-page {
+    display: grid;
+    gap: 1.1rem;
+}
+
+.food-form {
+    display: grid;
+    gap: 1rem;
+}
+
+.food-form__fields {
+    display: grid;
+    gap: .9rem;
+}
+
+.food-form__field {
+    display: grid;
+    gap: .35rem;
+}
+
+.food-form__label {
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.food-form__input,
+.food-form__textarea {
+    width: 100%;
+    border-radius: .75rem;
+    border: 1px solid color-mix(in srgb, var(--color-primary) 18%, #dfe3ef 82%);
+    background: #fff;
+    color: var(--color-text);
+    padding: .72rem .85rem;
+    font: inherit;
+    box-sizing: border-box;
+}
+
+.food-form__input:focus,
+.food-form__textarea:focus {
+    outline: 2px solid color-mix(in srgb, var(--color-primary) 40%, white 60%);
+    outline-offset: 1px;
+    border-color: var(--color-primary);
+}
+
+.food-form__textarea {
+    resize: vertical;
+    min-height: 92px;
+}
+
+.food-form__actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.food-list {
+    display: grid;
+    gap: 1rem;
+}
+
+.food-card {
+    display: grid;
+    gap: .85rem;
+}
+
+.food-card__image-link {
+    display: block;
+    border-radius: .95rem;
+    width: min(100%, 180px);
+    max-height: 120px;
+    overflow: hidden;
+}
+
+.food-card__image {
+    display: block;
+    width: 180px;
+    height: 120px;
+    object-fit: cover;
+    background: #edf1f7;
+}
+
+.food-card__image-credit {
+    margin: -.25rem 0 0;
+    color: var(--color-text-muted);
+    font-size: .8rem;
+}
+
+.food-card__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.food-card__title {
+    margin: 0;
+    font-size: 1.2rem;
+    line-height: 1.25;
+}
+
+.food-card__notes {
+    margin: 0;
+    color: var(--color-text-muted);
+}
+
+.food-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem .9rem;
+    color: var(--color-text-muted);
+    font-size: .92rem;
+}
+
+.food-card__meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+}
+
+.food-card__hearted-by {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: .92rem;
+}
+
+.food-card__delete-form {
+    margin: 0;
+}
+
+.food-card__delete {
+    padding-inline: .75rem;
+}
+
+.food-card__owner-actions {
+    display: flex;
+    align-items: flex-start;
+    gap: .5rem;
+}
+
+.food-edit-form {
+    display: grid;
+    gap: .75rem;
+    padding: .9rem;
+    border-radius: .95rem;
+    background: color-mix(in srgb, var(--color-primary) 4%, #ffffff 96%);
+    border: 1px solid color-mix(in srgb, var(--color-primary) 12%, #dfe3ef 88%);
+}
+
+.food-form__actions--inline {
+    justify-content: flex-start;
+}
+
+.food-edit-disclosure {
+    display: grid;
+    gap: .75rem;
+}
+
+.food-edit-disclosure > summary {
+    list-style: none;
+}
+
+.food-edit-disclosure > summary::-webkit-details-marker {
+    display: none;
+}
+
+.food-edit-disclosure__summary {
+    width: fit-content;
+    cursor: pointer;
+}
+
+.food-edit-disclosure[open] > .food-edit-disclosure__summary {
+    margin-bottom: .1rem;
+}
+
+@media (max-width: 640px) {
+    .food-card__header {
+        flex-direction: column;
+    }
+
+    .food-form__actions {
+        justify-content: stretch;
+    }
+
+    .food-form__actions .btn {
+        width: 100%;
+    }
+}
+
 @keyframes heart-fly {
     0%   { transform: translate(-50%, -50%) scale(1);   opacity: 1; }
     100% { transform: translate(calc(-50% + var(--fly-x)), calc(-50% + var(--fly-y))) scale(0.3); opacity: 0; }

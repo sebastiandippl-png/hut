@@ -370,13 +370,22 @@ document.addEventListener('DOMContentLoaded', () => {
     // ── Hearts ───────────────────────────────────────────────────────────────
     document.querySelectorAll('[data-heart-button]').forEach(btn => {
         btn.addEventListener('click', async () => {
-            const gameId = btn.dataset.gameId;
-            if (!gameId) {
+            const controls = btn.closest('.heart-controls');
+            const heartId = controls?.dataset.heartId || btn.dataset.heartId || btn.dataset.gameId || '';
+            if (!heartId) {
                 return;
             }
 
+            const endpointRaw = controls?.dataset.heartEndpoint
+                || btn.dataset.heartEndpoint
+                || (btn.dataset.gameId ? `/games/${heartId}/heart` : `/news/food/${heartId}/heart`);
+
+            const endpoint = /^https?:\/\//i.test(endpointRaw)
+                ? endpointRaw
+                : withBase(endpointRaw);
+
             try {
-                const res = await fetch(withBase(`/games/${gameId}/heart`), {
+                const res = await fetch(endpoint, {
                     method: 'POST',
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest',
@@ -389,11 +398,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 btn.textContent = data.hearted === true ? '♥ Hearted' : '♥ Heart';
                 if (data.hearted === true) spawnHearts(btn);
 
-                document.querySelectorAll(`.heart-controls[data-game-id="${gameId}"] .heart-tally`).forEach(node => {
-                    node.textContent = String(data.hearts);
+                document.querySelectorAll(`.heart-controls[data-heart-id="${heartId}"], .heart-controls[data-game-id="${heartId}"]`).forEach(node => {
+                    const tally = node.querySelector('.heart-tally');
+                    if (tally) {
+                        tally.textContent = String(data.hearts);
+                    }
+                    const labelNode = node.querySelector('.heart-label');
+                    if (labelNode) {
+                        labelNode.textContent = `heart${data.hearts === 1 ? '' : 's'}`;
+                    }
                 });
 
-                document.querySelectorAll(`[data-hearted-by="${gameId}"]`).forEach(node => {
+                document.querySelectorAll(`[data-hearted-by="${heartId}"]`).forEach(node => {
                     if (node.dataset.heartedMode === 'names') {
                         node.innerHTML = linkifyHeartedBy(data.heartedBy);
                     } else {
@@ -401,14 +417,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
 
-                document.querySelectorAll(`.heart-controls[data-game-id="${gameId}"] .heart-summary`).forEach(node => {
+                document.querySelectorAll(`.heart-controls[data-game-id="${heartId}"] .heart-tally`).forEach(node => {
+                    node.textContent = String(data.hearts);
+                });
+
+                document.querySelectorAll(`.heart-controls[data-game-id="${heartId}"] .heart-summary`).forEach(node => {
                     const labelNode = node.querySelector('.heart-label');
                     if (labelNode) {
                         labelNode.textContent = `heart${data.hearts === 1 ? '' : 's'}`;
                     }
                 });
 
-                const collectionCard = document.querySelector(`.collection-card .heart-controls[data-game-id="${gameId}"]`)?.closest('.collection-card');
+                const collectionCard = document.querySelector(`.collection-card .heart-controls[data-game-id="${heartId}"]`)?.closest('.collection-card');
                 if (collectionCard) {
                     collectionCard.dataset.hearts = String(data.hearts);
                 }

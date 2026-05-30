@@ -9,36 +9,14 @@ Users can sign in, browse imported BoardGameGeek games, add games to the shared 
 
 ## Features
 
-- Mandatory authentication for all app usage
-- Local account registration and login
-- Google OAuth login
-- Admin-only BoardGameGeek import for the rankings CSV used by this project
-- Searchable/filterable game catalog
-- Personal game selection toggle ("Add to hut")
-- Shared collection view (who selected what)
-- Heart system with live tally updates
-- Detailed game metadata view
-- Responsive, mobile-friendly light UI
+- Food suggestions board for hut-week meals with hearts and owner-only deletes
 
 ## Tech Stack
 
-- PHP 8.1+
-- PDO for database access
-- SQLite for local development
-- MariaDB for production (via DSN configuration)
-- Composer for dependency management
-- Dotenv for runtime configuration
-- Google API Client for OAuth
-- Vanilla HTML, CSS, and JavaScript
-
-## Project Status
-
-Core MVP is implemented and runnable.
-
-## Quick Start (Local Development)
-
-1. Install dependencies:
-
+- GET /news/food
+- POST /news/food
+- POST /news/food/{id}/heart
+- POST /news/food/{id}/delete
 ```bash
 composer install
 ```

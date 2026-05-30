@@ -56,7 +56,7 @@ if ($user) {
             </div>
             <div class="<?= htmlspecialchars($newsGroupClass) ?>" data-nav-group>
                 <button type="button" class="nav__group-btn" data-nav-group-toggle aria-expanded="false" aria-haspopup="true">
-                    News
+                    Verschiedenes
                     <span class="nav__arrow" aria-hidden="true">▾</span>
                 </button>
                 <div class="nav__dropdown">

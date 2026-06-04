@@ -317,6 +317,49 @@ class Game
     }
 
     /**
+     * Return hut collection games that are ambiguous for "who brings it":
+     * either no tracked owner or multiple tracked owners.
+     */
+    public static function whoBringsItCandidates(): array
+    {
+        $pdo = Database::getInstance();
+        $stmt = $pdo->query(
+            'SELECT g.id,
+                    g.name,
+                    g.rank,
+                    g.yearpublished
+             FROM games g
+             WHERE EXISTS (
+                 SELECT 1
+                 FROM user_games ug
+                 WHERE ug.game_id = g.id
+                   AND ug.selected = 1
+             )
+             ORDER BY ' . self::RANK_ORDER_SQL
+        );
+        $rows = $stmt->fetchAll();
+        $ownerRows = self::collectionOwnersMap(array_column($rows, 'id'));
+
+        $filtered = [];
+        foreach ($rows as $row) {
+            $ownersCsv = $ownerRows[(int) $row['id']] ?? '';
+            $ownerCount = 0;
+            if ($ownersCsv !== '') {
+                $ownerNames = array_values(array_filter(array_map('trim', explode(',', $ownersCsv)), static fn (string $name): bool => $name !== ''));
+                $ownerCount = count($ownerNames);
+            }
+
+            if ($ownerCount === 0 || $ownerCount > 1) {
+                $row['bgg_owned_by'] = $ownersCsv;
+                $row['owner_count'] = $ownerCount;
+                $filtered[] = $row;
+            }
+        }
+
+        return $filtered;
+    }
+
+    /**
      * @param array<int, int|string> $gameIds
      * @return array<int, string>
      */

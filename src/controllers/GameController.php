@@ -406,6 +406,16 @@ class GameController
         require __DIR__ . '/../../templates/games/statistics.php';
     }
 
+    public static function whoBringsIt(array $params): void
+    {
+        Auth::requireLogin();
+
+        $games = Game::whoBringsItCandidates();
+        BggThingFetcher::ensureForPage(array_column($games, 'id'));
+
+        require __DIR__ . '/../../templates/games/who_brings_it.php';
+    }
+
     public static function changelog(array $params): void
     {
         Auth::requireLogin();

@@ -10,7 +10,7 @@ class Resident
     {
         $pdo = Database::getInstance();
         $stmt = $pdo->query(
-            'SELECT id, name, last_login_at, created_at
+            'SELECT id, name, bgg_username, last_login_at, created_at
              FROM users
              WHERE is_approved = 1
              ORDER BY LOWER(name) ASC, id ASC'
@@ -39,7 +39,7 @@ class Resident
     {
         $pdo = Database::getInstance();
         $stmt = $pdo->prepare(
-            'SELECT id, name, last_login_at, created_at
+            'SELECT id, name, bgg_username, last_login_at, created_at
              FROM users
              WHERE id = ? AND is_approved = 1
              LIMIT 1'

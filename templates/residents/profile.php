@@ -14,6 +14,16 @@ require __DIR__ . '/../partials/header.php';
     <div class="resident-profile__meta-top">
         <p><strong>🏡 Registered:</strong> <?= !empty($resident['created_at']) ? htmlspecialchars((string) $resident['created_at']) : 'Unknown' ?></p>
         <p><strong>🕒 Last login:</strong> <?= !empty($resident['last_login_at']) ? htmlspecialchars((string) $resident['last_login_at']) : 'Never logged in' ?></p>
+        <p>
+            <strong>🎲 BGG user:</strong>
+            <?php if (!empty($resident['bgg_username'])): ?>
+                <a href="https://boardgamegeek.com/user/<?= rawurlencode((string) $resident['bgg_username']) ?>" target="_blank" rel="noopener noreferrer">
+                    <?= htmlspecialchars((string) $resident['bgg_username']) ?>
+                </a>
+            <?php else: ?>
+                Not mapped
+            <?php endif; ?>
+        </p>
     </div>
 
     <div class="resident-profile__latest-grid">

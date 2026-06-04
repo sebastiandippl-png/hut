@@ -163,6 +163,7 @@ $router->post('/admin/collections/fetch', [AdminController::class, 'fetchConfigu
 $router->post('/admin/users/{id}/delete', [AdminController::class, 'deleteUser']);
 $router->post('/admin/users/{id}/approve', [AdminController::class, 'approveUser']);
 $router->post('/admin/users/{id}/disapprove', [AdminController::class, 'disapproveUser']);
+$router->post('/admin/users/{id}/bgg-user', [AdminController::class, 'updateUserBggUsername']);
 $router->post('/admin/games/{id}/remove-from-hut', [GameController::class, 'adminRemoveFromHut']);
 $router->get('/admin/links',        [AdminController::class, 'showAdminLinks']);
 $router->post('/admin/links',       [AdminController::class, 'addLink']);

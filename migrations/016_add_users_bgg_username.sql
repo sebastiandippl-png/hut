@@ -1,0 +1,1 @@
+ALTER TABLE users ADD COLUMN bgg_username VARCHAR(255) NULL;

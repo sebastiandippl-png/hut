@@ -29,6 +29,7 @@ class AdminController
                 u.id,
                 u.name,
                 u.email,
+                u.bgg_username,
                 u.is_admin,
                 u.is_approved,
                 u.created_at,
@@ -38,6 +39,7 @@ class AdminController
             ORDER BY u.created_at DESC, u.id DESC'
         );
         $users = $usersStmt->fetchAll();
+        $availableBggUsers = self::availableBggUsers();
 
         require __DIR__ . '/../../templates/admin/users.php';
     }
@@ -458,6 +460,51 @@ class AdminController
         header('Location: ' . \Hut\Url::to('/admin')); exit;
     }
 
+    public static function updateUserBggUsername(array $params): void
+    {
+        Auth::requireAdmin();
+        Auth::requireCsrf();
+
+        $id = isset($params['id']) ? (int) $params['id'] : 0;
+        if ($id <= 0) {
+            $_SESSION['flash_error'] = 'Invalid user id.';
+            header('Location: ' . \Hut\Url::to('/admin/users')); exit;
+        }
+
+        $mappedBggUser = trim((string) ($_POST['bgg_username'] ?? ''));
+        if ($mappedBggUser !== '' && !preg_match('/^[A-Za-z0-9_-]{2,64}$/', $mappedBggUser)) {
+            $_SESSION['flash_error'] = 'Invalid BGG username format.';
+            header('Location: ' . \Hut\Url::to('/admin/users')); exit;
+        }
+
+        if ($mappedBggUser !== '') {
+            $allowed = self::availableBggUsers();
+            if (!in_array($mappedBggUser, $allowed, true)) {
+                $_SESSION['flash_error'] = 'Selected BGG user is not available in the configured/imported list.';
+                header('Location: ' . \Hut\Url::to('/admin/users')); exit;
+            }
+        }
+
+        $pdo = Database::getInstance();
+        $userStmt = $pdo->prepare('SELECT id, name FROM users WHERE id = ? LIMIT 1');
+        $userStmt->execute([$id]);
+        $user = $userStmt->fetch();
+        if (!$user) {
+            $_SESSION['flash_error'] = 'User not found.';
+            header('Location: ' . \Hut\Url::to('/admin/users')); exit;
+        }
+
+        $updateStmt = $pdo->prepare('UPDATE users SET bgg_username = :bgg_username WHERE id = :id');
+        $updateStmt->bindValue(':bgg_username', $mappedBggUser !== '' ? $mappedBggUser : null, $mappedBggUser !== '' ? \PDO::PARAM_STR : \PDO::PARAM_NULL);
+        $updateStmt->bindValue(':id', $id, \PDO::PARAM_INT);
+        $updateStmt->execute();
+
+        $_SESSION['flash_success'] = $mappedBggUser !== ''
+            ? 'Mapped ' . $user['name'] . ' to BGG user ' . $mappedBggUser . '.'
+            : 'Removed BGG mapping for ' . $user['name'] . '.';
+        header('Location: ' . \Hut\Url::to('/admin/users')); exit;
+    }
+
     public static function fetchConfiguredCollections(array $params): void
     {
         Auth::requireAdmin();
@@ -542,6 +589,38 @@ class AdminController
         $parts = array_values(array_filter($parts, static fn (string $value): bool => $value !== ''));
 
         return array_values(array_unique($parts));
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private static function availableBggUsers(): array
+    {
+        $names = self::configuredCollectionUsers();
+
+        $pdo = Database::getInstance();
+        $stmt = $pdo->query('SELECT DISTINCT bgg_user FROM user_collection WHERE bgg_user IS NOT NULL AND TRIM(bgg_user) <> "" ORDER BY bgg_user');
+        $rows = $stmt->fetchAll(\PDO::FETCH_COLUMN);
+        foreach ($rows as $row) {
+            $name = trim((string) $row);
+            if ($name !== '') {
+                $names[] = $name;
+            }
+        }
+
+        $mappedStmt = $pdo->query('SELECT DISTINCT bgg_username FROM users WHERE bgg_username IS NOT NULL AND TRIM(bgg_username) <> "" ORDER BY bgg_username');
+        $mappedRows = $mappedStmt->fetchAll(\PDO::FETCH_COLUMN);
+        foreach ($mappedRows as $row) {
+            $name = trim((string) $row);
+            if ($name !== '') {
+                $names[] = $name;
+            }
+        }
+
+        $names = array_values(array_unique($names));
+        usort($names, static fn (string $a, string $b): int => strcasecmp($a, $b));
+
+        return $names;
     }
 
     /**

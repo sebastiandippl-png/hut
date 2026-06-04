@@ -22,6 +22,7 @@ require __DIR__ . '/../partials/header.php';
                     <tr>
                         <th>Name</th>
                         <th>Email</th>
+                        <th>BGG User</th>
                         <th>Role</th>
                         <th>Status</th>
                         <th>Collection</th>
@@ -40,6 +41,20 @@ require __DIR__ . '/../partials/header.php';
                         <tr>
                             <td><?= $safeName ?></td>
                             <td><?= $safeEmail ?></td>
+                            <td>
+                                <form method="POST" action="/admin/users/<?= (int) $managedUser['id'] ?>/bgg-user" class="admin-users__bgg-map-form">
+                                    <input type="hidden" name="_csrf" value="<?= htmlspecialchars(\Hut\Auth::csrfToken()) ?>">
+                                    <select name="bgg_username" class="form__input" aria-label="Map BGG user for <?= $safeName ?>">
+                                        <option value="">Not mapped</option>
+                                        <?php foreach ($availableBggUsers as $bggUser): ?>
+                                            <option value="<?= htmlspecialchars($bggUser) ?>" <?= (string) ($managedUser['bgg_username'] ?? '') === (string) $bggUser ? 'selected' : '' ?>>
+                                                <?= htmlspecialchars($bggUser) ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                    <button class="btn btn--small" type="submit">Save</button>
+                                </form>
+                            </td>
                             <td><?= (int) $managedUser['is_admin'] === 1 ? 'Admin' : 'User' ?></td>
                             <td><?= (int) $managedUser['is_approved'] === 1 ? 'Approved' : 'Pending' ?></td>
                             <td><?= (int) $managedUser['selected_games'] ?></td>

@@ -1,45 +1,48 @@
 # Hut
 
-Hut is a multi-user PHP web application for planning which board games to bring to a hut trip.
+Hut is multi-user PHP app.
+People plan which board games go to hut trip.
 
-**Note: This is a toy project to learn a few things. Do not expect that this will work for you out of the box. The code also makes string assumptions on my setup**
+Note: toy project for learning. Setup assumptions are personal and may not fit every machine.
 
+## What App Do
 
-Users can sign in, browse imported BoardGameGeek games, add games to the shared shortlist, and heart games to rank what the group should play.
+- Login/register with local auth or Google OAuth
+- Browse imported BoardGameGeek games
+- Add games to hut shortlist and heart games for ranking
+- Keep personal collection links to games
+- Food suggestion board with hearts and owner-only delete/update
+- Weather page for trip location
+- Residents overview/profile
+- Admin import and admin tools
 
-## Features
+## Quick Start
 
-- Food suggestions board for hut-week meals with hearts and owner-only deletes
+1. Install deps:
 
-## Tech Stack
-
-- GET /news/food
-- POST /news/food
-- POST /news/food/{id}/heart
-- POST /news/food/{id}/delete
 ```bash
 composer install
 ```
 
-2. Create environment file:
+2. Create env file:
 
 ```bash
 cp .env.example .env
 ```
 
-3. Edit .env values as needed (especially Google OAuth values).
+3. Edit env values (especially Google OAuth).
 
-4. Start the PHP development server:
+4. Start server:
 
 ```bash
 php -S localhost:8080 -t public/
 ```
 
-5. Open the app:
+5. Open app:
 
 - http://localhost:8080
 
-On startup, migrations are applied automatically.
+Migrations run automatically on startup.
 
 ## Environment Variables
 
@@ -50,17 +53,15 @@ On startup, migrations are applied automatically.
 | DB_USERNAME | Database user (empty for SQLite) |
 | DB_PASSWORD | Database password (empty for SQLite) |
 | SESSION_NAME | PHP session cookie name |
-| SESSION_SECRET | Session secret (set a strong random value in production) |
+| SESSION_SECRET | Session secret (use strong random value in production) |
 | GOOGLE_CLIENT_ID | Google OAuth client ID |
 | GOOGLE_CLIENT_SECRET | Google OAuth client secret |
 | GOOGLE_REDIRECT_URI | OAuth callback URL |
-| USER_COLLECTION / USER_COLLECTIONS | Comma-separated BGG usernames used by admin collection fetch |
-| ALWAYS_ADMIN_EMAILS | Optional comma-separated emails that should always be treated as admin users |
-| BGG_TOKEN | Optional token used for authenticated BGG API requests |
+| USER_COLLECTION / USER_COLLECTIONS | Comma-separated BGG usernames for admin collection fetch |
+| ALWAYS_ADMIN_EMAILS | Optional comma-separated emails always treated as admin |
+| BGG_TOKEN | Optional token for authenticated BGG API requests |
 
-### Example DSNs
-
-SQLite (dev):
+### Example DSN (SQLite dev)
 
 ```env
 DB_DSN=sqlite:storage/hut.sqlite
@@ -68,7 +69,7 @@ DB_USERNAME=
 DB_PASSWORD=
 ```
 
-MariaDB (prod):
+### Example DSN (MariaDB prod)
 
 ```env
 DB_DSN=mysql:host=localhost;dbname=hut;charset=utf8mb4
@@ -76,27 +77,29 @@ DB_USERNAME=hut_user
 DB_PASSWORD=replace_me
 ```
 
-## Authentication
+## Auth
 
-Two sign-in methods are supported:
+Sign-in methods:
 
 - Local email/password
 - Google OAuth
 
-For Google OAuth, configure:
+For Google OAuth:
 
-- Authorized redirect URI in Google Cloud Console
-- Matching GOOGLE_REDIRECT_URI in .env
+- Configure authorized redirect URI in Google Cloud Console
+- Match GOOGLE_REDIRECT_URI in .env
 
-Default local callback path:
+Default callback path:
 
 - /auth/google/callback
 
-## Admin Import Flow
+## Admin Import
 
-Only admin users can upload a BoardGameGeek export.
+Only admins can import BoardGameGeek data.
 
-The primary supported format is the rankings CSV shaped like [bgg_dump/boardgames_ranks.csv](bgg_dump/boardgames_ranks.csv).
+Primary CSV format example:
+
+- [bgg_dump/boardgames_ranks.csv](bgg_dump/boardgames_ranks.csv)
 
 Required CSV columns:
 
@@ -104,47 +107,88 @@ Required CSV columns:
 - name
 - yearpublished
 
-Optional columns such as rank, average, bayesaverage, usersrated, and category-specific rank columns are preserved in the raw import payload and partially surfaced in the description field.
+Optional columns like rank, average, bayesaverage, usersrated, and category ranks are kept in raw payload and partially surfaced.
 
-Routes:
-
-- GET /admin
-- GET /admin/import
-- POST /admin/import
-- POST /admin/collections/fetch
-- POST /admin/users/{id}/delete
-
-If you need to promote a user to admin, update the users table and set is_admin = 1 for that user.
+If user must become admin, set users.is_admin = 1 in database.
 
 ## Main Routes
+
+Public/auth:
 
 - GET /login
 - POST /login
 - GET /register
 - POST /register
 - POST /logout
+- GET /auth/google
+- GET /auth/google/callback
+
+Core app:
+
+- GET /
 - GET /games
+- GET /games/statistics
+- GET /games/suggestions
 - GET /games/{id}
 - POST /games/{id}/select
 - POST /games/{id}/heart
-- GET /games/suggestions
+- POST /games/{id}/add-to-collection
+- POST /games/{id}/remove-from-collection
 - GET /collection
 - GET /changelog
+- GET /links
+
+News/info:
+
+- GET /news/food
+- POST /news/food
+- POST /news/food/{id}/update
+- POST /news/food/{id}/heart
+- POST /news/food/{id}/delete
+- GET /news/weather
+
+Residents:
+
+- GET /residents
+- GET /residents/{id}
+
+Admin:
+
 - GET /admin
+- GET /admin/users
 - GET /admin/import
+- GET /admin/import/status
+- GET /admin/notice
+- GET /admin/links
 - POST /admin/import
+- POST /admin/import/start
+- POST /admin/import/process
+- POST /admin/site-notice
 - POST /admin/collections/fetch
 - POST /admin/users/{id}/delete
+- POST /admin/users/{id}/approve
+- POST /admin/users/{id}/disapprove
+- POST /admin/games/{id}/remove-from-hut
+- POST /admin/links
+- POST /admin/links/{id}/category
+- POST /admin/links/reorder
+- POST /admin/links/{id}/delete
+- POST /admin/links/{id}/refetch-preview
+- POST /admin/links/refetch-all-previews
+- POST /admin/link-categories
+- POST /admin/link-categories/reorder
+- POST /admin/link-categories/{id}/rename
+- POST /admin/link-categories/{id}/delete
 
 ## Deployment Changelog
 
-- `ionos_deploy.sh` generates `storage/changelog.json` on each run.
-- The same generated file is also written into the release artifact, so deployed environments show the latest entries.
-- Entries are taken from recent git commits and include direct links to each commit on GitHub.
+- ionos_deploy.sh generates storage/changelog.json each deploy
+- Generated file is also in release artifact
+- Entries come from recent git commits with GitHub links
 
 ## Database
 
-The schema includes these tables:
+Main tables:
 
 - users
 - games
@@ -154,7 +198,7 @@ The schema includes these tables:
 - user_collection
 - migrations
 
-Migrations live in the migrations directory and are executed automatically at startup.
+Migrations live in migrations/ and run automatically on startup.
 
 ## Directory Layout
 
@@ -168,20 +212,20 @@ storage/         SQLite database file in development
 
 ## Development Notes
 
-- Autoloading uses PSR-4 under the Hut namespace.
-- AJAX is used for suggestions, selection toggles, and heart interactions.
-- .env is ignored by git and should not be committed.
-- There is currently no dedicated automated test suite or linter command in composer.json.
+- PSR-4 autoloading under Hut namespace
+- AJAX used for suggestions, selection toggles, and hearts
+- .env ignored by git and must not be committed
+- No dedicated automated test suite or lint script in composer.json yet
 
 ## Security Notes
 
-- Use HTTPS in production.
-- Set strong secrets and database credentials.
-- Restrict PHP error display in production.
-- Validate Google OAuth settings before deployment.
-- State-changing routes use POST and CSRF protection (including AJAX requests).
-- Session cookies are configured as HttpOnly and SameSite=Lax; `Secure` is enabled when running over HTTPS.
+- Use HTTPS in production
+- Use strong session secret and DB credentials
+- Restrict PHP error display in production
+- Validate Google OAuth settings before deploy
+- State-changing routes must use POST + CSRF (forms and AJAX)
+- Session cookies: HttpOnly, SameSite=Lax, Secure when HTTPS
 
 ## License
 
-No license file has been added yet.
+No license file yet.

@@ -383,21 +383,21 @@ class Game
                      SELECT 1
                      FROM user_personal_collection upc
                      WHERE upc.game_id = g.id
-                       AND upc.user_id = :user_id
+                       AND upc.user_id = :user_id_1
                  )
                  OR EXISTS (
                      SELECT 1
                      FROM user_collection uc
                      JOIN users u ON u.bgg_username = uc.bgg_user
                      WHERE uc.bgg_game_id = g.id
-                       AND u.id = :user_id
+                       AND u.id = :user_id_2
                        AND u.bgg_username IS NOT NULL
                        AND u.bgg_username <> \'\'
                  )
              )
              ORDER BY ' . self::RANK_ORDER_SQL
         );
-        $stmt->execute([':user_id' => $userId]);
+        $stmt->execute([':user_id_1' => $userId, ':user_id_2' => $userId]);
         $rows = $stmt->fetchAll();
         $ownerRows = self::collectionOwnersMap(array_column($rows, 'id'));
 

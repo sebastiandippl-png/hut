@@ -136,6 +136,8 @@ $router->get('/games/{id}',         [GameController::class, 'detail']);
 $router->post('/games/{id}/select', [GameController::class, 'toggleSelect']);
 $router->post('/games/{id}/add-to-collection', [GameController::class, 'addToMyCollection']);
 $router->post('/games/{id}/remove-from-collection', [GameController::class, 'removeFromMyCollection']);
+$router->post('/games/{id}/bring',  [GameController::class, 'claimBring']);
+$router->post('/games/{id}/not-bring', [GameController::class, 'releaseBring']);
 $router->get('/collection',         [GameController::class, 'collection']);
 $router->get('/changelog',          [GameController::class, 'changelog']);
 $router->get('/links',              [LinksController::class, 'showLinks']);

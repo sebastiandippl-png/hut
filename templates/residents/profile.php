@@ -70,8 +70,8 @@ require __DIR__ . '/../partials/header.php';
 
     <div class="resident-profile__lists">
         <section class="resident-profile__list-block">
-            <h2>� Games I shall pack <span class="count-badge"><?= count($gamesToPack) ?></span></h2>
-            <p class="page-header__sub">Hut collection games where <?= htmlspecialchars($residentFirstName) ?> is the only tracked owner.</p>
+            <h2>Games I shall pack <span class="count-badge"><?= count($gamesToPack) ?></span></h2>
+            <p class="page-header__sub">Hut collection games where <?= htmlspecialchars($residentFirstName) ?> is the only tracked owner, or has claimed to bring it.</p>
             <?php if (empty($gamesToPack)): ?>
                 <p class="empty-state">No games currently owned solely by this user in the hut collection.</p>
             <?php else: ?>
@@ -87,6 +87,15 @@ require __DIR__ . '/../partials/header.php';
                                 <?php endif; ?>
                                 <div>
                                     <a href="/games/<?= (int) $game['id'] ?>"><?= htmlspecialchars((string) $game['name']) ?></a>
+                                    <?php if (!empty($game['claimed_by_resident'])): ?>
+                                        <span class="badge badge--success">Claimed to bring</span>
+                                        <?php if ($isOwnProfile): ?>
+                                            <form method="POST" action="/games/<?= (int) $game['id'] ?>/not-bring" style="display: inline;">
+                                                <input type="hidden" name="_csrf" value="<?= htmlspecialchars(\Hut\Auth::csrfToken()) ?>">
+                                                <button class="btn btn--small btn--warning" type="submit">I do not bring it</button>
+                                            </form>
+                                        <?php endif; ?>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </li>
@@ -96,7 +105,7 @@ require __DIR__ . '/../partials/header.php';
         </section>
 
         <section class="resident-profile__list-block">
-            <h2>🤷 Not sure who brings it <span class="count-badge"><?= count($gamesUnclearOwner) ?></span></h2>
+            <h2>Not sure who brings it <span class="count-badge"><?= count($gamesUnclearOwner) ?></span></h2>
             <p class="page-header__sub">Hut collection games <?= htmlspecialchars($residentFirstName) ?> owns along with other tracked owners.</p>
             <?php if (empty($gamesUnclearOwner)): ?>
                 <p class="empty-state">No shared-ownership games in the hut collection for this user.</p>
@@ -114,6 +123,15 @@ require __DIR__ . '/../partials/header.php';
                                 <div>
                                     <a href="/games/<?= (int) $game['id'] ?>"><?= htmlspecialchars((string) $game['name']) ?></a><br>
                                     <small>Also owned by: <?= htmlspecialchars((string) $game['bgg_owned_by']) ?></small>
+                                    <?php if (!empty($game['bringer_name'])): ?>
+                                        <br><small>Already claimed by <?= htmlspecialchars((string) $game['bringer_name']) ?></small>
+                                    <?php elseif ($isOwnProfile): ?>
+                                        <br>
+                                        <form method="POST" action="/games/<?= (int) $game['id'] ?>/bring" style="display: inline;">
+                                            <input type="hidden" name="_csrf" value="<?= htmlspecialchars(\Hut\Auth::csrfToken()) ?>">
+                                            <button class="btn btn--small btn--success" type="submit">I bring it!</button>
+                                        </form>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </li>
@@ -123,7 +141,7 @@ require __DIR__ . '/../partials/header.php';
         </section>
 
         <section class="resident-profile__list-block">
-            <h2>�🎲 Games added by <?= htmlspecialchars($residentFirstName) ?> to the collection <span class="count-badge"><?= count($addedGames) ?></span></h2>
+            <h2>Games added by <?= htmlspecialchars($residentFirstName) ?> to the collection <span class="count-badge"><?= count($addedGames) ?></span></h2>
             <?php if (empty($addedGames)): ?>
                 <p class="empty-state">No games currently added by this user.</p>
             <?php else: ?>

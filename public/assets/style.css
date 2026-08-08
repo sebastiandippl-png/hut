@@ -2233,6 +2233,25 @@ img { max-width: 100%; display: block; }
     margin-left: .35em;
 }
 
+.badge {
+    display: inline-block;
+    font-size: .7rem;
+    font-weight: 600;
+    line-height: 1;
+    padding: .25em .55em;
+    border-radius: 1em;
+    vertical-align: middle;
+}
+
+.badge--success { background: var(--color-success); color: #fff; }
+
+.btn--success { background: var(--color-success); color: #fff; }
+.btn--success:hover { background: #5c838b; text-decoration: none; color: #fff; }
+
+.btn--warning { background: #b08d4f; color: #fff; }
+.btn--warning:hover { background: #957641; text-decoration: none; color: #fff; }
+
+
 .resident-list {
     list-style: none;
     display: flex;

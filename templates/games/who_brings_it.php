@@ -60,6 +60,12 @@ require __DIR__ . '/../partials/header.php';
                             Owned by <?= htmlspecialchars($owners) ?>
                         <?php endif; ?>
                     </p>
+
+                    <?php if (!empty($game['bringer_name'])): ?>
+                        <p class="collection-card__meta">
+                            <span class="badge badge--success">🙋 <?= htmlspecialchars((string) $game['bringer_name']) ?> will bring this!</span>
+                        </p>
+                    <?php endif; ?>
                 </div>
             </article>
         <?php endforeach; ?>

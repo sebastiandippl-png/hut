@@ -7,6 +7,7 @@ namespace Hut\controllers;
 use Hut\Auth;
 use Hut\BggThingFetcher;
 use Hut\Game;
+use Hut\GameBringCommitment;
 use Hut\PersonalCollection;
 use Hut\UserGame;
 
@@ -413,7 +414,46 @@ class GameController
         $games = Game::whoBringsItCandidates();
         BggThingFetcher::ensureForPage(array_column($games, 'id'));
 
+        $bringers = GameBringCommitment::bringersForGames(array_column($games, 'id'));
+        $games = array_map(static function (array $game) use ($bringers): array {
+            $bringer = $bringers[(int) $game['id']] ?? null;
+            $game['bringer_name'] = $bringer['name'] ?? null;
+            return $game;
+        }, $games);
+
         require __DIR__ . '/../../templates/games/who_brings_it.php';
+    }
+
+    public static function claimBring(array $params): void
+    {
+        Auth::requireLogin();
+        Auth::requireCsrf();
+
+        $gameId = (int) $params['id'];
+        $userId = (int) Auth::user()['id'];
+        $claimed = GameBringCommitment::claim($userId, $gameId);
+
+        $_SESSION['flash_success'] = $claimed
+            ? 'You are now marked as bringing this game.'
+            : 'Someone else already claimed bringing this game.';
+
+        header('Location: ' . \Hut\Url::to('/residents/' . $userId));
+        exit;
+    }
+
+    public static function releaseBring(array $params): void
+    {
+        Auth::requireLogin();
+        Auth::requireCsrf();
+
+        $gameId = (int) $params['id'];
+        $userId = (int) Auth::user()['id'];
+        GameBringCommitment::release($userId, $gameId);
+
+        $_SESSION['flash_success'] = 'You are no longer marked as bringing this game.';
+
+        header('Location: ' . \Hut\Url::to('/residents/' . $userId));
+        exit;
     }
 
     public static function changelog(array $params): void

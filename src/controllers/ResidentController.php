@@ -7,6 +7,7 @@ namespace Hut\controllers;
 use Hut\Auth;
 use Hut\BggThingFetcher;
 use Hut\Game;
+use Hut\GameBringCommitment;
 use Hut\Resident;
 
 class ResidentController
@@ -44,16 +45,24 @@ class ResidentController
             return;
         }
 
+        $currentUserId = (int) (Auth::user()['id'] ?? 0);
+        $isOwnProfile = $currentUserId > 0 && $currentUserId === $residentId;
+
         $latestHearted = Resident::latestHeartedGame($residentId);
         $latestAdded = Resident::latestAddedToHutCollection($residentId);
         $addedGames = Resident::gamesAddedToHutCollection($residentId);
         $heartedGames = Resident::heartedGames($residentId);
 
         $ownedHutGames = Game::gamesOwnedByUserInHutCollection($residentId);
+        $bringers = GameBringCommitment::bringersForGames(array_column($ownedHutGames, 'id'));
         $gamesToPack = [];
         $gamesUnclearOwner = [];
         foreach ($ownedHutGames as $game) {
-            if ((int) $game['owner_count'] === 1) {
+            $bringer = $bringers[(int) $game['id']] ?? null;
+            $game['claimed_by_resident'] = $bringer !== null && $bringer['user_id'] === $residentId;
+            $game['bringer_name'] = $bringer['name'] ?? null;
+
+            if ((int) $game['owner_count'] === 1 || $game['claimed_by_resident']) {
                 $gamesToPack[] = $game;
             } else {
                 $gamesUnclearOwner[] = $game;

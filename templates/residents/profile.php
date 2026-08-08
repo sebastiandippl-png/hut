@@ -70,7 +70,60 @@ require __DIR__ . '/../partials/header.php';
 
     <div class="resident-profile__lists">
         <section class="resident-profile__list-block">
-            <h2>🎲 Games added by <?= htmlspecialchars($residentFirstName) ?> to the collection <span class="count-badge"><?= count($addedGames) ?></span></h2>
+            <h2>� Games I shall pack <span class="count-badge"><?= count($gamesToPack) ?></span></h2>
+            <p class="page-header__sub">Hut collection games where <?= htmlspecialchars($residentFirstName) ?> is the only tracked owner.</p>
+            <?php if (empty($gamesToPack)): ?>
+                <p class="empty-state">No games currently owned solely by this user in the hut collection.</p>
+            <?php else: ?>
+                <ul class="resident-list">
+                    <?php foreach ($gamesToPack as $game): ?>
+                        <?php $gameThumb = \Hut\BggThingFetcher::localUrl((int) $game['id']); ?>
+                        <li>
+                            <div class="resident-game-inline resident-game-inline--list">
+                                <?php if ($gameThumb): ?>
+                                    <a href="/games/<?= (int) $game['id'] ?>" tabindex="-1" aria-hidden="true">
+                                        <img class="resident-game-inline__thumb" src="<?= htmlspecialchars($gameThumb) ?>" alt="<?= htmlspecialchars((string) $game['name']) ?>" loading="lazy">
+                                    </a>
+                                <?php endif; ?>
+                                <div>
+                                    <a href="/games/<?= (int) $game['id'] ?>"><?= htmlspecialchars((string) $game['name']) ?></a>
+                                </div>
+                            </div>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
+        </section>
+
+        <section class="resident-profile__list-block">
+            <h2>🤷 Not sure who brings it <span class="count-badge"><?= count($gamesUnclearOwner) ?></span></h2>
+            <p class="page-header__sub">Hut collection games <?= htmlspecialchars($residentFirstName) ?> owns along with other tracked owners.</p>
+            <?php if (empty($gamesUnclearOwner)): ?>
+                <p class="empty-state">No shared-ownership games in the hut collection for this user.</p>
+            <?php else: ?>
+                <ul class="resident-list">
+                    <?php foreach ($gamesUnclearOwner as $game): ?>
+                        <?php $gameThumb = \Hut\BggThingFetcher::localUrl((int) $game['id']); ?>
+                        <li>
+                            <div class="resident-game-inline resident-game-inline--list">
+                                <?php if ($gameThumb): ?>
+                                    <a href="/games/<?= (int) $game['id'] ?>" tabindex="-1" aria-hidden="true">
+                                        <img class="resident-game-inline__thumb" src="<?= htmlspecialchars($gameThumb) ?>" alt="<?= htmlspecialchars((string) $game['name']) ?>" loading="lazy">
+                                    </a>
+                                <?php endif; ?>
+                                <div>
+                                    <a href="/games/<?= (int) $game['id'] ?>"><?= htmlspecialchars((string) $game['name']) ?></a><br>
+                                    <small>Also owned by: <?= htmlspecialchars((string) $game['bgg_owned_by']) ?></small>
+                                </div>
+                            </div>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
+        </section>
+
+        <section class="resident-profile__list-block">
+            <h2>�🎲 Games added by <?= htmlspecialchars($residentFirstName) ?> to the collection <span class="count-badge"><?= count($addedGames) ?></span></h2>
             <?php if (empty($addedGames)): ?>
                 <p class="empty-state">No games currently added by this user.</p>
             <?php else: ?>

@@ -6,6 +6,7 @@ namespace Hut\controllers;
 
 use Hut\Auth;
 use Hut\BggThingFetcher;
+use Hut\Game;
 use Hut\Resident;
 
 class ResidentController
@@ -48,6 +49,17 @@ class ResidentController
         $addedGames = Resident::gamesAddedToHutCollection($residentId);
         $heartedGames = Resident::heartedGames($residentId);
 
+        $ownedHutGames = Game::gamesOwnedByUserInHutCollection($residentId);
+        $gamesToPack = [];
+        $gamesUnclearOwner = [];
+        foreach ($ownedHutGames as $game) {
+            if ((int) $game['owner_count'] === 1) {
+                $gamesToPack[] = $game;
+            } else {
+                $gamesUnclearOwner[] = $game;
+            }
+        }
+
         $gameIds = [];
         if ($latestHearted !== null) {
             $gameIds[] = (int) $latestHearted['id'];
@@ -60,6 +72,9 @@ class ResidentController
             $gameIds[] = (int) $game['id'];
         }
         foreach ($heartedGames as $game) {
+            $gameIds[] = (int) $game['id'];
+        }
+        foreach ($ownedHutGames as $game) {
             $gameIds[] = (int) $game['id'];
         }
 

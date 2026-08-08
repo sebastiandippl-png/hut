@@ -360,6 +360,61 @@ class Game
     }
 
     /**
+     * Return hut collection games tracked as owned (BGG import or manual personal collection)
+     * by the given user, with owner count/CSV attached so callers can split single vs shared owners.
+     */
+    public static function gamesOwnedByUserInHutCollection(int $userId): array
+    {
+        $pdo = Database::getInstance();
+        $stmt = $pdo->prepare(
+            'SELECT g.id,
+                    g.name,
+                    g.rank,
+                    g.yearpublished
+             FROM games g
+             WHERE EXISTS (
+                 SELECT 1
+                 FROM user_games ug
+                 WHERE ug.game_id = g.id
+                   AND ug.selected = 1
+             )
+             AND (
+                 EXISTS (
+                     SELECT 1
+                     FROM user_personal_collection upc
+                     WHERE upc.game_id = g.id
+                       AND upc.user_id = :user_id
+                 )
+                 OR EXISTS (
+                     SELECT 1
+                     FROM user_collection uc
+                     JOIN users u ON u.bgg_username = uc.bgg_user
+                     WHERE uc.bgg_game_id = g.id
+                       AND u.id = :user_id
+                       AND u.bgg_username IS NOT NULL
+                       AND u.bgg_username <> \'\'
+                 )
+             )
+             ORDER BY ' . self::RANK_ORDER_SQL
+        );
+        $stmt->execute([':user_id' => $userId]);
+        $rows = $stmt->fetchAll();
+        $ownerRows = self::collectionOwnersMap(array_column($rows, 'id'));
+
+        return array_map(static function (array $row) use ($ownerRows): array {
+            $ownersCsv = $ownerRows[(int) $row['id']] ?? '';
+            $ownerCount = 0;
+            if ($ownersCsv !== '') {
+                $ownerNames = array_values(array_filter(array_map('trim', explode(',', $ownersCsv)), static fn (string $name): bool => $name !== ''));
+                $ownerCount = count($ownerNames);
+            }
+            $row['bgg_owned_by'] = $ownersCsv;
+            $row['owner_count'] = $ownerCount;
+            return $row;
+        }, $rows);
+    }
+
+    /**
      * @param array<int, int|string> $gameIds
      * @return array<int, string>
      */

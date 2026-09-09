@@ -16,7 +16,8 @@ $isNewsLinks = $currentPath === '/links';
 $isNewsFood = $currentPath === '/news/food';
 $isNewsWeather = $currentPath === '/news/weather';
 $isNewsShoppingList = $currentPath === '/news/shopping-list';
-$isNewsGroupActive = $isNewsChangelog || $isNewsLinks || $isNewsFood || $isNewsWeather || $isNewsShoppingList;
+$isNewsExpenses = $currentPath === '/news/expenses';
+$isNewsGroupActive = $isNewsChangelog || $isNewsLinks || $isNewsFood || $isNewsWeather || $isNewsShoppingList || $isNewsExpenses;
 
 $isResidentsProfile = str_starts_with($currentPath, '/residents/');
 $isResidentsGroupActive = $currentPath === '/residents' || $isResidentsProfile;
@@ -69,6 +70,7 @@ if ($user) {
                     <a href="/news/food" class="nav__dropdown-link<?= $isNewsFood ? ' nav__dropdown-link--active' : '' ?>">Food</a>
                     <a href="/news/weather" class="nav__dropdown-link<?= $isNewsWeather ? ' nav__dropdown-link--active' : '' ?>">Weather</a>
                     <a href="/news/shopping-list" class="nav__dropdown-link<?= $isNewsShoppingList ? ' nav__dropdown-link--active' : '' ?>">Einkaufsliste</a>
+                    <a href="/news/expenses" class="nav__dropdown-link<?= $isNewsExpenses ? ' nav__dropdown-link--active' : '' ?>">Ausgaben</a>
                 </div>
             </div>
             <div class="<?= htmlspecialchars($residentsGroupClass) ?>" data-nav-group>

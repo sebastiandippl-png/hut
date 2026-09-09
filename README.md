@@ -146,6 +146,8 @@ News/info:
 - POST /news/food/{id}/heart
 - POST /news/food/{id}/delete
 - GET /news/weather
+- GET /news/shopping-list
+- GET /news/expenses
 
 Residents:
 

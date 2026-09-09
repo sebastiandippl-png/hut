@@ -32,6 +32,10 @@ function linkifyResidentNames(string $names, array $map): string
     <p class="empty-state">No games selected yet. <a href="/games">Suggest games</a> and add some!</p>
 <?php else: ?>
 
+    <div class="collection-search">
+        <input type="search" class="collection-search__input" placeholder="Search games…" data-collection-search aria-label="Search games in the hut collection">
+    </div>
+
     <div class="collection-filters">
         <div class="collection-filters__group">
             <span class="collection-filters__label">Best players</span>
@@ -116,6 +120,7 @@ function linkifyResidentNames(string $names, array $map): string
             }
             ?>
             <article class="collection-card"
+                     data-name="<?= htmlspecialchars(mb_strtolower((string) $game['name']), ENT_QUOTES, 'UTF-8') ?>"
                      data-bestplayercount="<?= $bestPlayerCountNum >= 0 ? $bestPlayerCountNum : -1 ?>"
                      data-maxplayers="<?= $maxPlayers > 0 ? $maxPlayers : -1 ?>"
                      data-maxplaytime="<?= $maxPlaytime > 0 ? $maxPlaytime : -1 ?>"

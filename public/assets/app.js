@@ -1565,6 +1565,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let mechanicFilter = '';
         let designerFilter = '';
         let heartsFilter = '';
+        let searchFilter = '';
 
         const filterCards = () => {
             const bpSel  = document.querySelector('[data-collection-filter="bestplayers"]')?.value  || '';
@@ -1582,9 +1583,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 const mechs = String(card.dataset.mechanics || '');
                 const designers = String(card.dataset.designers || '');
                 const hearts = Number(card.dataset.hearts);
+                const name = String(card.dataset.name || '');
 
                 let show = true;
 
+                if (searchFilter !== '') {
+                    show = show && name.includes(searchFilter);
+                }
                 if (bpSel !== '') {
                     const bpVal = Number(bpSel);
                     show = show && (bpVal === 6 ? bp >= 6 : bp === bpVal);
@@ -1667,6 +1672,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.querySelector('[data-collection-filter-reset]')?.addEventListener('click', () => {
             document.querySelectorAll('[data-collection-filter]').forEach(el => { el.value = ''; });
+            const searchInput = document.querySelector('[data-collection-search]');
+            if (searchInput) {
+                searchInput.value = '';
+            }
             document.querySelectorAll('[data-collection-filter-group]').forEach(group => {
                 group.querySelectorAll('.filter-seg').forEach((seg, i) => {
                     seg.classList.toggle('filter-seg--active', i === 0);
@@ -1678,6 +1687,7 @@ document.addEventListener('DOMContentLoaded', () => {
             mechanicFilter = '';
             designerFilter = '';
             heartsFilter = '';
+            searchFilter = '';
             document.querySelectorAll('[data-complexity-filters] .filter-seg').forEach((b, i) => {
                 b.classList.toggle('filter-seg--active', i === 0);
             });
@@ -1686,6 +1696,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // ── Apply URL params on page load ─────────────────────────────────
         const collectionParams = new URLSearchParams(window.location.search);
+
+        const urlSearch = collectionParams.get('search') || '';
+        if (urlSearch !== '') {
+            searchFilter = urlSearch.toLowerCase();
+            const searchInput = document.querySelector('[data-collection-search]');
+            if (searchInput) {
+                searchInput.value = urlSearch;
+            }
+        }
+
+        document.querySelector('[data-collection-search]')?.addEventListener('input', (e) => {
+            searchFilter = (e.target.value || '').trim().toLowerCase();
+            filterCards();
+        });
 
         const urlComplexity = collectionParams.get('complexity') || '';
         if (['light', 'medium', 'complex'].includes(urlComplexity)) {

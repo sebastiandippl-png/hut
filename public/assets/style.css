@@ -1903,6 +1903,11 @@ img { max-width: 100%; display: block; }
 .card h2 { font-size: 1.1rem; margin-bottom: .75rem; }
 .card ol { padding-left: 1.25rem; font-size: .95rem; line-height: 1.8; }
 
+/* ── Google Sheet embed ─────────────────────────────────────────────────── */
+/* height is bumped and clipped to crop Google's tab bar/branding strip at the bottom */
+.sheet-embed { position: relative; height: 75vh; padding: 0; overflow: hidden; }
+.sheet-embed__frame { position: absolute; top: 0; left: 0; width: 100%; height: calc(100% + 43px); border: 0; }
+
 /* ── Error pages ─────────────────────────────────────────────────────────── */
 .error-page { text-align: center; padding: 4rem 1rem; }
 .error-page h1 { font-size: 5rem; color: var(--color-text-muted); }

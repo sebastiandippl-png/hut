@@ -17,6 +17,7 @@ use Hut\controllers\FoodController;
 use Hut\controllers\VoteController;
 use Hut\controllers\LinksController;
 use Hut\controllers\WeatherController;
+use Hut\controllers\ShoppingListController;
 use Hut\controllers\ResidentController;
 
 $dotenv = Dotenv::createImmutable(__DIR__ . '/..');
@@ -147,6 +148,7 @@ $router->post('/news/food/{id}/update', [FoodController::class, 'update']);
 $router->post('/news/food/{id}/heart', [FoodController::class, 'heart']);
 $router->post('/news/food/{id}/delete', [FoodController::class, 'delete']);
 $router->get('/news/weather',       [WeatherController::class, 'showWeather']);
+$router->get('/news/shopping-list', [ShoppingListController::class, 'show']);
 $router->get('/residents',          [ResidentController::class, 'index']);
 $router->get('/residents/{id}',     [ResidentController::class, 'profile']);
 $router->post('/games/{id}/heart',  [VoteController::class, 'heart']);

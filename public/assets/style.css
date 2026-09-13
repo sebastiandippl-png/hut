@@ -3004,6 +3004,44 @@ img { max-width: 100%; display: block; }
     margin: .15rem 0 0;
 }
 
+/* Recent activity feed card */
+.landing-activity-feed {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: .55rem;
+}
+
+.landing-activity-feed__item {
+    display: flex;
+    align-items: baseline;
+    gap: .5rem;
+}
+
+.landing-activity-feed__icon {
+    flex-shrink: 0;
+}
+
+.landing-activity-feed__text {
+    flex: 1;
+    min-width: 0;
+    font-size: .85rem;
+    color: var(--color-text);
+}
+
+.landing-activity-feed__text a {
+    font-weight: 600;
+}
+
+.landing-activity-feed__time {
+    flex-shrink: 0;
+    font-size: .76rem;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+}
+
 /* Weather card */
 .landing-weather {
     display: flex;

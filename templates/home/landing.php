@@ -12,6 +12,7 @@ use Hut\WeatherForecast;
  *   $complexityData— list<array{label:string,count:int}>
  *   $latestAdded   — array{id,name,added_by,added_at}|null
  *   $latestHearted — array{id,name,hearted_by,hearted_at}|null
+ *   $recentActivity— list<array{type,actor,subject,entity_id,url,occurred_at}>
  *   $randomDish    — array{id,title,image_url,suggested_by,hearts}|null
  *   $weatherToday  — array{temp,feels_like,temp_max,temp_min,label,icon}|null
  */
@@ -47,6 +48,34 @@ $linkifyName = static function (string $fullName) use ($residentNameMap): string
         return '<a href="/residents/' . $residentNameMap[$first] . '">' . htmlspecialchars($first) . '</a>';
     }
     return htmlspecialchars($first !== '' ? $first : $fullName);
+};
+
+// Helper: format a datetime string as a compact relative time (e.g. "5m ago")
+$fmtRelative = static function (string $dt): string {
+    $parsed = \DateTime::createFromFormat('Y-m-d H:i:s', $dt) ?: false;
+    if ($parsed === false) {
+        return htmlspecialchars($dt);
+    }
+    $diff = max(0, time() - $parsed->getTimestamp());
+    if ($diff < 60) {
+        return 'just now';
+    }
+    if ($diff < 3600) {
+        return (int) floor($diff / 60) . 'm ago';
+    }
+    return (int) floor($diff / 3600) . 'h ago';
+};
+
+// Helper: icon + verb for a recent-activity entry type
+$activityLabel = static function (string $type): array {
+    return match ($type) {
+        'added_game' => ['🎲', 'added'],
+        'hearted_game' => ['♥', 'hearted'],
+        'suggested_food' => ['🍲', 'suggested'],
+        'hearted_food' => ['♥', 'hearted'],
+        'bring_commitment' => ['🎒', 'is bringing'],
+        default => ['•', 'updated'],
+    };
 };
 
 $complexityJson = json_encode($complexityData, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
@@ -129,6 +158,29 @@ $complexityJson = is_string($complexityJson) ? $complexityJson : '[]';
             </div>
         <?php else: ?>
             <p class="empty-state">No games have been hearted yet.</p>
+        <?php endif; ?>
+    </section>
+
+    <?php /* ── Card 3b: Recent activity (last 24h) ─────────────────────── */ ?>
+    <section class="landing-card landing-card--activity" aria-labelledby="landing-recent-activity-title">
+        <h2 id="landing-recent-activity-title" class="landing-card__heading">🕒 Recent activity <span class="landing-card__sub">last 24h</span></h2>
+        <?php if (!empty($recentActivity)): ?>
+            <ul class="landing-activity-feed">
+                <?php foreach ($recentActivity as $activity): ?>
+                    <?php [$activityIcon, $activityVerb] = $activityLabel((string) $activity['type']); ?>
+                    <li class="landing-activity-feed__item">
+                        <span class="landing-activity-feed__icon" aria-hidden="true"><?= $activityIcon ?></span>
+                        <span class="landing-activity-feed__text">
+                            <?= $linkifyName((string) $activity['actor']) ?>
+                            <?= htmlspecialchars($activityVerb) ?>
+                            <a href="<?= htmlspecialchars((string) $activity['url']) ?>"><?= htmlspecialchars((string) $activity['subject']) ?></a>
+                        </span>
+                        <span class="landing-activity-feed__time"><?= $fmtRelative((string) $activity['occurred_at']) ?></span>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+        <?php else: ?>
+            <p class="empty-state">No activity in the last 24 hours.</p>
         <?php endif; ?>
     </section>
 

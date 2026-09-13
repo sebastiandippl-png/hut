@@ -179,6 +179,9 @@ class GameController
         $latestAdded   = \Hut\Resident::latestAddedGameGlobally();
         $latestHearted = \Hut\Resident::latestHeartedGameGlobally();
 
+        // Recent shared activity across all residents in the last 24 hours
+        $recentActivity = \Hut\Resident::recentActivity(24, 8);
+
         // Most hearted game overall
         $mostHeartedStmt = $pdo->query(
             'SELECT g.id, g.name, COUNT(DISTINCT v.user_id) AS hearts

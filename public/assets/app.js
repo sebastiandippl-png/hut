@@ -1573,6 +1573,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const mptSel = document.querySelector('[data-collection-filter="maxplaytime"]')?.value  || '';
 
             let visible = 0;
+            let wellHearted = 0;
             collectionGrid.querySelectorAll('.collection-card').forEach(card => {
                 const bp  = Number(card.dataset.bestplayercount);
                 const mp  = Number(card.dataset.maxplayers);
@@ -1630,11 +1631,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (heartsFilter === '6+')  { show = show && (hearts >= 6); }
 
                 card.hidden = !show;
-                if (show) visible++;
+                if (show) {
+                    visible++;
+                    if (hearts >= 2) wellHearted++;
+                }
             });
 
             if (countEl) {
-                countEl.textContent = `${visible} game${visible !== 1 ? 's' : ''}`;
+                countEl.textContent = `${visible} game${visible !== 1 ? 's' : ''} (${wellHearted} with 2+ hearts)`;
             }
         };
 

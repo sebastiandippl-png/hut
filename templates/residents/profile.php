@@ -121,7 +121,10 @@ require __DIR__ . '/../partials/header.php';
                                     </a>
                                 <?php endif; ?>
                                 <div>
-                                    <a href="/games/<?= (int) $game['id'] ?>"><?= htmlspecialchars((string) $game['name']) ?></a><br>
+                                    <a href="/games/<?= (int) $game['id'] ?>"><?= htmlspecialchars((string) $game['name']) ?></a>
+                                    <?php $gameHearts = (int) ($game['hearts'] ?? 0); ?>
+                                    <span class="heart-summary"><span class="heart-tally">♥ <?= $gameHearts ?></span></span>
+                                    <br>
                                     <small>Also owned by: <?= htmlspecialchars((string) $game['bgg_owned_by']) ?></small>
                                     <?php if (!empty($game['bringer_name'])): ?>
                                         <br><small>Already claimed by <?= htmlspecialchars((string) $game['bringer_name']) ?></small>

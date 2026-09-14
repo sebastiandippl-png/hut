@@ -400,8 +400,9 @@ class Game
         $stmt->execute([':user_id_1' => $userId, ':user_id_2' => $userId]);
         $rows = $stmt->fetchAll();
         $ownerRows = self::collectionOwnersMap(array_column($rows, 'id'));
+        $heartRows = self::heartCountsMap(array_column($rows, 'id'));
 
-        return array_map(static function (array $row) use ($ownerRows): array {
+        return array_map(static function (array $row) use ($ownerRows, $heartRows): array {
             $ownersCsv = $ownerRows[(int) $row['id']] ?? '';
             $ownerCount = 0;
             if ($ownersCsv !== '') {
@@ -410,6 +411,7 @@ class Game
             }
             $row['bgg_owned_by'] = $ownersCsv;
             $row['owner_count'] = $ownerCount;
+            $row['hearts'] = $heartRows[(int) $row['id']] ?? 0;
             return $row;
         }, $rows);
     }
@@ -470,6 +472,38 @@ class Game
         }
 
         return $ownersByGame;
+    }
+
+    /**
+     * @param array<int, int|string> $gameIds
+     * @return array<int, int>
+     */
+    public static function heartCountsMap(array $gameIds): array
+    {
+        $ids = array_values(array_unique(array_map('intval', $gameIds)));
+        $ids = array_values(array_filter($ids, static fn (int $id): bool => $id > 0));
+        if ($ids === []) {
+            return [];
+        }
+
+        $pdo = Database::getInstance();
+        $placeholders = implode(',', array_map(static fn (int $index): string => ':id_' . $index, array_keys($ids)));
+
+        $stmt = $pdo->prepare(
+            "SELECT game_id, COUNT(DISTINCT user_id) AS hearts
+             FROM votes
+             WHERE game_id IN ($placeholders)
+             GROUP BY game_id"
+        );
+        self::bindGameIds($stmt, $ids);
+        $stmt->execute();
+
+        $heartsByGame = [];
+        foreach ($stmt->fetchAll() as $row) {
+            $heartsByGame[(int) $row['game_id']] = (int) $row['hearts'];
+        }
+
+        return $heartsByGame;
     }
 
     /**

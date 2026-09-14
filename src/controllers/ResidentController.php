@@ -69,6 +69,12 @@ class ResidentController
             }
         }
 
+        $byHeartsDesc = static function (array $a, array $b): int {
+            return (int) ($b['hearts'] ?? 0) <=> (int) ($a['hearts'] ?? 0);
+        };
+        usort($gamesToPack, $byHeartsDesc);
+        usort($gamesUnclearOwner, $byHeartsDesc);
+
         $gameIds = [];
         if ($latestHearted !== null) {
             $gameIds[] = (int) $latestHearted['id'];

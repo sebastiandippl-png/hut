@@ -87,6 +87,8 @@ require __DIR__ . '/../partials/header.php';
                                 <?php endif; ?>
                                 <div>
                                     <a href="/games/<?= (int) $game['id'] ?>"><?= htmlspecialchars((string) $game['name']) ?></a>
+                                    <?php $gameHearts = (int) ($game['hearts'] ?? 0); ?>
+                                    <span class="heart-summary"><span class="heart-tally">♥ <?= $gameHearts ?></span></span>
                                     <?php if (!empty($game['claimed_by_resident'])): ?>
                                         <span class="badge badge--success">Claimed to bring</span>
                                         <?php if ($isOwnProfile): ?>

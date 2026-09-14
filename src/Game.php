@@ -32,7 +32,7 @@ class Game
         string $complexity = ''
     ): array {
         $pdo    = Database::getInstance();
-        $where  = ['1=1'];
+        $where  = ['(g.is_expansion IS NULL OR g.is_expansion = 0)'];
         $params = [];
         $joins  = [];
 

@@ -2889,12 +2889,12 @@ img { max-width: 100%; display: block; }
     outline: none;
 }
 
-.landing-card--span2 {
-    grid-row: span 2;
+.landing-card--span4 {
+    grid-row: span 4;
 }
 
 @media (max-width: 640px) {
-    .landing-card--span2 {
+    .landing-card--span4 {
         grid-row: auto;
     }
 }

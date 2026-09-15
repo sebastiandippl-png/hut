@@ -162,7 +162,7 @@ $complexityJson = is_string($complexityJson) ? $complexityJson : '[]';
     </section>
 
     <?php /* ── Card 3b: Recent activity (last 50 changes) ──────────────── */ ?>
-    <section class="landing-card landing-card--activity landing-card--span2 landing-card--activity-feed" aria-labelledby="landing-recent-activity-title">
+    <section class="landing-card landing-card--activity landing-card--span4 landing-card--activity-feed" aria-labelledby="landing-recent-activity-title">
         <h2 id="landing-recent-activity-title" class="landing-card__heading">🕒 Recent activity <span class="landing-card__sub">last 50 changes</span></h2>
         <?php if (!empty($recentActivity)): ?>
             <ul class="landing-activity-feed">

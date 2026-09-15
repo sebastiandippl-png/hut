@@ -3016,6 +3016,11 @@ img { max-width: 100%; display: block; }
 }
 
 /* Recent activity feed card */
+.landing-card--activity-feed {
+    /* 4x the height of a normal (non-spanned) activity card, so the feed scrolls internally */
+    max-height: calc(4 * 9rem);
+}
+
 .landing-activity-feed {
     list-style: none;
     margin: 0;

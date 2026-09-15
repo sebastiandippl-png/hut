@@ -155,22 +155,21 @@ class Resident
     }
 
     /**
-     * Returns recent shared activity (games added/hearted, food suggested/hearted, bring
-     * commitments) from approved users within the given number of hours, newest first.
+     * Returns the most recent shared activity (games added/hearted, food suggested/hearted,
+     * bring commitments) from approved users, newest first.
      *
      * @return list<array{type:string,actor:string,subject:string,entity_id:int,url:string,occurred_at:string}>
      */
-    public static function recentActivity(int $hours = 24, int $limit = 12): array
+    public static function recentActivity(int $limit = 50): array
     {
         $pdo = Database::getInstance();
-        $cutoff = (new \DateTimeImmutable("-{$hours} hours"))->format('Y-m-d H:i:s');
 
         $stmt = $pdo->prepare(
             "SELECT 'added_game' AS type, u.name AS actor, g.name AS subject, g.id AS entity_id, ug.created_at AS occurred_at
              FROM user_games ug
              JOIN games g ON g.id = ug.game_id
              JOIN users u ON u.id = ug.user_id
-             WHERE ug.selected = 1 AND u.is_approved = 1 AND ug.created_at >= ?
+             WHERE ug.selected = 1 AND u.is_approved = 1
 
              UNION ALL
 
@@ -178,14 +177,14 @@ class Resident
              FROM votes v
              JOIN games g ON g.id = v.game_id
              JOIN users u ON u.id = v.user_id
-             WHERE u.is_approved = 1 AND v.created_at >= ?
+             WHERE u.is_approved = 1
 
              UNION ALL
 
              SELECT 'suggested_food', u.name, fs.title, fs.id, fs.created_at
              FROM food_suggestions fs
              JOIN users u ON u.id = fs.user_id
-             WHERE u.is_approved = 1 AND fs.created_at >= ?
+             WHERE u.is_approved = 1
 
              UNION ALL
 
@@ -193,7 +192,7 @@ class Resident
              FROM food_votes fv
              JOIN food_suggestions fs ON fs.id = fv.food_suggestion_id
              JOIN users u ON u.id = fv.user_id
-             WHERE u.is_approved = 1 AND fv.created_at >= ?
+             WHERE u.is_approved = 1
 
              UNION ALL
 
@@ -201,17 +200,12 @@ class Resident
              FROM game_bring_commitments gbc
              JOIN games g ON g.id = gbc.game_id
              JOIN users u ON u.id = gbc.user_id
-             WHERE u.is_approved = 1 AND gbc.created_at >= ?
+             WHERE u.is_approved = 1
 
              ORDER BY occurred_at DESC
              LIMIT ?"
         );
-        $stmt->bindValue(1, $cutoff);
-        $stmt->bindValue(2, $cutoff);
-        $stmt->bindValue(3, $cutoff);
-        $stmt->bindValue(4, $cutoff);
-        $stmt->bindValue(5, $cutoff);
-        $stmt->bindValue(6, $limit, \PDO::PARAM_INT);
+        $stmt->bindValue(1, $limit, \PDO::PARAM_INT);
         $stmt->execute();
 
         $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);

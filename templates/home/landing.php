@@ -161,9 +161,9 @@ $complexityJson = is_string($complexityJson) ? $complexityJson : '[]';
         <?php endif; ?>
     </section>
 
-    <?php /* ── Card 3b: Recent activity (last 24h) ─────────────────────── */ ?>
-    <section class="landing-card landing-card--activity landing-card--span2" aria-labelledby="landing-recent-activity-title">
-        <h2 id="landing-recent-activity-title" class="landing-card__heading">🕒 Recent activity <span class="landing-card__sub">last 24h</span></h2>
+    <?php /* ── Card 3b: Recent activity (last 50 changes) ──────────────── */ ?>
+    <section class="landing-card landing-card--activity landing-card--span2 landing-card--activity-feed" aria-labelledby="landing-recent-activity-title">
+        <h2 id="landing-recent-activity-title" class="landing-card__heading">🕒 Recent activity <span class="landing-card__sub">last 50 changes</span></h2>
         <?php if (!empty($recentActivity)): ?>
             <ul class="landing-activity-feed">
                 <?php foreach ($recentActivity as $activity): ?>
@@ -180,7 +180,7 @@ $complexityJson = is_string($complexityJson) ? $complexityJson : '[]';
                 <?php endforeach; ?>
             </ul>
         <?php else: ?>
-            <p class="empty-state">No activity in the last 24 hours.</p>
+            <p class="empty-state">No recent activity.</p>
         <?php endif; ?>
     </section>
 

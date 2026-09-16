@@ -417,6 +417,74 @@ class Game
     }
 
     /**
+     * Whether the given user is a tracked owner of the game (manual personal collection or BGG import).
+     */
+    public static function isOwnedByUser(int $userId, int $gameId): bool
+    {
+        $pdo = Database::getInstance();
+        $stmt = $pdo->prepare(
+            'SELECT
+                EXISTS (
+                    SELECT 1
+                    FROM user_personal_collection upc
+                    WHERE upc.game_id = :game_id_1
+                      AND upc.user_id = :user_id_1
+                ) AS owns_personal,
+                EXISTS (
+                    SELECT 1
+                    FROM user_collection uc
+                    JOIN users u ON u.bgg_username = uc.bgg_user
+                    WHERE uc.bgg_game_id = :game_id_2
+                      AND u.id = :user_id_2
+                      AND u.bgg_username IS NOT NULL
+                      AND u.bgg_username <> \'\'
+                ) AS owns_bgg'
+        );
+        $stmt->execute([
+            ':game_id_1' => $gameId,
+            ':user_id_1' => $userId,
+            ':game_id_2' => $gameId,
+            ':user_id_2' => $userId,
+        ]);
+
+        $row = $stmt->fetch();
+
+        return (bool) ($row['owns_personal'] ?? false) || (bool) ($row['owns_bgg'] ?? false);
+    }
+
+    /**
+     * Decide whether a user may remove a game from the shared hut collection.
+     * Exclusive owners may always remove; otherwise only someone who added the game
+     * themselves (any of possibly several independent adders) may remove it.
+     *
+     * @return array{allowed: bool, reason: ?string}
+     */
+    public static function removalEligibility(int $userId, int $gameId): array
+    {
+        $ownersCsv = self::collectionOwnersMap([$gameId])[$gameId] ?? '';
+        $ownerCount = 0;
+        if ($ownersCsv !== '') {
+            $ownerNames = array_values(array_filter(array_map('trim', explode(',', $ownersCsv)), static fn (string $name): bool => $name !== ''));
+            $ownerCount = count($ownerNames);
+        }
+
+        if ($ownerCount === 1 && self::isOwnedByUser($userId, $gameId)) {
+            return ['allowed' => true, 'reason' => CollectionRemoval::REASON_EXCLUSIVE_OWNER];
+        }
+
+        $pdo = Database::getInstance();
+        $stmt = $pdo->prepare(
+            'SELECT 1 FROM user_games WHERE user_id = ? AND game_id = ? AND selected = 1 LIMIT 1'
+        );
+        $stmt->execute([$userId, $gameId]);
+        if ($stmt->fetchColumn() !== false) {
+            return ['allowed' => true, 'reason' => CollectionRemoval::REASON_SUGGESTER];
+        }
+
+        return ['allowed' => false, 'reason' => null];
+    }
+
+    /**
      * @param array<int, int|string> $gameIds
      * @return array<int, string>
      */

@@ -41,6 +41,16 @@ class GameBringCommitment
         return $stmt->rowCount() > 0;
     }
 
+    /**
+     * Clear any claim on a game, regardless of who holds it (used when a game leaves the hut collection).
+     */
+    public static function clearForGame(int $gameId): void
+    {
+        $pdo = Database::getInstance();
+        $stmt = $pdo->prepare('DELETE FROM game_bring_commitments WHERE game_id = ?');
+        $stmt->execute([$gameId]);
+    }
+
     public static function bringerUserId(int $gameId): ?int
     {
         $pdo = Database::getInstance();

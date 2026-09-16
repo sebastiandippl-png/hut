@@ -140,8 +140,10 @@ $router->post('/games/{id}/add-to-collection', [GameController::class, 'addToMyC
 $router->post('/games/{id}/remove-from-collection', [GameController::class, 'removeFromMyCollection']);
 $router->post('/games/{id}/bring',  [GameController::class, 'claimBring']);
 $router->post('/games/{id}/not-bring', [GameController::class, 'releaseBring']);
+$router->post('/games/{id}/remove-from-hut', [GameController::class, 'removeFromHut']);
 $router->get('/collection',         [GameController::class, 'collection']);
 $router->get('/changelog',          [GameController::class, 'changelog']);
+$router->get('/news/collection-removals', [GameController::class, 'collectionRemovals']);
 $router->get('/links',              [LinksController::class, 'showLinks']);
 $router->get('/news/food',          [FoodController::class, 'show']);
 $router->post('/news/food',         [FoodController::class, 'create']);

@@ -6,6 +6,7 @@ namespace Hut\controllers;
 
 use Hut\Auth;
 use Hut\BggThingFetcher;
+use Hut\CollectionRemoval;
 use Hut\Game;
 use Hut\GameBringCommitment;
 use Hut\PersonalCollection;
@@ -136,6 +137,43 @@ class GameController
 
         $_SESSION['flash_success'] = 'Game removed from hut collection for all users.';
         header('Location: ' . \Hut\Url::to('/games/' . $gameId));
+        exit;
+    }
+
+    public static function removeFromHut(array $params): void
+    {
+        Auth::requireLogin();
+        Auth::requireCsrf();
+
+        $gameId = (int) $params['id'];
+        $game = Game::find($gameId);
+        if (!$game) {
+            http_response_code(404);
+            require __DIR__ . '/../../templates/404.php';
+            return;
+        }
+
+        $userId = (int) Auth::user()['id'];
+
+        if (!UserGame::selectionState($userId, $gameId)['in_hut']) {
+            $_SESSION['flash_error'] = 'This game is not currently in the hut collection.';
+            header('Location: ' . \Hut\Url::to('/residents/' . $userId));
+            exit;
+        }
+
+        $eligibility = Game::removalEligibility($userId, $gameId);
+        if (!$eligibility['allowed']) {
+            http_response_code(403);
+            require __DIR__ . '/../../templates/403.php';
+            return;
+        }
+
+        UserGame::clearForAll($gameId);
+        GameBringCommitment::clearForGame($gameId);
+        CollectionRemoval::log($gameId, $userId, (string) $eligibility['reason']);
+
+        $_SESSION['flash_success'] = 'Removed "' . $game['name'] . '" from the hut collection.';
+        header('Location: ' . \Hut\Url::to('/residents/' . $userId));
         exit;
     }
 
@@ -498,6 +536,15 @@ class GameController
         }
 
         require __DIR__ . '/../../templates/info/changelog.php';
+    }
+
+    public static function collectionRemovals(array $params): void
+    {
+        Auth::requireLogin();
+
+        $removals = CollectionRemoval::recent(200);
+
+        require __DIR__ . '/../../templates/info/collection_removals.php';
     }
 
     public static function addToMyCollection(array $params): void

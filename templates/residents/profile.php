@@ -98,6 +98,12 @@ require __DIR__ . '/../partials/header.php';
                                             </form>
                                         <?php endif; ?>
                                     <?php endif; ?>
+                                    <?php if ($isOwnProfile && (int) $game['owner_count'] === 1): ?>
+                                        <form method="POST" action="/games/<?= (int) $game['id'] ?>/remove-from-hut" style="display: inline;" onsubmit="return confirm('Remove this game from the hut collection? Hearts will be kept.');">
+                                            <input type="hidden" name="_csrf" value="<?= htmlspecialchars(\Hut\Auth::csrfToken()) ?>">
+                                            <button class="btn btn--small btn--danger" type="submit">Remove from hut collection</button>
+                                        </form>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </li>
@@ -163,6 +169,13 @@ require __DIR__ . '/../partials/header.php';
                                 <div>
                                     <a href="/games/<?= (int) $game['id'] ?>"><?= htmlspecialchars((string) $game['name']) ?></a>
                                     <small><?= htmlspecialchars((string) $game['added_at']) ?></small>
+                                    <?php if ($isOwnProfile): ?>
+                                        <br>
+                                        <form method="POST" action="/games/<?= (int) $game['id'] ?>/remove-from-hut" style="display: inline;" onsubmit="return confirm('Remove this game from the hut collection? Hearts will be kept.');">
+                                            <input type="hidden" name="_csrf" value="<?= htmlspecialchars(\Hut\Auth::csrfToken()) ?>">
+                                            <button class="btn btn--small btn--danger" type="submit">Remove from hut collection</button>
+                                        </form>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </li>

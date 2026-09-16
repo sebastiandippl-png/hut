@@ -74,6 +74,7 @@ $activityLabel = static function (string $type): array {
         'suggested_food' => ['🍲', 'suggested'],
         'hearted_food' => ['♥', 'hearted'],
         'bring_commitment' => ['🎒', 'is bringing'],
+        'removed_game' => ['🗑️', 'removed'],
         default => ['•', 'updated'],
     };
 };

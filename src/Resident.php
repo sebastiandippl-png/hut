@@ -202,6 +202,14 @@ class Resident
              JOIN users u ON u.id = gbc.user_id
              WHERE u.is_approved = 1
 
+             UNION ALL
+
+             SELECT 'removed_game', u.name, g.name, g.id, cr.removed_at
+             FROM collection_removals cr
+             JOIN games g ON g.id = cr.game_id
+             JOIN users u ON u.id = cr.removed_by_user_id
+             WHERE u.is_approved = 1
+
              ORDER BY occurred_at DESC
              LIMIT ?"
         );

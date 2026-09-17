@@ -1067,60 +1067,64 @@ img { max-width: 100%; display: block; }
 
 .food-list {
     display: grid;
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: .75rem;
+    align-items: start;
 }
 
-.food-card {
+article.food-card {
     display: grid;
-    gap: .85rem;
+    padding: .8rem;
+    gap: .55rem;
 }
 
 .food-card__image-link {
     display: block;
-    border-radius: .95rem;
-    width: min(100%, 180px);
-    max-height: 120px;
+    border-radius: .8rem;
+    width: 100%;
+    max-height: 90px;
     overflow: hidden;
 }
 
 .food-card__image {
     display: block;
-    width: 180px;
-    height: 120px;
+    width: 100%;
+    height: 90px;
     object-fit: cover;
     background: #edf1f7;
 }
 
 .food-card__image-credit {
-    margin: -.25rem 0 0;
+    margin: -.2rem 0 0;
     color: var(--color-text-muted);
-    font-size: .8rem;
+    font-size: .74rem;
 }
 
 .food-card__header {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: 1rem;
+    gap: .6rem;
 }
 
 .food-card__title {
     margin: 0;
-    font-size: 1.2rem;
+    font-size: 1.02rem;
     line-height: 1.25;
 }
 
 .food-card__notes {
     margin: 0;
     color: var(--color-text-muted);
+    font-size: .88rem;
 }
 
 .food-card__meta {
     display: flex;
     flex-wrap: wrap;
-    gap: .5rem .9rem;
+    gap: .4rem .7rem;
     color: var(--color-text-muted);
-    font-size: .92rem;
+    font-size: .8rem;
 }
 
 .food-card__meta-item {
@@ -1132,7 +1136,54 @@ img { max-width: 100%; display: block; }
 .food-card__hearted-by {
     margin: 0;
     color: var(--color-text-muted);
-    font-size: .92rem;
+    font-size: .8rem;
+}
+
+.food-card__cook-date {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    width: fit-content;
+    padding: .3rem .65rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--color-text-muted) 12%, #ffffff 88%);
+    border: 1px solid color-mix(in srgb, var(--color-text-muted) 20%, #dfe3ef 80%);
+    font-size: .82rem;
+    transition: background-color .15s ease, border-color .15s ease;
+}
+
+.food-card__cook-date--set {
+    background: color-mix(in srgb, var(--color-primary) 16%, #ffffff 84%);
+    border-color: color-mix(in srgb, var(--color-primary) 35%, #dfe3ef 65%);
+}
+
+.food-card__cook-date-icon {
+    font-size: .9rem;
+    line-height: 1;
+}
+
+.food-card__cook-date-input {
+    padding: 0;
+    border: none;
+    background: transparent;
+    font: inherit;
+    color: var(--color-text);
+    width: 8.2rem;
+}
+
+.food-card__cook-date--set .food-card__cook-date-input {
+    color: color-mix(in srgb, var(--color-primary) 70%, var(--color-text) 30%);
+    font-weight: 700;
+}
+
+.food-card__cook-date-input:focus {
+    outline: 2px solid color-mix(in srgb, var(--color-primary) 40%, white 60%);
+    outline-offset: 1px;
+}
+
+.food-card__cook-date-status {
+    color: var(--color-text-muted);
+    font-size: .74rem;
 }
 
 .food-card__delete-form {

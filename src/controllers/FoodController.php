@@ -55,6 +55,33 @@ class FoodController
         echo json_encode(['hearted' => $hearted, 'hearts' => $hearts, 'heartedBy' => $heartedBy]);
     }
 
+    public static function cookDate(array $params): void
+    {
+        Auth::requireLogin();
+        Auth::requireCsrf(true);
+
+        $foodSuggestionId = (int) $params['id'];
+        $suggestion = FoodSuggestion::find($foodSuggestionId);
+        if ($suggestion === null) {
+            http_response_code(404);
+            echo json_encode(['error' => 'Not found']);
+            return;
+        }
+
+        $cookDate = trim((string) ($_POST['cook_date'] ?? ''));
+        $ok = FoodSuggestion::setCookDate($foodSuggestionId, $cookDate === '' ? null : $cookDate);
+
+        if (!$ok) {
+            http_response_code(422);
+            header('Content-Type: application/json');
+            echo json_encode(['error' => 'Invalid date']);
+            return;
+        }
+
+        header('Content-Type: application/json');
+        echo json_encode(['cookDate' => $cookDate === '' ? null : $cookDate]);
+    }
+
     public static function update(array $params): void
     {
         Auth::requireLogin();
@@ -85,6 +112,7 @@ class FoodController
         }
 
         if (FoodSuggestion::updateIfOwned($foodSuggestionId, $userId, $title, $notes)) {
+            FoodSuggestion::attachImageFromSearch($foodSuggestionId, $title);
             $_SESSION['flash_success'] = 'Food suggestion updated.';
         } else {
             $_SESSION['flash_error'] = 'Food suggestion could not be updated.';

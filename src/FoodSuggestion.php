@@ -20,6 +20,7 @@ class FoodSuggestion
                      fs.image_source_url,
                      fs.image_creator,
                      fs.image_license,
+                   fs.cook_date,
                    fs.created_at,
                    u.name AS suggested_by_name,
                    COALESCE(h.hearts, 0) AS hearts,
@@ -40,7 +41,9 @@ class FoodSuggestion
                 JOIN users u2 ON u2.id = fv.user_id
                 GROUP BY fv.food_suggestion_id
             ) h ON h.food_suggestion_id = fs.id
-            ORDER BY COALESCE(h.hearts, 0) DESC,
+            ORDER BY CASE WHEN fs.cook_date IS NULL THEN 1 ELSE 0 END ASC,
+                     fs.cook_date ASC,
+                     COALESCE(h.hearts, 0) DESC,
                      fs.created_at ASC,
                      fs.title ASC
         SQL);
@@ -119,6 +122,24 @@ class FoodSuggestion
         $stmt->execute([trim($title), trim($notes), $id, $userId]);
 
         return $stmt->rowCount() > 0;
+    }
+
+    public static function setCookDate(int $foodSuggestionId, ?string $cookDate): bool
+    {
+        if ($cookDate !== null) {
+            $cookDate = trim($cookDate);
+            if ($cookDate === '') {
+                $cookDate = null;
+            } elseif (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $cookDate) || strtotime($cookDate) === false) {
+                return false;
+            }
+        }
+
+        $pdo = Database::getInstance();
+        $stmt = $pdo->prepare('UPDATE food_suggestions SET cook_date = ? WHERE id = ?');
+        $stmt->execute([$cookDate, $foodSuggestionId]);
+
+        return true;
     }
 
     public static function toggleHeart(int $userId, int $foodSuggestionId): bool

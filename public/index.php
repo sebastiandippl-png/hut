@@ -149,6 +149,7 @@ $router->get('/news/food',          [FoodController::class, 'show']);
 $router->post('/news/food',         [FoodController::class, 'create']);
 $router->post('/news/food/{id}/update', [FoodController::class, 'update']);
 $router->post('/news/food/{id}/heart', [FoodController::class, 'heart']);
+$router->post('/news/food/{id}/cook-date', [FoodController::class, 'cookDate']);
 $router->post('/news/food/{id}/delete', [FoodController::class, 'delete']);
 $router->get('/news/weather',       [WeatherController::class, 'showWeather']);
 $router->get('/news/shopping-list', [ShoppingListController::class, 'show']);

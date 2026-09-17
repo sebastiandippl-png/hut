@@ -71,6 +71,7 @@ function linkifyFoodNames(string $names, array $map): string
                             $createdAt = date('d.m.Y', $timestamp);
                         }
                     }
+                    $cookDate = trim((string) ($suggestion['cook_date'] ?? ''));
                     $suggestedBy = trim((string) ($suggestion['suggested_by_name'] ?? ''));
                 ?>
                 <article class="card food-card" data-heart-id="<?= $suggestionId ?>" data-hearts="<?= $hearts ?>">
@@ -129,6 +130,13 @@ function linkifyFoodNames(string $names, array $map): string
                         <?php if ($createdAt !== ''): ?>
                             <span class="food-card__meta-item">Added <?= htmlspecialchars($createdAt) ?></span>
                         <?php endif; ?>
+                    </div>
+
+                    <div class="food-card__cook-date<?= $cookDate !== '' ? ' food-card__cook-date--set' : '' ?>" data-cook-date-controls="<?= $suggestionId ?>" data-cook-date-endpoint="/news/food/<?= $suggestionId ?>/cook-date">
+                        <span class="food-card__cook-date-icon" aria-hidden="true">📅</span>
+                        <label class="visually-hidden" for="cook-date-<?= $suggestionId ?>">Cook date</label>
+                        <input class="food-card__cook-date-input" type="date" id="cook-date-<?= $suggestionId ?>" data-cook-date-input value="<?= htmlspecialchars($cookDate) ?>">
+                        <span class="food-card__cook-date-status" data-cook-date-status></span>
                     </div>
 
                     <div class="heart-controls" data-heart-id="<?= $suggestionId ?>" data-heart-endpoint="/news/food/<?= $suggestionId ?>/heart">

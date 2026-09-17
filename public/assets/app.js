@@ -565,6 +565,58 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // ── Food cook date picker ──────────────────────────────────────────────
+    document.querySelectorAll('[data-cook-date-controls]').forEach(controls => {
+        const input = controls.querySelector('[data-cook-date-input]');
+        const status = controls.querySelector('[data-cook-date-status]');
+        if (!input) {
+            return;
+        }
+
+        const endpointRaw = controls.dataset.cookDateEndpoint || '';
+        if (!endpointRaw) {
+            return;
+        }
+
+        input.addEventListener('change', async () => {
+            const endpoint = /^https?:\/\//i.test(endpointRaw) ? endpointRaw : withBase(endpointRaw);
+
+            if (status) {
+                status.textContent = 'Saving…';
+            }
+
+            try {
+                const body = new URLSearchParams({ cook_date: input.value });
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-Token': csrfToken,
+                    },
+                    body: body.toString(),
+                });
+
+                if (!res.ok) {
+                    throw new Error(`Request failed with ${res.status}`);
+                }
+
+                const data = await res.json();
+                input.value = data.cookDate || '';
+                controls.classList.toggle('food-card__cook-date--set', Boolean(data.cookDate));
+                if (status) {
+                    status.textContent = 'Saved';
+                    setTimeout(() => { status.textContent = ''; }, 2000);
+                }
+            } catch (e) {
+                console.error('Cook date update failed', e);
+                if (status) {
+                    status.textContent = 'Could not save date';
+                }
+            }
+        });
+    });
+
     // ── Collection statistics charts ───────────────────────────────────────
     const statisticsRoot = document.querySelector('[data-statistics-page]');
     if (statisticsRoot) {

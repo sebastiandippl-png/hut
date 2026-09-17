@@ -69,7 +69,7 @@ class FoodController
         }
 
         $cookDate = trim((string) ($_POST['cook_date'] ?? ''));
-        $ok = FoodSuggestion::setCookDate($foodSuggestionId, $cookDate === '' ? null : $cookDate);
+        $ok = FoodSuggestion::setCookDate($foodSuggestionId, $cookDate === '' ? null : $cookDate, (int) Auth::user()['id']);
 
         if (!$ok) {
             http_response_code(422);

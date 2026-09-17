@@ -142,7 +142,7 @@ class FoodSuggestion
         return $stmt->rowCount() > 0;
     }
 
-    public static function setCookDate(int $foodSuggestionId, ?string $cookDate): bool
+    public static function setCookDate(int $foodSuggestionId, ?string $cookDate, int $userId): bool
     {
         if ($cookDate !== null) {
             $cookDate = trim($cookDate);
@@ -154,8 +154,21 @@ class FoodSuggestion
         }
 
         $pdo = Database::getInstance();
-        $stmt = $pdo->prepare('UPDATE food_suggestions SET cook_date = ? WHERE id = ?');
-        $stmt->execute([$cookDate, $foodSuggestionId]);
+        if ($cookDate === null) {
+            $stmt = $pdo->prepare(
+                'UPDATE food_suggestions
+                 SET cook_date = NULL, cook_date_user_id = NULL, cook_date_updated_at = NULL
+                 WHERE id = ?'
+            );
+            $stmt->execute([$foodSuggestionId]);
+        } else {
+            $stmt = $pdo->prepare(
+                'UPDATE food_suggestions
+                 SET cook_date = ?, cook_date_user_id = ?, cook_date_updated_at = CURRENT_TIMESTAMP
+                 WHERE id = ?'
+            );
+            $stmt->execute([$cookDate, $userId, $foodSuggestionId]);
+        }
 
         return true;
     }

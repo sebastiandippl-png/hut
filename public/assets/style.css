@@ -1077,6 +1077,7 @@ article.food-card {
     display: grid;
     align-content: start;
     height: 100%;
+    min-width: 0;
     padding: .8rem;
     gap: .55rem;
 }
@@ -1112,6 +1113,8 @@ article.food-card {
 
 .food-card__title {
     margin: 0;
+    min-width: 0;
+    overflow-wrap: break-word;
     font-size: 1.02rem;
     line-height: 1.25;
 }
@@ -1143,12 +1146,16 @@ article.food-card {
 }
 
 .food-card__cook-date {
-    display: inline-flex;
+    display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: .35rem;
-    width: fit-content;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    align-self: start;
     padding: .3rem .65rem;
-    border-radius: 999px;
+    border-radius: .9rem;
     background: color-mix(in srgb, var(--color-text-muted) 12%, #ffffff 88%);
     border: 1px solid color-mix(in srgb, var(--color-text-muted) 20%, #dfe3ef 80%);
     font-size: .82rem;
@@ -1161,8 +1168,43 @@ article.food-card {
 }
 
 .food-card__cook-date-icon {
-    font-size: .9rem;
+    flex: 0 0 auto;
+    font-size: .85rem;
     line-height: 1;
+}
+
+.food-card__cook-date-text {
+    flex: 0 1 auto;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.food-card__cook-date--set .food-card__cook-date-text {
+    color: color-mix(in srgb, var(--color-primary) 70%, var(--color-text) 30%);
+    font-weight: 700;
+}
+
+.food-card__cook-date-weekday {
+    flex: 0 0 auto;
+    padding: .05rem .4rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--color-text-muted) 16%, #ffffff 84%);
+    color: var(--color-text-muted);
+    font-size: .74rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .02em;
+}
+
+.food-card__cook-date-weekday:empty {
+    display: none;
+}
+
+.food-card__cook-date--set .food-card__cook-date-weekday {
+    background: color-mix(in srgb, var(--color-primary) 28%, #ffffff 72%);
+    color: color-mix(in srgb, var(--color-primary) 75%, var(--color-text) 25%);
 }
 
 .food-card__cook-date-input {
@@ -1171,7 +1213,9 @@ article.food-card {
     background: transparent;
     font: inherit;
     color: var(--color-text);
-    width: 8.2rem;
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 100%;
 }
 
 .food-card__cook-date--set .food-card__cook-date-input {

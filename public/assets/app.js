@@ -566,9 +566,22 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ── Food cook date picker ──────────────────────────────────────────────
+    const weekdayAbbrFromDateString = dateStr => {
+        if (!dateStr) {
+            return '';
+        }
+        const parsed = new Date(`${dateStr}T00:00:00`);
+        if (Number.isNaN(parsed.getTime())) {
+            return '';
+        }
+        return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][parsed.getDay()];
+    };
+
     document.querySelectorAll('[data-cook-date-controls]').forEach(controls => {
         const input = controls.querySelector('[data-cook-date-input]');
         const status = controls.querySelector('[data-cook-date-status]');
+        const text = controls.querySelector('[data-cook-date-text]');
+        const weekday = controls.querySelector('[data-cook-date-weekday]');
         if (!input) {
             return;
         }
@@ -604,6 +617,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await res.json();
                 input.value = data.cookDate || '';
                 controls.classList.toggle('food-card__cook-date--set', Boolean(data.cookDate));
+                if (text) {
+                    text.textContent = data.cookDate ? 'Cooking on' : 'Not scheduled yet';
+                }
+                if (weekday) {
+                    weekday.textContent = weekdayAbbrFromDateString(data.cookDate);
+                }
                 if (status) {
                     status.textContent = 'Saved';
                     setTimeout(() => { status.textContent = ''; }, 2000);

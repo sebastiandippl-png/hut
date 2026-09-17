@@ -1068,12 +1068,15 @@ img { max-width: 100%; display: block; }
 .food-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    grid-auto-rows: 1fr;
     gap: .75rem;
-    align-items: start;
+    align-items: stretch;
 }
 
 article.food-card {
     display: grid;
+    align-content: start;
+    height: 100%;
     padding: .8rem;
     gap: .55rem;
 }

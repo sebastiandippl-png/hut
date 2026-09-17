@@ -111,6 +111,15 @@ class FoodSuggestion
         return $stmt->rowCount() > 0;
     }
 
+    public static function deleteAsAdmin(int $id): bool
+    {
+        $pdo = Database::getInstance();
+        $stmt = $pdo->prepare('DELETE FROM food_suggestions WHERE id = ?');
+        $stmt->execute([$id]);
+
+        return $stmt->rowCount() > 0;
+    }
+
     public static function updateIfOwned(int $id, int $userId, string $title, string $notes = ''): bool
     {
         $pdo = Database::getInstance();
@@ -120,6 +129,15 @@ class FoodSuggestion
              WHERE id = ? AND user_id = ?'
         );
         $stmt->execute([trim($title), trim($notes), $id, $userId]);
+
+        return $stmt->rowCount() > 0;
+    }
+
+    public static function updateAsAdmin(int $id, string $title, string $notes = ''): bool
+    {
+        $pdo = Database::getInstance();
+        $stmt = $pdo->prepare('UPDATE food_suggestions SET title = ?, notes = ? WHERE id = ?');
+        $stmt->execute([trim($title), trim($notes), $id]);
 
         return $stmt->rowCount() > 0;
     }

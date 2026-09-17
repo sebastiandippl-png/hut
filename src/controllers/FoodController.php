@@ -96,7 +96,8 @@ class FoodController
         }
 
         $userId = (int) Auth::user()['id'];
-        if ((int) $suggestion['user_id'] !== $userId) {
+        $isAdmin = (bool) Auth::user()['is_admin'];
+        if ((int) $suggestion['user_id'] !== $userId && !$isAdmin) {
             http_response_code(403);
             require __DIR__ . '/../../templates/403.php';
             return;
@@ -111,7 +112,11 @@ class FoodController
             exit;
         }
 
-        if (FoodSuggestion::updateIfOwned($foodSuggestionId, $userId, $title, $notes)) {
+        $updated = $isAdmin
+            ? FoodSuggestion::updateAsAdmin($foodSuggestionId, $title, $notes)
+            : FoodSuggestion::updateIfOwned($foodSuggestionId, $userId, $title, $notes);
+
+        if ($updated) {
             FoodSuggestion::attachImageFromSearch($foodSuggestionId, $title);
             $_SESSION['flash_success'] = 'Food suggestion updated.';
         } else {
@@ -136,13 +141,18 @@ class FoodController
         }
 
         $userId = (int) Auth::user()['id'];
-        if ((int) $suggestion['user_id'] !== $userId) {
+        $isAdmin = (bool) Auth::user()['is_admin'];
+        if ((int) $suggestion['user_id'] !== $userId && !$isAdmin) {
             http_response_code(403);
             require __DIR__ . '/../../templates/403.php';
             return;
         }
 
-        if (!FoodSuggestion::deleteIfOwned($foodSuggestionId, $userId)) {
+        $deleted = $isAdmin
+            ? FoodSuggestion::deleteAsAdmin($foodSuggestionId)
+            : FoodSuggestion::deleteIfOwned($foodSuggestionId, $userId);
+
+        if (!$deleted) {
             $_SESSION['flash_error'] = 'Food suggestion could not be deleted.';
         } else {
             $_SESSION['flash_success'] = 'Food suggestion deleted.';

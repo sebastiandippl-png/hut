@@ -58,6 +58,7 @@ function linkifyFoodNames(string $names, array $map): string
                     $suggestionId = (int) $suggestion['id'];
                     $hearts = (int) $suggestion['hearts'];
                     $isOwner = (int) $suggestion['user_id'] === (int) \Hut\Auth::user()['id'];
+                    $canManage = $isOwner || (bool) \Hut\Auth::user()['is_admin'];
                     $suggestionTitle = (string) $suggestion['title'];
                     $suggestionNotes = (string) ($suggestion['notes'] ?? '');
                     $suggestionImageUrl = trim((string) ($suggestion['image_url'] ?? ''));
@@ -91,7 +92,7 @@ function linkifyFoodNames(string $names, array $map): string
 
                     <div class="food-card__header">
                         <h2 class="food-card__title"><?= htmlspecialchars((string) $suggestion['title']) ?></h2>
-                        <?php if ($isOwner): ?>
+                        <?php if ($canManage): ?>
                             <div class="food-card__owner-actions">
                                 <form method="POST" action="/news/food/<?= $suggestionId ?>/delete" class="food-card__delete-form">
                                     <input type="hidden" name="_csrf" value="<?= htmlspecialchars(\Hut\Auth::csrfToken()) ?>">
@@ -105,7 +106,7 @@ function linkifyFoodNames(string $names, array $map): string
                         <p class="food-card__notes"><?= htmlspecialchars((string) $suggestion['notes']) ?></p>
                     <?php endif; ?>
 
-                    <?php if ($isOwner): ?>
+                    <?php if ($canManage): ?>
                         <details class="food-edit-disclosure">
                             <summary class="btn btn--ghost food-edit-disclosure__summary">Edit suggestion</summary>
                             <form class="food-edit-form" method="POST" action="/news/food/<?= $suggestionId ?>/update">

@@ -11,7 +11,7 @@
             <p class="empty-state">No games have been removed from the hut collection yet.</p>
         </div>
     <?php else: ?>
-        <?php $reasonLabels = ['exclusive_owner' => 'Sole owner', 'suggester' => 'Original adder']; ?>
+        <?php $reasonLabels = ['exclusive_owner' => 'Sole owner', 'suggester' => 'Original adder', 'admin' => 'Admin removal']; ?>
         <ol class="changelog__list">
             <?php foreach ($removals as $removal): ?>
                 <li class="changelog__entry">

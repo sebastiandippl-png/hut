@@ -8,6 +8,7 @@ class CollectionRemoval
 {
     public const REASON_EXCLUSIVE_OWNER = 'exclusive_owner';
     public const REASON_SUGGESTER = 'suggester';
+    public const REASON_ADMIN = 'admin';
 
     public static function log(int $gameId, int $removedByUserId, string $reason): void
     {

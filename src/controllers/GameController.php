@@ -133,7 +133,10 @@ class GameController
         Auth::requireCsrf();
 
         $gameId = (int) $params['id'];
+        $adminUserId = (int) Auth::user()['id'];
         UserGame::clearForAll($gameId);
+        GameBringCommitment::clearForGame($gameId);
+        CollectionRemoval::log($gameId, $adminUserId, CollectionRemoval::REASON_ADMIN);
 
         $_SESSION['flash_success'] = 'Game removed from hut collection for all users.';
         header('Location: ' . \Hut\Url::to('/games/' . $gameId));
